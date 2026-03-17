@@ -16,6 +16,19 @@ service firebase.storage {
       allow update, delete: if false;
     }
 
+    // Photos d'annonces (ancien format) - upload depuis le client, lecture publique
+    match /announcement-photos/{fileName} {
+      // Lecture publique
+      allow read: if true;
+
+      // Upload: max 5MB, images uniquement
+      allow create: if request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+
+      // Pas de modification/suppression depuis le client
+      allow update, delete: if false;
+    }
+
     // Cartes d'alerte générées - écriture serveur uniquement, lecture publique
     match /alert-cards/{fileName} {
       allow read: if true;
