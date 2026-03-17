@@ -5,11 +5,11 @@ import {
 } from "firebase-functions/v2/firestore";
 import { logger } from "firebase-functions";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { db, COLLECTIONS, REMINDER_SCHEDULE } from "../config";
+import { db, COLLECTIONS, REMINDER_SCHEDULE, FACEBOOK_PAGE_TOKEN } from "../config";
 import { AnnouncementDoc } from "../types";
 import { generateAlertCard } from "../services/alertCard";
+import { postAnnouncementToFacebook } from "../services/facebook";
 // Temporairement désactivé - secrets non configurés
-// import { postAnnouncementToFacebook } from "../services/facebook";
 // import { sendNewAnnouncementToParent } from "../services/whatsapp";
 // import { sendZonePushNotification } from "../services/onesignal";
 // import { findAndNotifyPotentialMatches } from "../services/crossMatching";
@@ -18,15 +18,13 @@ import { generateAlertCard } from "../services/alertCard";
 /**
  * Trigger déclenché à chaque création d'annonce
  *
- * VERSION SIMPLIFIÉE - Sans Facebook/WhatsApp/OneSignal
- *
- * Actions actives:
+ * Actions:
  * 1. Générer l'image d'alerte (alertCard) ✅
- * 2. Incrémenter le compteur de zone ✅
- * 3. Programmer le premier rappel ✅
+ * 2. Poster sur Facebook ✅
+ * 3. Incrémenter le compteur de zone ✅
+ * 4. Programmer le premier rappel ✅
  *
  * Actions désactivées (secrets manquants):
- * - Poster sur Facebook
  * - Envoyer WhatsApp au parent
  * - Push notifications OneSignal
  * - Cross-matching
@@ -36,7 +34,7 @@ export const onAnnouncementCreate = onDocumentCreated(
   {
     document: `${COLLECTIONS.ANNOUNCEMENTS}/{docId}`,
     region: "europe-west1",
-    // Pas de secrets pour l'instant
+    secrets: [FACEBOOK_PAGE_TOKEN],
   },
   async (event: FirestoreEvent<QueryDocumentSnapshot | undefined>) => {
     const snapshot = event.data;
@@ -48,7 +46,7 @@ export const onAnnouncementCreate = onDocumentCreated(
     const docId = event.params.docId;
     const announcement = snapshot.data() as AnnouncementDoc;
 
-    logger.info("Processing new announcement (simplified mode)", {
+    logger.info("Processing new announcement", {
       docId,
       shortCode: announcement.shortCode,
       zone: announcement.zoneId,
@@ -63,35 +61,49 @@ export const onAnnouncementCreate = onDocumentCreated(
       logger.error("Alert card generation failed", { error, docId });
     }
 
-    // 2. Incrémenter le compteur de zone
+    // 2. Poster sur Facebook (avec l'image d'alerte)
+    let facebookPostId: string | null = null;
+    try {
+      // On passe l'annonce mise à jour avec l'URL de l'alertCard
+      const announcementWithCard = { ...announcement, alertCardURL };
+      facebookPostId = await postAnnouncementToFacebook(announcementWithCard, docId);
+      if (facebookPostId) {
+        logger.info("Facebook post created", { docId, facebookPostId });
+      }
+    } catch (error) {
+      logger.error("Facebook post failed", { error, docId });
+    }
+
+    // 3. Incrémenter le compteur de zone
     try {
       await incrementZoneCounter(announcement.zoneId);
     } catch (error) {
       logger.error("Zone counter increment failed", { error, docId });
     }
 
-    // 3. Programmer le premier rappel (24h)
+    // 4. Programmer le premier rappel (24h)
     const nextReminderAt = Timestamp.fromDate(
       new Date(Date.now() + REMINDER_SCHEDULE.FIRST * 60 * 60 * 1000)
     );
 
-    // Mise à jour du document
+    // Mise à jour du document avec toutes les infos
     await db
       .collection(COLLECTIONS.ANNOUNCEMENTS)
       .doc(docId)
       .update({
         alertCardURL,
+        "stats.facebookPostId": facebookPostId,
         nextReminderAt,
         updatedAt: FieldValue.serverTimestamp(),
       });
 
     // Log récapitulatif
-    logger.info("Announcement processing complete (simplified)", {
+    logger.info("Announcement processing complete", {
       docId,
       shortCode: announcement.shortCode,
       type: announcement.type || "missing",
       alertCard: !!alertCardURL,
-      note: "Facebook/WhatsApp/Push disabled - secrets not configured",
+      facebookPost: !!facebookPostId,
     });
   }
 );
