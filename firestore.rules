@@ -1,0 +1,169 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Fonctions utilitaires ──────────────────────────────────────────────────
+
+    // Valide qu'une chaîne n'est pas trop longue
+    function validStringLength(field, maxLen) {
+      return field is string && field.size() <= maxLen;
+    }
+
+    // Valide qu'un numéro de téléphone est dans un format acceptable
+    function validPhone(phone) {
+      return phone is string && phone.size() >= 8 && phone.size() <= 20;
+    }
+
+    // Valide que le timestamp est récent (pas plus de 1h dans le passé ou futur)
+    function recentTimestamp(ts) {
+      return ts is timestamp
+             && ts > request.time - duration.value(1, 'h')
+             && ts < request.time + duration.value(5, 'm');
+    }
+
+    // ─── Annonces ───────────────────────────────────────────────────────────────
+
+    match /announcements/{announcementId} {
+      // Lecture publique (les annonces sont des données publiques)
+      allow read: if true;
+
+      // Création d'annonce avec validation stricte
+      allow create: if
+        // Champs obligatoires
+        request.resource.data.keys().hasAll(['shortCode', 'childName', 'childAge', 'status', 'type', 'parentPhone'])
+        // Types et valeurs
+        && request.resource.data.status == 'active'
+        && (request.resource.data.type == 'missing' || request.resource.data.type == 'found')
+        // Validation des longueurs (anti-abuse)
+        && validStringLength(request.resource.data.childName, 100)
+        && validStringLength(request.resource.data.shortCode, 20)
+        && validPhone(request.resource.data.parentPhone)
+        && request.resource.data.childAge is number
+        && request.resource.data.childAge >= 0
+        && request.resource.data.childAge <= 18
+        // Description limitée
+        && (!('description' in request.resource.data) || validStringLength(request.resource.data.description, 2000))
+        && (!('distinctiveSign' in request.resource.data) || validStringLength(request.resource.data.distinctiveSign, 500))
+        && (!('lastSeenPlace' in request.resource.data) || validStringLength(request.resource.data.lastSeenPlace, 500));
+
+      // Mise à jour autorisée pour :
+      // - stats (pageViews, alertSubscribers, etc.)
+      // - updatedAt, alertCardURL
+      // - status/resolvedAt (marquer comme retrouvé)
+      // - description, distinctiveSign, childPhotoURL (édition annonce)
+      allow update: if
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['stats', 'updatedAt', 'alertCardURL', 'status', 'resolvedAt', 'description', 'distinctiveSign', 'childPhotoURL']);
+
+      // Suppression interdite côté client
+      allow delete: if false;
+
+      // Sous-collection des abonnés aux alertes
+      match /alert_subscribers/{subscriberId} {
+        // Lecture autorisée pour vérifier si déjà abonné
+        allow read: if true;
+        allow create: if
+          request.resource.data.keys().hasAll(['waPhone', 'createdAt', 'notified'])
+          && validPhone(request.resource.data.waPhone)
+          && request.resource.data.notified == false;
+        allow update, delete: if false;
+      }
+    }
+
+    // ─── Zones ──────────────────────────────────────────────────────────────────
+
+    match /zones/{zoneId} {
+      allow read: if true;
+      allow write: if false; // Admin uniquement via Cloud Functions
+    }
+
+    // ─── Signalements ───────────────────────────────────────────────────────────
+
+    match /sightings/{sightingId} {
+      // Lecture publique (pour afficher les signalements sur la page d'annonce)
+      allow read: if true;
+
+      // Création avec validation
+      allow create: if
+        request.resource.data.keys().hasAll(['announcementId', 'place', 'description', 'createdAt'])
+        && validStringLength(request.resource.data.announcementId, 50)
+        && validStringLength(request.resource.data.place, 500)
+        && validStringLength(request.resource.data.description, 2000)
+        // Téléphone optionnel mais validé si présent
+        && (!('reporterPhone' in request.resource.data) || validPhone(request.resource.data.reporterPhone));
+
+      allow update, delete: if false;
+    }
+
+    // ─── Abonnés push ───────────────────────────────────────────────────────────
+
+    match /push_subscribers/{subscriberId} {
+      allow read, write: if false; // Géré côté serveur
+    }
+
+    // ─── Stats globales ─────────────────────────────────────────────────────────
+
+    match /global_stats/{statId} {
+      allow read: if true;
+      allow write: if false; // Géré côté serveur
+    }
+
+    // ─── Métadonnées des jobs schedulés ─────────────────────────────────────────
+
+    match /_scheduled_jobs/{jobId} {
+      allow read, write: if false; // Géré côté serveur uniquement
+    }
+
+    // ─── Collections SecureID ───────────────────────────────────────────────────
+
+    match /bracelets/{braceletId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /profiles/{profileId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /orders/{orderId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /scans/{scanId} {
+      allow create: if
+        request.resource.data.keys().hasAll(['braceletId', 'scannedAt'])
+        && validStringLength(request.resource.data.braceletId, 50);
+      allow read, update, delete: if false;
+    }
+
+    // ─── Vigies communautaires ──────────────────────────────────────────────────
+
+    match /vigies/{vigieId} {
+      // Lecture autorisée (pour compter les vigies par zone, afficher stats)
+      // Note: les numéros de téléphone ne doivent pas être exposés côté client
+      allow read: if true;
+
+      // Inscription comme vigie avec validation
+      allow create: if
+        request.resource.data.keys().hasAll(['name', 'phone', 'zoneId', 'status', 'createdAt'])
+        && validStringLength(request.resource.data.name, 100)
+        && validPhone(request.resource.data.phone)
+        && validStringLength(request.resource.data.zoneId, 50)
+        && request.resource.data.status == 'active';
+
+      // Mise à jour uniquement pour réactiver
+      allow update: if
+        request.resource.data.status == 'active'
+        && resource.data.phone == request.resource.data.phone; // Même téléphone
+
+      allow delete: if false;
+    }
+  }
+}

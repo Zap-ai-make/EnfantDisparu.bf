@@ -1,0 +1,38 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Photos d'annonces - upload depuis le client, lecture publique
+    match /announcements/{announcementId}/{fileName} {
+      // Lecture publique
+      allow read: if true;
+
+      // Upload: max 5MB, images uniquement
+      allow create: if request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+
+      // Pas de modification/suppression depuis le client
+      allow update, delete: if false;
+    }
+
+    // Cartes d'alerte générées - écriture serveur uniquement, lecture publique
+    match /alert-cards/{fileName} {
+      allow read: if true;
+      allow write: if false; // Uniquement via Cloud Functions avec Admin SDK
+    }
+
+    // Photos de profils SecureID existantes
+    match /profiles/{profileId}/{fileName} {
+      allow read: if true;
+      allow create: if request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+      allow update, delete: if false;
+    }
+
+    // Fallback - tout bloquer
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
