@@ -5,7 +5,7 @@ import {
 } from "firebase-functions/v2/firestore";
 import { logger } from "firebase-functions";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { db, COLLECTIONS, REMINDER_SCHEDULE, FACEBOOK_PAGE_TOKEN } from "../config";
+import { db, COLLECTIONS, REMINDER_SCHEDULE, FACEBOOK_PAGE_TOKEN, FACEBOOK_PAGE_ID } from "../config";
 import { AnnouncementDoc } from "../types";
 import { generateAlertCard } from "../services/alertCard";
 import { postAnnouncementToFacebook } from "../services/facebook";
@@ -34,7 +34,7 @@ export const onAnnouncementCreate = onDocumentCreated(
   {
     document: `${COLLECTIONS.ANNOUNCEMENTS}/{docId}`,
     region: "europe-west1",
-    secrets: [FACEBOOK_PAGE_TOKEN],
+    secrets: [FACEBOOK_PAGE_TOKEN, FACEBOOK_PAGE_ID],
   },
   async (event: FirestoreEvent<QueryDocumentSnapshot | undefined>) => {
     const snapshot = event.data;

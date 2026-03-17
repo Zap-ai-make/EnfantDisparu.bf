@@ -10,11 +10,6 @@ export const db = getFirestore();
 export const storage = getStorage();
 
 // Configuration parameters (Firebase Remote Config)
-export const FACEBOOK_PAGE_ID = defineString("FACEBOOK_PAGE_ID", {
-  description: "Facebook Page ID for posting announcements",
-  default: "",
-});
-
 export const ONESIGNAL_APP_ID = defineString("ONESIGNAL_APP_ID", {
   description: "OneSignal App ID for push notifications",
   default: "",
@@ -27,6 +22,7 @@ export const BASE_URL = defineString("BASE_URL", {
 
 // Secrets (Firebase Secret Manager)
 export const FACEBOOK_PAGE_TOKEN = defineSecret("FACEBOOK_PAGE_TOKEN");
+export const FACEBOOK_PAGE_ID = defineSecret("FACEBOOK_PAGE_ID");
 export const WHATSAPP_PHONE_NUMBER_ID = defineSecret("WHATSAPP_PHONE_NUMBER_ID");
 export const WHATSAPP_API_TOKEN = defineSecret("WHATSAPP_API_TOKEN");
 export const ONESIGNAL_API_KEY = defineSecret("ONESIGNAL_API_KEY");

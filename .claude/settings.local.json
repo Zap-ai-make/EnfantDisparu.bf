@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/Users/X1 Carbon/Desktop/EnfantPerdu.bf\" && npm install react-onesignal 2>&1)",
+      "Bash(npm run lint)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Read(//c/Users/X1 Carbon/Desktop/EnfantPerdu.bf/**)",
+      "Bash(git push:*)"
+    ]
+  }
+}
