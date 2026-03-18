@@ -26,6 +26,7 @@ export { onAnnouncementCreate } from "./triggers/onAnnouncementCreate";
 // Endpoints HTTP
 export { regenerateAlertCard } from "./http/regenerateAlertCard";
 export { healthCheck } from "./http/healthCheck";
+export { postToTikTok } from "./http/postToTikTok";
 
 // Temporairement désactivé - secrets non configurés
 // export { onAnnouncementUpdate } from "./triggers/onAnnouncementUpdate";

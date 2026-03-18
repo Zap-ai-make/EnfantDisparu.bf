@@ -26,6 +26,8 @@ export const FACEBOOK_PAGE_ID = defineSecret("FACEBOOK_PAGE_ID");
 export const WHATSAPP_PHONE_NUMBER_ID = defineSecret("WHATSAPP_PHONE_NUMBER_ID");
 export const WHATSAPP_API_TOKEN = defineSecret("WHATSAPP_API_TOKEN");
 export const ONESIGNAL_API_KEY = defineSecret("ONESIGNAL_API_KEY");
+export const TIKTOK_CLIENT_KEY = defineSecret("TIKTOK_CLIENT_KEY");
+export const TIKTOK_CLIENT_SECRET = defineSecret("TIKTOK_CLIENT_SECRET");
 
 // Constants
 export const COLLECTIONS = {

@@ -1,0 +1,248 @@
+import { logger } from "firebase-functions";
+import { AnnouncementDoc } from "../types";
+import { TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, BASE_URL } from "../config";
+import { fetchWithRetry } from "../utils/http";
+
+const TIKTOK_API_VERSION = "v2";
+const TIKTOK_API_BASE = `https://open.tiktokapis.com/${TIKTOK_API_VERSION}`;
+const TIKTOK_TIMEOUT_MS = 30000; // 30 secondes (upload d'images peut être lent)
+
+// Interface pour future implémentation OAuth
+// interface TikTokTokenResponse {
+//   access_token: string;
+//   expires_in: number;
+//   refresh_token: string;
+//   refresh_expires_in: number;
+//   token_type: string;
+//   scope: string;
+// }
+
+interface TikTokPhotoUploadResponse {
+  data: {
+    photo_id: string;
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+interface TikTokPostResponse {
+  data: {
+    post_id: string;
+    share_url: string;
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+/**
+ * Poste une nouvelle alerte sur TikTok (Photo Carousel)
+ *
+ * Pour la démo sandbox, nous utiliserons l'access token obtenu manuellement
+ * En production, l'access token sera stocké en Firestore après l'OAuth
+ */
+export async function postAnnouncementToTikTok(
+  announcement: AnnouncementDoc,
+  docId: string,
+  accessToken?: string
+): Promise<string | null> {
+  const clientKey = TIKTOK_CLIENT_KEY.value();
+  const clientSecret = TIKTOK_CLIENT_SECRET.value();
+
+  if (!clientKey || !clientSecret) {
+    logger.warn("TikTok credentials not configured, skipping post");
+    return null;
+  }
+
+  if (!accessToken) {
+    logger.warn("TikTok access token not provided, skipping post");
+    return null;
+  }
+
+  if (!announcement.alertCardURL) {
+    logger.warn("Alert card URL not available, cannot post to TikTok");
+    return null;
+  }
+
+  const announcementUrl = `${BASE_URL.value()}/annonce/${announcement.shortCode}`;
+
+  // Caption du post TikTok (max 2200 caractères)
+  const caption = `
+🚨 ALERTE ENFANT DISPARU - ${announcement.zoneName.toUpperCase()}
+
+👦 ${announcement.childName}, ${announcement.childAge} ans
+📍 ${announcement.lastSeenPlace}
+🕐 ${formatDate(announcement.lastSeenAt.toDate())}
+
+👁️ Si vous l'avez vu, signalez:
+🔗 ${announcementUrl}
+
+📱 Partagez pour aider!
+
+#EnfantDisparu #${announcement.zoneName.replace(/\s+/g, "")} #BurkinaFaso #Alerte #MissingChild
+`.trim();
+
+  try {
+    // Étape 1: Uploader la photo d'alerte vers TikTok
+    logger.info("Uploading photo to TikTok", { docId, alertCardURL: announcement.alertCardURL });
+
+    // TikTok nécessite un upload en 2 étapes:
+    // 1. Initialiser l'upload et obtenir l'URL d'upload
+    const initResponse = await fetchWithRetry(`${TIKTOK_API_BASE}/post/photo/init/`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({
+        source_info: {
+          source: "PULL_FROM_URL",
+          photo_url: announcement.alertCardURL,
+        },
+      }),
+      timeoutMs: TIKTOK_TIMEOUT_MS,
+      maxRetries: 2,
+    });
+
+    if (!initResponse.ok) {
+      const error = await initResponse.text();
+      logger.error("TikTok photo init failed", { error, status: initResponse.status, docId });
+      return null;
+    }
+
+    const uploadData = (await initResponse.json()) as TikTokPhotoUploadResponse;
+
+    if (uploadData.error) {
+      logger.error("TikTok photo upload error", { error: uploadData.error, docId });
+      return null;
+    }
+
+    const photoId = uploadData.data.photo_id;
+    logger.info("Photo uploaded to TikTok", { photoId, docId });
+
+    // Étape 2: Publier le post avec la photo
+    const publishResponse = await fetchWithRetry(`${TIKTOK_API_BASE}/post/photo/publish/`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({
+        photo_ids: [photoId],
+        post_info: {
+          title: caption,
+          privacy_level: "PUBLIC_TO_EVERYONE",
+          disable_duet: false,
+          disable_comment: false,
+          disable_stitch: false,
+          video_cover_timestamp_ms: 0,
+        },
+        source_info: {
+          source: "PULL_FROM_URL",
+        },
+      }),
+      timeoutMs: TIKTOK_TIMEOUT_MS,
+      maxRetries: 2,
+    });
+
+    if (!publishResponse.ok) {
+      const error = await publishResponse.text();
+      logger.error("TikTok post publish failed", { error, status: publishResponse.status, docId });
+      return null;
+    }
+
+    const publishData = (await publishResponse.json()) as TikTokPostResponse;
+
+    if (publishData.error) {
+      logger.error("TikTok publish error", { error: publishData.error, docId });
+      return null;
+    }
+
+    logger.info("TikTok post created", {
+      postId: publishData.data.post_id,
+      shareUrl: publishData.data.share_url,
+      docId
+    });
+
+    return publishData.data.post_id;
+  } catch (error) {
+    logger.error("TikTok post error", { error, docId });
+    return null;
+  }
+}
+
+/**
+ * Poste un message de retrouvailles sur TikTok
+ */
+export async function postResolutionToTikTok(
+  announcement: AnnouncementDoc,
+  docId: string,
+  accessToken?: string
+): Promise<string | null> {
+  const clientKey = TIKTOK_CLIENT_KEY.value();
+
+  if (!clientKey || !accessToken) {
+    logger.warn("TikTok not configured or no access token, skipping resolution post");
+    return null;
+  }
+
+  const caption = `
+🎉 RETROUVAILLES - ${announcement.childName.toUpperCase()} A ÉTÉ RETROUVÉ(E)!
+
+Excellente nouvelle! L'enfant signalé disparu à ${announcement.zoneName} a été retrouvé sain et sauf.
+
+Merci à tous pour votre mobilisation! Ensemble, nous faisons la différence.
+
+💚 EnfantDisparu.bf - Retrouvons nos enfants ensemble
+
+#Retrouvailles #BonneNouvelle #BurkinaFaso #MissingChildFound
+`.trim();
+
+  try {
+    // Pour les retrouvailles, on peut poster un simple texte
+    // ou utiliser une image générique de célébration
+    // Pour l'instant, on log juste (à implémenter plus tard)
+    logger.info("TikTok resolution post would be created", { docId, caption });
+
+    // TODO: Implémenter le post de résolution
+    // Nécessite soit une image générique, soit du texte seul (si TikTok le supporte)
+
+    return null;
+  } catch (error) {
+    logger.error("TikTok resolution post error", { error, docId });
+    return null;
+  }
+}
+
+/**
+ * Récupère les statistiques d'un post TikTok
+ * Note: L'API TikTok ne fournit pas d'endpoints publics pour les stats en temps réel
+ * Cette fonction est un placeholder pour une future implémentation
+ */
+export async function getTikTokPostStats(
+  postId: string,
+  accessToken: string
+): Promise<{ views: number; likes: number; shares: number; comments: number } | null> {
+  try {
+    // TODO: Implémenter quand TikTok fournira une API pour les stats
+    // Pour l'instant, on retourne null
+    logger.info("TikTok stats not yet implemented", { postId });
+    return null;
+  } catch (error) {
+    logger.error("TikTok stats fetch error", { error, postId });
+    return null;
+  }
+}
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
