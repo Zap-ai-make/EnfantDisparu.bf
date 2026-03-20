@@ -178,29 +178,6 @@ function ConfirmationContent() {
         </Link>
       </div>
 
-      {/* SecureID CTA */}
-      <a
-        href="https://secureid-app.vercel.app"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
-      >
-        <div className="flex items-start gap-3">
-          <span className="text-3xl">🛡</span>
-          <div>
-            <p className="font-bold text-gray-900 text-sm">
-              Évitez que cela se reproduise
-            </p>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Le bracelet SecureID GPS vous alerte en temps réel et les enfants avec bracelet
-              sont retrouvés 3× plus vite grâce au GPS et au réseau de vigies.
-            </p>
-            <p className="text-xs text-red-600 font-semibold mt-2">
-              Découvrir SecureID →
-            </p>
-          </div>
-        </div>
-      </a>
     </div>
   );
 }

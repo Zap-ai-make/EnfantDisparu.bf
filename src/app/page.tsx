@@ -369,25 +369,6 @@ export default function HomePage() {
         </div>
       </Link>
 
-      {/* CTA SecureID */}
-      <a
-        href="https://secureid-app.vercel.app"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🔗</div>
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-gray-900 text-sm">Protégez votre enfant avec SecureID</p>
-            <p className="text-xs text-gray-500 mt-0.5">
-              GPS · Carnet de santé · Géofencing · Les enfants avec bracelet sont retrouvés 3× plus vite.
-            </p>
-          </div>
-          <span className="text-gray-300 text-lg flex-shrink-0">›</span>
-        </div>
-      </a>
-
     </div>
   );
 }

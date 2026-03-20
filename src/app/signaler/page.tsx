@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { Upload, ChevronRight, ChevronLeft, Shield } from "lucide-react";
-import Link from "next/link";
+import { Upload, ChevronRight, ChevronLeft } from "lucide-react";
 import { createAnnouncement } from "@/lib/firestore";
 import { ZonePicker } from "@/components/ZonePicker";
 import { Field, inputClass } from "@/components/forms";
@@ -80,44 +79,6 @@ export default function SignalerPage() {
 
   return (
     <div className="space-y-6">
-      {/* Bandeau SecureID */}
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-5 text-white">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Shield className="w-6 h-6" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold text-lg mb-1">Vous avez un bracelet SecureID ?</h3>
-            <p className="text-emerald-100 text-sm mb-3">
-              Déclenchez l&apos;alerte directement depuis l&apos;app SecureID avec le GPS et le profil de votre enfant pré-remplis.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <a
-                href="https://secureid-app.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white text-emerald-600 px-4 py-2 rounded-xl font-semibold text-sm hover:bg-emerald-50 transition-colors"
-              >
-                Ouvrir SecureID →
-              </a>
-              <Link
-                href="/signaler/secureid"
-                className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-xl font-medium text-sm hover:bg-white/30 transition-colors"
-              >
-                J&apos;ai un code SecureID
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Ou continuer sans SecureID */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 h-px bg-gray-200" />
-        <span className="text-sm text-gray-400">ou signaler sans SecureID</span>
-        <div className="flex-1 h-px bg-gray-200" />
-      </div>
-
       {/* Progress */}
       <div className="flex items-center gap-2">
         {STEPS.map((label, i) => (

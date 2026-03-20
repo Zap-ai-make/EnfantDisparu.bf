@@ -221,7 +221,6 @@ export function AnnouncementCard({ announcement: a }: AnnouncementCardProps) {
           <div className="mt-3 flex flex-wrap gap-2">
             <Badge variant="gray">📍 {a.zoneName}</Badge>
             {isFound && <Badge variant="green">🙋 Cherche ses parents</Badge>}
-            {a.isSecureID && <Badge variant="green">🛡 SecureID</Badge>}
           </div>
         </div>
       </article>

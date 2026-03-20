@@ -2,12 +2,28 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import Link from "next/link";
+import Image from "next/image";
 import { OneSignalInit } from "@/components/OneSignalInit";
 
 export const metadata: Metadata = {
   title: "EnfantDisparu.bf — Retrouvons-les ensemble",
   description:
     "Signalez un enfant disparu ou retrouvé au Burkina Faso. Chaque annonce est diffusée instantanément sur Facebook, WhatsApp et auprès de la communauté.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      { rel: "android-chrome-192x192", url: "/android-chrome-192x192.png" },
+      { rel: "android-chrome-512x512", url: "/android-chrome-512x512.png" },
+    ],
+  },
   openGraph: {
     title: "EnfantDisparu.bf",
     description: "Signalez un enfant disparu. Touchez des milliers de personnes en quelques secondes.",
@@ -15,6 +31,14 @@ export const metadata: Metadata = {
     siteName: "EnfantDisparu.bf",
     locale: "fr_FR",
     type: "website",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "EnfantDisparu.bf - Nous protégeons et retrouvons nos enfants",
+      },
+    ],
   },
 };
 
@@ -46,7 +70,14 @@ export default function RootLayout({
         <header className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
           <div className="max-w-2xl mx-auto px-3 sm:px-4 h-14 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-1.5 sm:gap-2 min-h-[44px]">
-              <span className="text-xl sm:text-2xl">🔴</span>
+              <Image
+                src="/logo.png"
+                alt="EnfantDisparu.bf"
+                width={36}
+                height={36}
+                className="w-8 h-8 sm:w-9 sm:h-9"
+                priority
+              />
               <span className="font-extrabold text-gray-900 text-base sm:text-lg">
                 EnfantDisparu<span className="text-red-600">.bf</span>
               </span>

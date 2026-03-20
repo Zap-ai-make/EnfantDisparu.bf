@@ -165,9 +165,6 @@ export function AnnonceClient({ shortCode }: AnnonceClientProps) {
                 {announcement.childAge} ans · {announcement.childGender === "M" ? "Garçon" : "Fille"}
               </p>
             </div>
-            {announcement.isSecureID && (
-              <Badge variant="green">🛡 SecureID</Badge>
-            )}
           </div>
 
           <div className="space-y-2 text-sm">
@@ -222,36 +219,21 @@ export function AnnonceClient({ shortCode }: AnnonceClientProps) {
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <h2 className="font-bold text-gray-900 flex items-center gap-2">
               <Navigation className="w-4 h-4 text-red-500" />
-              {announcement.isSecureID ? "Position GPS" : "Dernière position connue"}
+              Dernière position connue
             </h2>
-            {announcement.isSecureID && !isResolved && (
-              <span className="flex items-center gap-1.5 text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                En direct
-              </span>
-            )}
           </div>
           <LocationMapWrapper
             latitude={announcement.lastGpsLat}
             longitude={announcement.lastGpsLng}
             childName={announcement.childName}
             lastSeenPlace={announcement.lastSeenPlace}
-            isSecureID={announcement.isSecureID}
-            isLive={announcement.isSecureID && !isResolved}
             showRadius={true}
-            radiusMeters={announcement.isSecureID ? 200 : 500}
+            radiusMeters={500}
             className="h-[250px]"
           />
           <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
             <p className="text-xs text-gray-500">
-              {announcement.isSecureID ? (
-                <>
-                  Position transmise par le bracelet SecureID.
-                  {!isResolved && " Mise à jour en temps réel."}
-                </>
-              ) : (
-                "Coordonnées approximatives basées sur le lieu du signalement."
-              )}
+              Coordonnées approximatives basées sur le lieu du signalement.
             </p>
           </div>
         </div>
@@ -370,22 +352,6 @@ export function AnnonceClient({ shortCode }: AnnonceClientProps) {
         </div>
       )}
 
-      {/* CTA SecureID */}
-      <a
-        href="https://secureid-app.vercel.app"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block bg-white border border-gray-100 rounded-2xl p-4 shadow-sm"
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🛡</span>
-          <div>
-            <p className="font-bold text-gray-900 text-sm">Protégez votre enfant avec SecureID</p>
-            <p className="text-xs text-gray-500">GPS · Géofencing · Alertes instantanées</p>
-          </div>
-          <span className="text-gray-300 ml-auto">›</span>
-        </div>
-      </a>
     </div>
   );
 }
