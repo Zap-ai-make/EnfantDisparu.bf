@@ -89,7 +89,7 @@ export function OneSignalInit() {
                 type: "push",
                 autoPrompt: true,
                 delay: {
-                  timeDelay: 10,
+                  timeDelay: 3,
                   pageViews: 1,
                 },
                 text: {
