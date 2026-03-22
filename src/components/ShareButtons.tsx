@@ -32,8 +32,9 @@ export function ShareButtons({
   const statusText = isFound ? "TROUVÉ" : "DISPARU";
   const emoji = isFound ? "🙋" : "🚨";
   const genderEmoji = childGender === "M" ? "👦" : "👧";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://enfantdisparu.bf";
   const announcementUrl = typeof window !== "undefined"
-    ? `https://enfantdisparu.bf/annonce/${shortCode}`
+    ? `${baseUrl}/annonce/${shortCode}`
     : "";
 
   // Template de texte personnalisé

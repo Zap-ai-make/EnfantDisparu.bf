@@ -3,7 +3,9 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
 import { OneSignalInit } from "@/components/OneSignalInit";
+import { AmbassadorRefTracker } from "@/components/AmbassadorRefTracker";
 
 export const metadata: Metadata = {
   title: "EnfantDisparu.bf — Retrouvons-les ensemble",
@@ -65,6 +67,9 @@ export default function RootLayout({
           }}
         />
         <OneSignalInit />
+        <Suspense fallback={null}>
+          <AmbassadorRefTracker />
+        </Suspense>
 
         {/* Header - sticky pour accès rapide sur mobile */}
         <header className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
@@ -110,8 +115,18 @@ export default function RootLayout({
               <Link href="/retrouvailles" className="hover:text-gray-600 underline py-1">
                 Retrouvailles
               </Link>
-              <Link href="/devenir-vigie" className="hover:text-gray-600 underline py-1">
-                🛡 Devenir Vigie
+              <Link href="/devenir-ambassadeur" className="hover:text-gray-600 underline py-1">
+                Devenir Ambassadeur
+              </Link>
+              <Link href="/candidature" className="hover:text-gray-600 underline py-1">
+                Suivre ma candidature
+              </Link>
+            </div>
+
+            {/* Lien admin discret */}
+            <div className="pt-2">
+              <Link href="/admin/ambassadeurs" className="text-gray-300 hover:text-gray-500 text-[10px]">
+                Admin
               </Link>
             </div>
 

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { MapPin, X, ChevronDown, Search } from "lucide-react";
 import { AnnouncementCard } from "@/components/AnnouncementCard";
+import { NetworkCoverageMap } from "@/components/NetworkCoverageMap";
 import { subscribeToFilteredAnnouncements, getGlobalStats } from "@/lib/firestore";
 import { COUNTRIES, CITIES_BY_COUNTRY, ZONES_BY_CITY, getZoneById } from "@/lib/zones";
 import { cn } from "@/lib/utils";
@@ -163,34 +164,21 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Double CTA - optimisé tactile */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* CTA Enfant disparu */}
+      {/* Double CTA - compact */}
+      <div className="grid grid-cols-2 gap-2">
         <Link
           href="/signaler"
-          className="block bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-2xl p-4 sm:p-5 transition-colors shadow-md shadow-red-200 active:scale-[0.98]"
+          className="flex items-center gap-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-xl px-3 py-2.5 transition-colors shadow-sm active:scale-[0.98]"
         >
-          <div className="flex items-center gap-3 mb-1.5 sm:mb-2">
-            <span className="text-2xl sm:text-3xl">🚨</span>
-            <p className="text-base sm:text-lg font-extrabold">Mon enfant a disparu</p>
-          </div>
-          <p className="text-xs sm:text-sm text-red-100 leading-relaxed">
-            Alerte immédiate sur Facebook, WhatsApp et la communauté.
-          </p>
+          <span className="text-lg">🚨</span>
+          <p className="text-sm font-bold">Mon enfant a disparu</p>
         </Link>
-
-        {/* CTA Enfant trouvé */}
         <Link
           href="/enfant-trouve"
-          className="block bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-2xl p-4 sm:p-5 transition-colors shadow-md shadow-emerald-200 active:scale-[0.98]"
+          className="flex items-center gap-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl px-3 py-2.5 transition-colors shadow-sm active:scale-[0.98]"
         >
-          <div className="flex items-center gap-3 mb-1.5 sm:mb-2">
-            <span className="text-2xl sm:text-3xl">🙋</span>
-            <p className="text-base sm:text-lg font-extrabold">J&apos;ai trouvé un enfant</p>
-          </div>
-          <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
-            Aidez-le à retrouver sa famille rapidement.
-          </p>
+          <span className="text-lg">🙋</span>
+          <p className="text-sm font-bold">J&apos;ai trouvé un enfant</p>
         </Link>
       </div>
 
@@ -352,22 +340,25 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* CTA Devenir Vigie */}
+      {/* CTA Devenir Ambassadeur */}
       <Link
-        href="/devenir-vigie"
-        className="block bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
+        href="/devenir-ambassadeur"
+        className="block bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🛡</div>
+          <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🛡</div>
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-gray-900 text-sm">Devenez Vigie de quartier</p>
+            <p className="font-bold text-gray-900 text-sm">Devenez Ambassadeur</p>
             <p className="text-xs text-gray-500 mt-0.5">
-              Recevez les alertes en temps réel et aidez à retrouver les enfants de votre zone.
+              Recevez les alertes et aidez à mobiliser votre communauté.
             </p>
           </div>
           <span className="text-gray-300 text-lg flex-shrink-0">›</span>
         </div>
       </Link>
+
+      {/* Carte du réseau de vigilance */}
+      <NetworkCoverageMap />
 
     </div>
   );

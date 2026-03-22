@@ -42,8 +42,8 @@ export function formatDateShort(date: Date | string | unknown): string {
 
 export function urgencyLevel(createdAt: Date | string | unknown): "critical" | "urgent" | "active" {
   const hours = (Date.now() - toDate(createdAt).getTime()) / 1000 / 3600;
-  if (hours < 6) return "critical";
-  if (hours < 24) return "urgent";
+  // Rouge pour toutes les disparitions < 2 semaines, gris après
+  if (hours < 336) return "critical"; // 336h = 14 jours = 2 semaines
   return "active";
 }
 

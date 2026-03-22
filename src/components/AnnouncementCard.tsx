@@ -1,16 +1,16 @@
+import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Clock, Timer, ChevronRight, Users, Eye } from "lucide-react";
+import { MapPin, Clock, Timer, ChevronRight, Users, Eye, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { timeAgo, elapsedTime, urgencyLevel, urgencyLabel, cn, formatK } from "@/lib/utils";
-import { CheckCircle } from "lucide-react";
 import type { Announcement } from "@/types/announcement";
 
 interface AnnouncementCardProps {
   announcement: Announcement;
 }
 
-export function AnnouncementCard({ announcement: a }: AnnouncementCardProps) {
+export const AnnouncementCard = memo(function AnnouncementCard({ announcement: a }: AnnouncementCardProps) {
   const isResolved = a.status === "resolved";
   const isFound = a.type === "found";
   const level = urgencyLevel(a.createdAt);
@@ -102,13 +102,17 @@ export function AnnouncementCard({ announcement: a }: AnnouncementCardProps) {
             <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
               <div>
                 <h3 className={cn(
-                  "font-extrabold text-lg sm:text-xl leading-tight truncate",
-                  isResolved ? "text-green-800" : isCritical ? "text-red-900" : "text-gray-900"
+                  "font-black text-xl sm:text-2xl leading-tight tracking-tight",
+                  isResolved
+                    ? "text-green-700"
+                    : isCritical
+                    ? "text-red-700 drop-shadow-sm"
+                    : "text-gray-900"
                 )}>
                   {a.childName}
                 </h3>
-                <p className="text-gray-500 text-sm font-medium mt-0.5">
-                  {a.childGender === "M" ? "Garçon" : "Fille"}
+                <p className="text-gray-500 text-xs font-medium mt-1 uppercase tracking-wide">
+                  {a.childGender === "M" ? "Garçon" : "Fille"} • {a.childAge} ans
                 </p>
               </div>
 
@@ -226,5 +230,5 @@ export function AnnouncementCard({ announcement: a }: AnnouncementCardProps) {
       </article>
     </Link>
   );
-}
+});
 

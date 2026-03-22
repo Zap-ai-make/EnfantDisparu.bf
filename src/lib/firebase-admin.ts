@@ -12,10 +12,18 @@ function getAdminApp(): App {
   const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
 
   if (serviceAccount) {
-    adminApp = initializeApp({
-      credential: cert(JSON.parse(serviceAccount)),
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    });
+    try {
+      adminApp = initializeApp({
+        credential: cert(JSON.parse(serviceAccount)),
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      });
+    } catch (error) {
+      console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT:", error);
+      // Fallback to Application Default Credentials
+      adminApp = initializeApp({
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      });
+    }
   } else {
     // Fallback: Application Default Credentials (gcloud ou GCE)
     adminApp = initializeApp({
