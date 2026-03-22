@@ -82,19 +82,32 @@ export function OneSignalInit() {
 
       OneSignal.init({
         appId,
-        autoPrompt: false, // Désactiver le prompt automatique pour le contrôler manuellement
         allowLocalhostAsSecureOrigin: true,
+        promptOptions: {
+          slidedown: {
+            prompts: [
+              {
+                type: "push" as const,
+                autoPrompt: true,
+                text: {
+                  actionMessage: "Soyez alerte quand un enfant disparait pres de chez vous !",
+                  acceptButton: "Oui, m'alerter",
+                  cancelButton: "Non merci",
+                },
+                delay: {
+                  pageViews: 1,
+                  timeDelay: 3,
+                },
+              },
+            ],
+          },
+        },
       }).then(() => {
         // Envoyer le tag ambassador_ref si présent
         const ambassadorRef = getStoredAmbassadorRef();
         if (ambassadorRef) {
           OneSignal.User.addTag("ambassador_ref", ambassadorRef);
         }
-
-        // Afficher le prompt après 3 secondes
-        setTimeout(() => {
-          OneSignal.Slidedown.promptPush();
-        }, 3000);
 
         // Écouter les changements d'abonnement aux notifications
         OneSignal.User.PushSubscription.addEventListener("change", (event) => {
