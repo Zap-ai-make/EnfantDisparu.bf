@@ -82,30 +82,7 @@ export function OneSignalInit() {
 
       OneSignal.init({
         appId,
-        promptOptions: {
-          slidedown: {
-            prompts: [
-              {
-                type: "push",
-                autoPrompt: true,
-                delay: {
-                  timeDelay: 3,
-                  pageViews: 1,
-                },
-                text: {
-                  actionMessage:
-                    "🚨 Soyez alerté immédiatement quand un enfant disparaît près de chez vous. Chaque minute compte !",
-                  acceptButton: "🔔 Oui, m'alerter",
-                  cancelButton: "Non merci",
-                },
-              },
-            ],
-          },
-        },
-        welcomeNotification: {
-          title: "Bienvenue sur EnfantDisparu.bf 🛡️",
-          message: "Merci de rejoindre notre réseau de vigilance. Vous serez alerté en cas de disparition dans votre secteur.",
-        },
+        // Laisser le dashboard OneSignal gérer les prompts
         allowLocalhostAsSecureOrigin: true,
       }).then(() => {
         // Envoyer le tag ambassador_ref si présent
