@@ -84,7 +84,7 @@ export default function GestionPage({
 
   const level = urgencyLevel(announcement.createdAt);
   const isResolved = announcement.status === "resolved";
-  const announcementUrl = `https://enfantdisparu.bf/annonce/${announcement.shortCode}`;
+  const announcementUrl = `https://enfentdisparu.bf/annonce/${announcement.shortCode}`;
 
   return (
     <div className="space-y-4">

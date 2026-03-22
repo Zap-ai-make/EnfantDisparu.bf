@@ -244,7 +244,7 @@ describe("ambassador-utils", () => {
     it("should generate WhatsApp invitation message with ref code", () => {
       const message = SHARE_MESSAGES.whatsappInvitation(testRefCode);
       expect(message).toContain(testRefCode);
-      expect(message).toContain("enfantdisparu.bf");
+      expect(message).toContain("enfentdisparu.bf");
       expect(message).toContain("ref=AMB-TEST");
     });
 
@@ -266,7 +266,7 @@ describe("ambassador-utils", () => {
   describe("getDashboardUrl", () => {
     it("should generate correct dashboard URL", () => {
       const url = getDashboardUrl("test-token-123");
-      expect(url).toBe("https://enfantdisparu.bf/ambassadeur/dashboard?t=test-token-123");
+      expect(url).toBe("https://enfentdisparu.bf/ambassadeur/dashboard?t=test-token-123");
     });
   });
 
@@ -275,7 +275,7 @@ describe("ambassador-utils", () => {
   describe("getShareUrl", () => {
     it("should generate correct share URL", () => {
       const url = getShareUrl("AMB-TEST");
-      expect(url).toBe("https://enfantdisparu.bf/?ref=AMB-TEST");
+      expect(url).toBe("https://enfentdisparu.bf/?ref=AMB-TEST");
     });
   });
 });

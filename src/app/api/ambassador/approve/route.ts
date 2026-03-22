@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build dashboard URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://enfantdisparu.bf";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://enfentdisparu.bf";
     const dashboardUrl = `${baseUrl}/ambassadeur?t=${accessToken}`;
 
     return NextResponse.json({

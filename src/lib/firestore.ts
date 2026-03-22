@@ -958,7 +958,7 @@ export async function regenerateAccessToken(
 
   await createAuditLog(ambassadorId, "token_regenerated", "system");
 
-  const dashboardUrl = `https://enfantdisparu.bf/ambassadeur/dashboard?t=${accessToken}`;
+  const dashboardUrl = `https://enfentdisparu.bf/ambassadeur/dashboard?t=${accessToken}`;
 
   return { success: true, accessToken, dashboardUrl };
 }

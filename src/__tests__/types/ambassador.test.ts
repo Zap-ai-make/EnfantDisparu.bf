@@ -148,7 +148,7 @@ describe("Ambassador Types", () => {
       const result: ApproveAmbassadorResult = {
         success: true,
         accessToken: "test-token",
-        dashboardUrl: "https://enfantdisparu.bf/ambassadeur?t=test-token",
+        dashboardUrl: "https://enfentdisparu.bf/ambassadeur?t=test-token",
       };
 
       expect(result.success).toBe(true);

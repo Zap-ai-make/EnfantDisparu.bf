@@ -99,7 +99,7 @@ export function buildShareText(announcement: {
   lastSeenPlace: string;
   shortCode: string;
 }): string {
-  return `🚨 ENFANT DISPARU — URGENT\n\n${announcement.childName}, ${announcement.childAge} ans\n📍 Dernière vue : ${announcement.lastSeenPlace} (${announcement.zoneName})\n\nSi vous l'avez vu(e), contactez sa famille :\n🔗 enfantdisparu.bf/annonce/${announcement.shortCode}\n\n⚡ Partagez — chaque partage peut sauver une vie.`;
+  return `🚨 ENFANT DISPARU — URGENT\n\n${announcement.childName}, ${announcement.childAge} ans\n📍 Dernière vue : ${announcement.lastSeenPlace} (${announcement.zoneName})\n\nSi vous l'avez vu(e), contactez sa famille :\n🔗 enfentdisparu.bf/annonce/${announcement.shortCode}\n\n⚡ Partagez — chaque partage peut sauver une vie.`;
 }
 
 /**

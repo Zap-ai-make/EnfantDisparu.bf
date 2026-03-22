@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "EnfantDisparu.bf",
     description: "Signalez un enfant disparu. Touchez des milliers de personnes en quelques secondes.",
-    url: "https://enfantdisparu.bf",
+    url: "https://enfentdisparu.bf",
     siteName: "EnfantDisparu.bf",
     locale: "fr_FR",
     type: "website",

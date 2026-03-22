@@ -178,7 +178,7 @@ export function hashIPSync(ip: string): string {
 
 // ─── Base URL ─────────────────────────────────────────────────────────────────
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://enfantdisparu.bf";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://enfentdisparu.bf";
 
 // ─── Messages Pré-écrits ──────────────────────────────────────────────────────
 

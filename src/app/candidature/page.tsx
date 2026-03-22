@@ -186,7 +186,7 @@ export default function CandidaturePage() {
               {ambassador.status === "approved" && (
                 <>
                   <strong>Vous n'avez pas reçu le lien ?</strong> Vérifiez vos messages WhatsApp
-                  ou contactez-nous. Le lien commence par : https://enfantdisparu.bf/ambassadeur
+                  ou contactez-nous. Le lien commence par : https://enfentdisparu.bf/ambassadeur
                 </>
               )}
               {ambassador.status === "rejected" && (

@@ -52,8 +52,8 @@ function ConfirmationContent() {
     };
   }, [docId]);
 
-  const announcementUrl = `https://enfantdisparu.bf/annonce/${shortCode}`;
-  const gestionUrl = `https://enfantdisparu.bf/gestion/${secretToken}`;
+  const announcementUrl = `https://enfentdisparu.bf/annonce/${shortCode}`;
+  const gestionUrl = `https://enfentdisparu.bf/gestion/${secretToken}`;
 
   const shareText = `🚨 ENFANT DISPARU — URGENT\n\nRetrouvez toutes les informations ici :\n🔗 ${announcementUrl}\n\n⚡ Partagez — chaque partage peut sauver une vie.`;
 

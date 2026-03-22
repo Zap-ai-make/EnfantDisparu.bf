@@ -165,5 +165,18 @@ service cloud.firestore {
 
       allow delete: if false;
     }
+
+    // ─── Ambassadeurs ───────────────────────────────────────────────────────────
+
+    match /ambassadors/{ambassadorId} {
+      // Lecture publique pour le suivi de candidature
+      // Les utilisateurs peuvent consulter le statut de leur candidature via refCode
+      // Note: l'UI ne doit pas afficher les données sensibles (téléphone)
+      allow read: if true;
+
+      // Écriture interdite côté client
+      // Toutes les opérations d'écriture passent par API routes/Cloud Functions
+      allow write: if false;
+    }
   }
 }

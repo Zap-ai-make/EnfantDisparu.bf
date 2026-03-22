@@ -23,7 +23,7 @@ describe("AmbassadorQRCode", () => {
 
     const qrCode = screen.getByTestId("qr-code");
     expect(qrCode).toBeInTheDocument();
-    expect(qrCode).toHaveAttribute("data-value", "https://enfantdisparu.bf/?ref=AMB-TEST");
+    expect(qrCode).toHaveAttribute("data-value", "https://enfentdisparu.bf/?ref=AMB-TEST");
   });
 
   it("should render QR code with custom size", () => {
@@ -44,7 +44,7 @@ describe("AmbassadorQRCode", () => {
   it("should display the share URL text", () => {
     render(<AmbassadorQRCode refCode={mockRefCode} />);
 
-    expect(screen.getByText("https://enfantdisparu.bf/?ref=AMB-TEST")).toBeInTheDocument();
+    expect(screen.getByText("https://enfentdisparu.bf/?ref=AMB-TEST")).toBeInTheDocument();
   });
 
   it("should have download button", () => {

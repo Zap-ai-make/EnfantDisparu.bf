@@ -28,6 +28,10 @@ export { regenerateAlertCard } from "./http/regenerateAlertCard";
 export { healthCheck } from "./http/healthCheck";
 export { postToTikTok } from "./http/postToTikTok";
 
+// Programme Ambassadeur
+export { oneSignalWebhook } from "./http/oneSignalWebhook";
+export { submitAmbassadorApplication } from "./http/submitAmbassadorApplication";
+
 // Temporairement désactivé - secrets non configurés
 // export { onAnnouncementUpdate } from "./triggers/onAnnouncementUpdate";
 // export { onSightingCreate } from "./triggers/onSightingCreate";

@@ -51,8 +51,8 @@ function ConfirmationContent() {
     };
   }, [docId]);
 
-  const announcementUrl = `https://enfantdisparu.bf/annonce/${shortCode}`;
-  const gestionUrl = `https://enfantdisparu.bf/gestion/${secretToken}`;
+  const announcementUrl = `https://enfentdisparu.bf/annonce/${shortCode}`;
+  const gestionUrl = `https://enfentdisparu.bf/gestion/${secretToken}`;
 
   return (
     <div className="space-y-6">
