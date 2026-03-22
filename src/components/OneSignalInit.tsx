@@ -83,25 +83,7 @@ export function OneSignalInit() {
       OneSignal.init({
         appId,
         allowLocalhostAsSecureOrigin: true,
-        promptOptions: {
-          slidedown: {
-            prompts: [
-              {
-                type: "push" as const,
-                autoPrompt: true,
-                text: {
-                  actionMessage: "Soyez alerte quand un enfant disparait pres de chez vous !",
-                  acceptButton: "Oui, m'alerter",
-                  cancelButton: "Non merci",
-                },
-                delay: {
-                  pageViews: 1,
-                  timeDelay: 3,
-                },
-              },
-            ],
-          },
-        },
+        // Le dashboard OneSignal gère la configuration du prompt
       }).then(() => {
         // Envoyer le tag ambassador_ref si présent
         const ambassadorRef = getStoredAmbassadorRef();
