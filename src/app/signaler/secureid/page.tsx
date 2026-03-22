@@ -85,19 +85,20 @@ export default function SignalerSecureIDPage() {
   const handleContinue = () => {
     if (!profile) return;
 
-    // Encoder les données du profil dans l'URL pour le formulaire
-    const params = new URLSearchParams({
-      secureid: "true",
+    // Stocker les données sensibles en sessionStorage (pas dans l'URL)
+    const sessionKey = `secureid_${Date.now()}`;
+    sessionStorage.setItem(sessionKey, JSON.stringify({
       profileId: profile.id,
       braceletId: profile.braceletId || "",
       name: profile.childName,
-      age: String(profile.childAge),
+      age: profile.childAge,
       gender: profile.childGender,
       phone: profile.parentPhone,
       photo: profile.childPhotoURL || "",
-    });
+    }));
 
-    router.push(`/signaler/secureid/form?${params.toString()}`);
+    // Passer seulement la clé de session dans l'URL
+    router.push(`/signaler/secureid/form?key=${sessionKey}`);
   };
 
   return (

@@ -1,12 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { v4 as uuidv4 } from "uuid";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 
 const db = getAdminDb();
 
+// Admin password authentication (server-side only)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+function isAuthorized(request: NextRequest): boolean {
+  const authHeader = request.headers.get("x-admin-password");
+  return !!ADMIN_PASSWORD && authHeader === ADMIN_PASSWORD;
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Vérifier authentification admin
+    if (!isAuthorized(request)) {
+      return NextResponse.json(
+        { success: false, error: "unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { ambassadorId, approvedBy } = body;
 
@@ -36,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate access token
-    const accessToken = uuidv4();
+    const accessToken = crypto.randomUUID();
     const accessTokenExpiresAt = Timestamp.fromDate(
       new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
     );

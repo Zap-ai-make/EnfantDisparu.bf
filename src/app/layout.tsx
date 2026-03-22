@@ -8,9 +8,16 @@ import { OneSignalInit } from "@/components/OneSignalInit";
 import { AmbassadorRefTracker } from "@/components/AmbassadorRefTracker";
 
 export const metadata: Metadata = {
-  title: "EnfantDisparu.bf — Retrouvons-les ensemble",
+  title: {
+    default: "EnfantDisparu.bf — Retrouvons-les ensemble",
+    template: "%s | EnfantDisparu.bf",
+  },
   description:
     "Signalez un enfant disparu ou retrouvé au Burkina Faso. Chaque annonce est diffusée instantanément sur Facebook, WhatsApp et auprès de la communauté.",
+  keywords: ["enfant disparu", "Burkina Faso", "signalement", "alerte enlèvement", "enfant perdu", "retrouver enfant"],
+  authors: [{ name: "EnfantDisparu.bf" }],
+  creator: "EnfantDisparu.bf",
+  metadataBase: new URL("https://enfentdisparu.bf"),
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32" },
@@ -41,6 +48,16 @@ export const metadata: Metadata = {
         alt: "EnfantDisparu.bf - Nous protégeons et retrouvons nos enfants",
       },
     ],
+  },
+  twitter: {
+    card: "summary",
+    title: "EnfantDisparu.bf — Retrouvons-les ensemble",
+    description: "Signalez un enfant disparu au Burkina Faso. Diffusion instantanée sur les réseaux sociaux.",
+    images: ["/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

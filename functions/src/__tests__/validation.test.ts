@@ -231,7 +231,10 @@ describe("Cloud Functions Validation Logic", () => {
     });
 
     it("should handle events without ambassador_ref tag", () => {
-      const eventWithoutTag = {
+      const eventWithoutTag: {
+        event: string;
+        data: { tags: { ambassador_ref?: string } };
+      } = {
         event: "notification.subscription.created",
         data: {
           tags: {},

@@ -126,8 +126,16 @@ async function checkRateLimit(ipHash: string, maxPerHour = 3): Promise<boolean> 
 // ─── Main Function ────────────────────────────────────────────────────────────
 
 export const submitAmbassadorApplication = functions.https.onRequest(async (req, res) => {
-  // CORS
-  res.set("Access-Control-Allow-Origin", "*");
+  // CORS - restreint au domaine principal
+  const allowedOrigins = [
+    "https://enfentdisparu.bf",
+    "https://www.enfentdisparu.bf",
+    "http://localhost:3000", // dev
+  ];
+  const origin = req.headers.origin || "";
+  if (allowedOrigins.includes(origin)) {
+    res.set("Access-Control-Allow-Origin", origin);
+  }
   res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.set("Access-Control-Allow-Headers", "Content-Type");
 

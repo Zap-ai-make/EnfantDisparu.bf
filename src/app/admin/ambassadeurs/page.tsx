@@ -7,7 +7,6 @@ import { ZONES_BY_CITY } from "@/lib/zones";
 import { cn } from "@/lib/utils";
 import type { Ambassador } from "@/types/ambassador";
 
-const ADMIN_PASSWORD = "zaparo";
 const AUTH_KEY = "admin_ambassadeurs_auth";
 
 type TabStatus = "pending" | "approved" | "rejected";
@@ -21,7 +20,9 @@ const TABS: { value: TabStatus; label: string; icon: React.ReactNode }[] = [
 export default function AdminAmbassadeursPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabStatus>("pending");
   const [ambassadors, setAmbassadors] = useState<Ambassador[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,14 +37,31 @@ export default function AdminAmbassadeursPage() {
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem(AUTH_KEY, "true");
-      setPasswordError(false);
-    } else {
+    setLoginLoading(true);
+    setPasswordError(false);
+
+    try {
+      const response = await fetch("/api/admin/verify-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setAdminPassword(password);
+        setIsAuthenticated(true);
+        sessionStorage.setItem(AUTH_KEY, "true");
+      } else {
+        setPasswordError(true);
+      }
+    } catch {
       setPasswordError(true);
+    } finally {
+      setLoginLoading(false);
     }
   };
 
@@ -62,7 +80,10 @@ export default function AdminAmbassadeursPage() {
     try {
       const response = await fetch("/api/ambassador/approve", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": adminPassword,
+        },
         body: JSON.stringify({ ambassadorId, approvedBy: "admin" }),
       });
 
@@ -92,7 +113,10 @@ export default function AdminAmbassadeursPage() {
     try {
       const response = await fetch("/api/ambassador/reject", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": adminPassword,
+        },
         body: JSON.stringify({ ambassadorId, rejectedBy: "admin", reason: reason || undefined }),
       });
 
@@ -178,9 +202,10 @@ export default function AdminAmbassadeursPage() {
             </div>
             <button
               type="submit"
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 rounded-xl transition-colors"
+              disabled={loginLoading}
+              className="w-full bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-semibold py-3 rounded-xl transition-colors"
             >
-              Accéder
+              {loginLoading ? "Vérification..." : "Accéder"}
             </button>
           </form>
         </div>

@@ -192,7 +192,7 @@ export default function CandidaturePage() {
               {ambassador.status === "rejected" && (
                 <>
                   <strong>Pourquoi ?</strong>{" "}
-                  {(ambassador as any).rejectionReason ||
+                  {ambassador.rejectionReason ||
                     "Vous pouvez nous contacter pour plus d'informations."}{" "}
                   Vous pouvez toujours aider en activant les notifications push !
                 </>

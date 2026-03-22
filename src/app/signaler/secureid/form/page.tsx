@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { ChevronLeft, Shield, MapPin, Clock, Upload } from "lucide-react";
+import { ChevronLeft, Shield, MapPin } from "lucide-react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/firebase";
@@ -22,19 +22,57 @@ interface FormData {
   distinctiveSign?: string;
 }
 
+interface SecureIDData {
+  profileId: string;
+  braceletId: string;
+  name: string;
+  age: number;
+  gender: "M" | "F";
+  phone: string;
+  photo: string;
+}
+
 function SecureIDFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [submitting, setSubmitting] = useState(false);
+  const [secureData, setSecureData] = useState<SecureIDData | null>(null);
 
-  // Données SecureID depuis les paramètres URL
-  const profileId = searchParams.get("profileId") || "";
-  const braceletId = searchParams.get("braceletId") || "";
-  const childName = searchParams.get("name") || "";
-  const childAge = parseInt(searchParams.get("age") || "0");
-  const childGender = (searchParams.get("gender") || "M") as "M" | "F";
-  const parentPhone = searchParams.get("phone") || "";
-  const childPhotoURL = searchParams.get("photo") || "";
+  // Récupérer les données depuis sessionStorage (sécurisé)
+  useEffect(() => {
+    const sessionKey = searchParams.get("key");
+    if (!sessionKey) {
+      toast.error("Données SecureID manquantes");
+      router.push("/signaler/secureid");
+      return;
+    }
+
+    const storedData = sessionStorage.getItem(sessionKey);
+    if (!storedData) {
+      toast.error("Session expirée, veuillez recommencer");
+      router.push("/signaler/secureid");
+      return;
+    }
+
+    try {
+      const data = JSON.parse(storedData) as SecureIDData;
+      setSecureData(data);
+      // Nettoyer après lecture pour éviter les fuites
+      sessionStorage.removeItem(sessionKey);
+    } catch {
+      toast.error("Données invalides");
+      router.push("/signaler/secureid");
+    }
+  }, [searchParams, router]);
+
+  // Données extraites
+  const profileId = secureData?.profileId || "";
+  const braceletId = secureData?.braceletId || "";
+  const childName = secureData?.name || "";
+  const childAge = secureData?.age || 0;
+  const childGender = secureData?.gender || "M";
+  const parentPhone = secureData?.phone || "";
+  const childPhotoURL = secureData?.photo || "";
 
   const {
     register,
@@ -43,13 +81,15 @@ function SecureIDFormContent() {
     formState: { errors },
   } = useForm<FormData>();
 
-  // Vérifier que les données SecureID sont présentes
-  useEffect(() => {
-    if (!profileId || !childName) {
-      toast.error("Données SecureID manquantes");
-      router.push("/signaler/secureid");
-    }
-  }, [profileId, childName, router]);
+  // Attendre que les données soient chargées
+  if (!secureData) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-white rounded-2xl h-32 animate-pulse border border-gray-100" />
+        <div className="bg-white rounded-2xl h-64 animate-pulse border border-gray-100" />
+      </div>
+    );
+  }
 
   const onSubmit = async (data: FormData) => {
     setSubmitting(true);

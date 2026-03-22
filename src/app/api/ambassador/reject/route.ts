@@ -4,8 +4,24 @@ import { FieldValue } from "firebase-admin/firestore";
 
 const db = getAdminDb();
 
+// Admin password authentication (server-side only)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+function isAuthorized(request: NextRequest): boolean {
+  const authHeader = request.headers.get("x-admin-password");
+  return !!ADMIN_PASSWORD && authHeader === ADMIN_PASSWORD;
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Vérifier authentification admin
+    if (!isAuthorized(request)) {
+      return NextResponse.json(
+        { success: false, error: "unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { ambassadorId, rejectedBy, reason } = body;
 
