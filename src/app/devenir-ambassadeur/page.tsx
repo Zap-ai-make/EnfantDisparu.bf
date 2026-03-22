@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, MapPin, User, CheckCircle, ChevronDown, Calendar, Cat } from "lucide-react";
+import { Shield, MapPin, User, CheckCircle, ChevronDown, Calendar, Cat, X, Heart, GraduationCap, Users, Award, Briefcase } from "lucide-react";
 import { COUNTRIES, CITIES_BY_COUNTRY, ZONES_BY_CITY } from "@/lib/zones";
 import { cn } from "@/lib/utils";
 import { getAmbassadorCount } from "@/lib/firestore";
 import { getStoredAmbassadorRef } from "@/components/AmbassadorRefTracker";
 import type { SubmitApplicationResult, CatAnswer } from "@/types/ambassador";
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 0 | 1 | 2 | 3 | 4; // 0 = modal info
 
 const MONTHS = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
@@ -18,10 +18,11 @@ const MONTHS = [
 
 export default function DevenirAmbassadeurPage() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] = useState<Step>(0); // Start with info modal
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [ambassadorCount, setAmbassadorCount] = useState<number | null>(null);
+  const [hasReadInfo, setHasReadInfo] = useState(false);
 
   // Form state
   const [firstName, setFirstName] = useState("");
@@ -120,64 +121,170 @@ export default function DevenirAmbassadeurPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-            <Shield className="w-6 h-6" />
+      {/* Step 0: Modal d'information */}
+      {step === 0 && (
+        <div className="space-y-4">
+          {/* Header */}
+          <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <Shield className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-xl font-extrabold">Devenir Ambassadeur</h1>
+                <p className="text-amber-100 text-sm">Rejoignez notre réseau de citoyens engagés</p>
+              </div>
+            </div>
+            <p className="text-sm text-amber-100 leading-relaxed italic">
+              &quot;Aucun parent ne devrait vivre l&apos;angoisse de chercher son enfant seul.&quot;
+            </p>
           </div>
-          <div>
-            <h1 className="text-xl font-extrabold">Devenir Ambassadeur</h1>
-            <p className="text-amber-100 text-sm">Protégez les enfants de votre quartier</p>
+
+          {/* Ce que tu fais */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-amber-500" />
+              Tes missions concrètes
+            </h2>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">📲</span>
+                <span className="text-gray-600"><strong>Partager</strong> — Diffuse les alertes dans tes groupes WhatsApp et ton quartier</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">👀</span>
+                <span className="text-gray-600"><strong>Rester attentif</strong> — Sois vigilant dans ta zone et signale si tu vois un enfant recherché</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">🔗</span>
+                <span className="text-gray-600"><strong>Activer</strong> — Convaincs les gens de s&apos;abonner aux alertes de leur quartier</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">👥</span>
+                <span className="text-gray-600"><strong>Recruter</strong> — Invite d&apos;autres personnes à devenir Ambassadeurs</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Ce que tu reçois */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Award className="w-5 h-5 text-amber-500" />
+              Ce que tu reçois
+            </h2>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">🛡️</span>
+                <span className="text-gray-600"><strong>Badge officiel</strong> — Reconnaissance comme Ambassadeur EnfantDisparu.bf</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">📊</span>
+                <span className="text-gray-600"><strong>Tableau de bord</strong> — Suis ton impact en temps réel (partages, activations, recrutements)</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">🎓</span>
+                <span className="text-gray-600"><strong>Formations certifiantes</strong> — Protection de l&apos;enfance, premiers secours (avec nos partenaires ONG)</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">🤝</span>
+                <span className="text-gray-600"><strong>Missions terrain</strong> — Participe aux actions de l&apos;association</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">🌐</span>
+                <span className="text-gray-600"><strong>Réseau</strong> — Connexion avec d&apos;autres Ambassadeurs et acteurs de la protection de l&apos;enfance</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">📜</span>
+                <span className="text-gray-600"><strong>Certificat</strong> — Attestation officielle d&apos;engagement bénévole</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-amber-500 text-lg">💰</span>
+                <span className="text-gray-600"><strong>Primes partenaires</strong> — Priorité quand l&apos;association aura des sponsors</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Avertissement honnête */}
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+            <div className="flex items-start gap-3">
+              <Heart className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-bold text-amber-900 mb-1">C&apos;est du bénévolat</p>
+                <p className="text-amber-700">
+                  EnfantDisparu.bf est une association à but non lucratif. Il n&apos;y a <strong>pas de salaire</strong>.
+                  La vraie récompense, c&apos;est de savoir que tu aides concrètement à retrouver des enfants.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Checkbox + CTA */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasReadInfo}
+                onChange={(e) => setHasReadInfo(e.target.checked)}
+                className="mt-0.5 w-5 h-5 rounded border-gray-300 text-amber-500 focus:ring-amber-500"
+              />
+              <span className="text-sm text-gray-600">
+                J&apos;ai lu et compris que c&apos;est un engagement bénévole. Je souhaite rejoindre le réseau des Ambassadeurs.
+              </span>
+            </label>
+
+            <button
+              onClick={() => setStep(1)}
+              disabled={!hasReadInfo}
+              className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-base transition-colors"
+            >
+              Continuer ma candidature
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4 text-center">
+            <p className="text-2xl font-extrabold text-amber-500">
+              {ambassadorCount !== null ? ambassadorCount : "..."}
+            </p>
+            <p className="text-xs text-gray-500">ambassadeurs actifs au Burkina Faso</p>
           </div>
         </div>
-        <p className="text-sm text-amber-100 leading-relaxed">
-          Les ambassadeurs sont des citoyens engagés qui aident à retrouver les enfants disparus
-          en partageant les alertes et en mobilisant leur communauté.
-        </p>
-      </div>
+      )}
 
-      {/* Avantages */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-        <h2 className="font-bold text-gray-900 mb-3">Ce que font les ambassadeurs</h2>
-        <ul className="space-y-2 text-sm">
-          <li className="flex items-start gap-2">
-            <span className="text-amber-500 mt-0.5">📲</span>
-            <span className="text-gray-600">Reçoivent une notification immédiate quand un enfant disparaît près de chez eux</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-amber-500 mt-0.5">🔗</span>
-            <span className="text-gray-600">Partagent leur lien unique pour recruter d&apos;autres ambassadeurs</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-amber-500 mt-0.5">📊</span>
-            <span className="text-gray-600">Suivent leur impact sur un tableau de bord personnel</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-amber-500 mt-0.5">🏆</span>
-            <span className="text-gray-600">Font partie d&apos;un réseau de citoyens engagés</span>
-          </li>
-        </ul>
-      </div>
-
-      {/* Progress bar */}
-      <div className="flex items-center gap-2 px-2">
-        {[1, 2, 3, 4].map((s) => (
-          <div key={s} className="flex-1 flex items-center gap-2">
-            <div
-              className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors",
-                step >= s ? "bg-amber-500 text-white" : "bg-gray-200 text-gray-400"
-              )}
-            >
-              {step > s ? <CheckCircle className="w-4 h-4" /> : s}
+      {/* Steps 1-4: Formulaire */}
+      {step >= 1 && (
+        <>
+          {/* Header compact */}
+          <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-4 text-white">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="text-lg font-extrabold">Candidature Ambassadeur</h1>
+                <p className="text-amber-100 text-xs">Étape {step} sur 4</p>
+              </div>
             </div>
-            {s < 4 && (
-              <div className={cn("flex-1 h-1 rounded-full", step > s ? "bg-amber-500" : "bg-gray-200")} />
-            )}
           </div>
-        ))}
-      </div>
+
+          {/* Progress bar */}
+          <div className="flex items-center gap-2 px-2">
+            {[1, 2, 3, 4].map((s) => (
+              <div key={s} className="flex-1 flex items-center gap-2">
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors",
+                    step >= s ? "bg-amber-500 text-white" : "bg-gray-200 text-gray-400"
+                  )}
+                >
+                  {step > s ? <CheckCircle className="w-4 h-4" /> : s}
+                </div>
+                {s < 4 && (
+                  <div className={cn("flex-1 h-1 rounded-full", step > s ? "bg-amber-500" : "bg-gray-200")} />
+                )}
+              </div>
+            ))}
+          </div>
 
       {/* Form */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
@@ -494,14 +601,8 @@ export default function DevenirAmbassadeurPage() {
           </div>
         )}
       </div>
-
-      {/* Stats */}
-      <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4 text-center">
-        <p className="text-2xl font-extrabold text-amber-500">
-          {ambassadorCount !== null ? ambassadorCount : "..."}
-        </p>
-        <p className="text-xs text-gray-500">ambassadeurs actifs au Burkina Faso</p>
-      </div>
+      </>
+      )}
     </div>
   );
 }

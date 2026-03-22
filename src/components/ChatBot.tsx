@@ -40,8 +40,47 @@ export function ChatBot() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+  const [displayedText, setDisplayedText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Effet de frappe mot par mot pour les messages assistant
+  useEffect(() => {
+    if (!typingMessageId) return;
+
+    const message = messages.find((m) => m.id === typingMessageId);
+    if (!message) return;
+
+    const fullText = message.content;
+
+    // Si on a affiché tout le texte, arrêter
+    if (displayedText === fullText) {
+      setTypingMessageId(null);
+      return;
+    }
+
+    // Trouver le prochain mot à ajouter
+    const remainingText = fullText.substring(displayedText.length);
+
+    // Trouver la fin du prochain "chunk" (mot + espace ou ponctuation)
+    let nextChunkEnd = 0;
+
+    // Ajouter caractère par caractère pour ponctuation/newlines, mot par mot sinon
+    if (remainingText[0] === '\n' || remainingText[0] === ' ') {
+      nextChunkEnd = 1;
+    } else {
+      // Trouver la fin du mot (espace, newline, ou fin de texte)
+      const spaceIndex = remainingText.search(/[\s\n]/);
+      nextChunkEnd = spaceIndex === -1 ? remainingText.length : spaceIndex + 1;
+    }
+
+    const timeout = setTimeout(() => {
+      setDisplayedText(fullText.substring(0, displayedText.length + nextChunkEnd));
+    }, 50); // 50ms par mot pour un effet visible
+
+    return () => clearTimeout(timeout);
+  }, [typingMessageId, displayedText, messages]);
 
   // Scroll to bottom when new message
   const scrollToBottom = useCallback(() => {
@@ -52,7 +91,7 @@ export function ChatBot() {
     if (isOpen && !isMinimized) {
       scrollToBottom();
     }
-  }, [messages, isOpen, isMinimized, scrollToBottom]);
+  }, [messages, isOpen, isMinimized, scrollToBottom, displayedText]);
 
   // Focus input when opened
   useEffect(() => {
@@ -101,8 +140,9 @@ export function ChatBot() {
 
       const data = await response.json();
 
+      const messageId = `assistant-${Date.now()}`;
       const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
+        id: messageId,
         role: "assistant",
         content: data.reply || "Désolé, je n'ai pas pu traiter votre demande.",
         timestamp: new Date(),
@@ -110,19 +150,26 @@ export function ChatBot() {
 
       setMessages((prev) => [...prev, assistantMessage]);
 
+      // Déclencher l'effet de frappe
+      setDisplayedText("");
+      setTypingMessageId(messageId);
+
       // Mark as unread if chat is closed
       if (!isOpen) {
         setHasUnread(true);
       }
     } catch (error) {
       console.error("Chatbot error:", error);
+      const errorId = `error-${Date.now()}`;
       const errorMessage: Message = {
-        id: `error-${Date.now()}`,
+        id: errorId,
         role: "assistant",
         content: "Désolé, une erreur est survenue. Veuillez réessayer ou contacter notre équipe directement.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
+      setDisplayedText("");
+      setTypingMessageId(errorId);
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +223,7 @@ export function ChatBot() {
               <div>
                 <h3 className="font-bold text-sm">Assistant EnfantDisparu</h3>
                 <p className="text-xs text-red-100">
-                  {isLoading ? "En train d'écrire..." : "En ligne"}
+                  {isLoading || typingMessageId ? "En train d'écrire..." : "En ligne"}
                 </p>
               </div>
             </div>
@@ -230,15 +277,22 @@ export function ChatBot() {
                           : "bg-white border border-gray-200 text-gray-800 rounded-bl-md shadow-sm"
                       )}
                     >
-                      <p className="whitespace-pre-wrap">{message.content}</p>
-                      <p
-                        className={cn(
-                          "text-[10px] mt-1",
-                          message.role === "user" ? "text-red-200" : "text-gray-400"
+                      <p className="whitespace-pre-wrap">
+                        {message.id === typingMessageId ? displayedText : message.content}
+                        {message.id === typingMessageId && (
+                          <span className="inline-block w-0.5 h-4 bg-gray-400 ml-0.5 animate-pulse" />
                         )}
-                      >
-                        {formatTime(message.timestamp)}
                       </p>
+                      {message.id !== typingMessageId && (
+                        <p
+                          className={cn(
+                            "text-[10px] mt-1",
+                            message.role === "user" ? "text-red-200" : "text-gray-400"
+                          )}
+                        >
+                          {formatTime(message.timestamp)}
+                        </p>
+                      )}
                     </div>
                     {message.role === "user" && (
                       <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
