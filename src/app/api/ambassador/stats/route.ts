@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { rateLimit, getClientIdentifier } from "@/lib/rate-limit";
 
 const db = getAdminDb();
+
+// Rate limit: 60 requests per minute (prevent stat inflation abuse)
+const RATE_LIMIT = { windowMs: 60 * 1000, max: 60 };
 
 type StatKey = "notificationsActivated" | "alertsShared" | "ambassadorsRecruited" | "viewsGenerated";
 
@@ -15,6 +19,22 @@ const VALID_STAT_KEYS: StatKey[] = [
 
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    const clientId = getClientIdentifier(request, "ambassador-stats");
+    const rateLimitResult = rateLimit(clientId, RATE_LIMIT);
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "too_many_requests" },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
     const { refCode, statKey, amount = 1 } = body;
 

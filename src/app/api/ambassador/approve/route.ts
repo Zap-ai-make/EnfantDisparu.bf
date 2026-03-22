@@ -1,15 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { timingSafeEqual } from "crypto";
 
 const db = getAdminDb();
 
 // Admin password authentication (server-side only)
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
+function safeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
+
 function isAuthorized(request: NextRequest): boolean {
   const authHeader = request.headers.get("x-admin-password");
-  return !!ADMIN_PASSWORD && authHeader === ADMIN_PASSWORD;
+  if (!ADMIN_PASSWORD || !authHeader) return false;
+  return safeCompare(authHeader, ADMIN_PASSWORD);
 }
 
 export async function POST(request: NextRequest) {

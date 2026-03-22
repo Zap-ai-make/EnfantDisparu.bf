@@ -1102,3 +1102,62 @@ export async function getAmbassadorRank(
     score: scored[index].score,
   };
 }
+
+/**
+ * Statistiques globales des ambassadeurs
+ */
+export interface AmbassadorGlobalStats {
+  totalPending: number;
+  totalApproved: number;
+  totalRejected: number;
+  totalNotificationsActivated: number;
+  totalAlertsShared: number;
+  totalAmbassadorsRecruited: number;
+  totalViewsGenerated: number;
+  totalScore: number;
+}
+
+/**
+ * Récupère les statistiques globales des ambassadeurs
+ */
+export async function getAmbassadorGlobalStats(): Promise<AmbassadorGlobalStats> {
+  // Récupérer tous les ambassadeurs
+  const [pendingSnap, approvedSnap, rejectedSnap] = await Promise.all([
+    getDocs(query(collection(db, "ambassadors"), where("status", "==", "pending"))),
+    getDocs(query(collection(db, "ambassadors"), where("status", "==", "approved"))),
+    getDocs(query(collection(db, "ambassadors"), where("status", "==", "rejected"))),
+  ]);
+
+  // Calculer les totaux des stats des ambassadeurs approuvés
+  let totalNotificationsActivated = 0;
+  let totalAlertsShared = 0;
+  let totalAmbassadorsRecruited = 0;
+  let totalViewsGenerated = 0;
+
+  approvedSnap.docs.forEach((doc) => {
+    const data = doc.data() as Ambassador;
+    if (data.stats) {
+      totalNotificationsActivated += data.stats.notificationsActivated || 0;
+      totalAlertsShared += data.stats.alertsShared || 0;
+      totalAmbassadorsRecruited += data.stats.ambassadorsRecruited || 0;
+      totalViewsGenerated += data.stats.viewsGenerated || 0;
+    }
+  });
+
+  const totalScore =
+    totalNotificationsActivated * 1 +
+    totalAlertsShared * 2 +
+    totalAmbassadorsRecruited * 5 +
+    totalViewsGenerated * 0.1;
+
+  return {
+    totalPending: pendingSnap.size,
+    totalApproved: approvedSnap.size,
+    totalRejected: rejectedSnap.size,
+    totalNotificationsActivated,
+    totalAlertsShared,
+    totalAmbassadorsRecruited,
+    totalViewsGenerated,
+    totalScore: Math.round(totalScore),
+  };
+}

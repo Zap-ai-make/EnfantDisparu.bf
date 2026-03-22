@@ -8,11 +8,31 @@ import {
 } from "@/lib/ambassador-utils";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { rateLimit, getClientIdentifier } from "@/lib/rate-limit";
 
 const db = getAdminDb();
 
+// Rate limit: 3 submissions per hour
+const RATE_LIMIT = { windowMs: 60 * 60 * 1000, max: 3 };
+
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    const clientId = getClientIdentifier(request, "ambassador-submit");
+    const rateLimitResult = rateLimit(clientId, RATE_LIMIT);
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: "too_many_requests" },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
 
     // Validate required fields
