@@ -91,17 +91,9 @@ export function OneSignalInit() {
           OneSignal.User.addTag("ambassador_ref", ambassadorRef);
         }
 
-        // Afficher notre prompt personnalisé après 3 secondes
+        // Afficher le prompt après 3 secondes
         setTimeout(() => {
-          OneSignal.Slidedown.promptPush({
-            force: true,
-            forceSlidedownOverNative: true,
-            slidedownPromptOptions: {
-              actionMessage: "🚨 Soyez alerté immédiatement quand un enfant disparaît près de chez vous. Chaque minute compte !",
-              acceptButtonText: "🔔 Oui, m'alerter",
-              cancelButtonText: "Non merci",
-            },
-          });
+          OneSignal.Slidedown.promptPush();
         }, 3000);
 
         // Écouter les changements d'abonnement aux notifications
