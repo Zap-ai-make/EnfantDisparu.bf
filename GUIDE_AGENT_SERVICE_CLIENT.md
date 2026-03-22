@@ -25,20 +25,19 @@ Quand un parent signale un enfant disparu sur le site :
 3. **Diffusion automatique** (en quelques secondes) :
    - Publication sur la page Facebook
    - Notifications push aux abonnés de la zone
-   - (À venir) Publication TikTok et Instagram
+   - Publication TikTok et Instagram
 
 ### 1.2 Flux de diffusion
 
 ```
 Parent crée annonce
         ↓
-   [Cloud Function se déclenche]
-        ↓
    ┌────────────────────────────────────┐
    │ 1. Génère image d'alerte (PNG)    │
    │ 2. Publie sur Facebook            │
    │ 3. Envoie push notifications      │
-   │ 4. Programme rappels WhatsApp     │
+   │ 4. Programme rappels WhatsApp  
+     5. Publie sur tiktok et instagram   │
    └────────────────────────────────────┘
         ↓
    Annonce visible partout en < 1 minute
@@ -94,7 +93,6 @@ Parent crée annonce
 
 ### 2.4 TikTok (En développement)
 
-**Statut** : Code prêt, en attente d'approbation TikTok Business
 - Publication photo avec caption
 - Nécessite compte TikTok Business vérifié
 
@@ -244,6 +242,7 @@ Le parent reçoit une notification WhatsApp à chaque signalement.
 - Date d'expiration actuelle : ~21 mai 2026
 - Renouveler via Graph API Explorer
 - Mettre à jour dans Firebase Secrets
+NB: ne jamais parler de ca a un utilisateur, tout ce qui est en rapport avec le code c'est en interne 
 
 ---
 

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { OneSignalInit } from "@/components/OneSignalInit";
 import { AmbassadorRefTracker } from "@/components/AmbassadorRefTracker";
+import { ChatBot } from "@/components/ChatBot";
 
 export const metadata: Metadata = {
   title: {
@@ -152,6 +153,9 @@ export default function RootLayout({
             </p>
           </div>
         </footer>
+
+        {/* ChatBot flottant */}
+        <ChatBot />
       </body>
     </html>
   );
