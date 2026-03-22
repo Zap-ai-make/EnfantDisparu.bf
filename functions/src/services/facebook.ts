@@ -2,6 +2,7 @@ import { logger } from "firebase-functions";
 import { AnnouncementDoc } from "../types";
 import { FACEBOOK_PAGE_ID, FACEBOOK_PAGE_TOKEN, BASE_URL } from "../config";
 import { fetchWithRetry } from "../utils/http";
+import { generateResolutionCard } from "./alertCard";
 
 const GRAPH_API_VERSION = "v19.0";
 const GRAPH_API_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
@@ -165,7 +166,7 @@ ${emotionalMessage}
 }
 
 /**
- * Poste un message de retrouvailles
+ * Poste un message de retrouvailles avec image
  */
 export async function postResolutionToFacebook(
   announcement: AnnouncementDoc,
@@ -178,6 +179,10 @@ export async function postResolutionToFacebook(
     logger.warn("Facebook credentials not configured, skipping resolution post");
     return null;
   }
+
+  // Générer la carte de retrouvailles (verte)
+  logger.info("Generating resolution card for Facebook", { docId });
+  const resolutionCardURL = await generateResolutionCard(announcement, docId);
 
   const childNameBold = toBold(announcement.childName.toUpperCase());
   const retrouvaillesTitle = toBold("RETROUVAILLES");
@@ -199,25 +204,49 @@ export async function postResolutionToFacebook(
 `.trim();
 
   try {
-    const endpoint = `${GRAPH_API_BASE}/${pageId}/feed`;
-    const params = new URLSearchParams({
-      message,
-      access_token: pageToken,
-    });
-    const response = await fetchWithRetry(`${endpoint}?${params}`, {
-      method: "POST",
-      timeoutMs: FACEBOOK_TIMEOUT_MS,
-      maxRetries: 2,
-    });
+    let response: Response;
+    let endpoint: string;
+
+    if (resolutionCardURL) {
+      // Post avec image (carte de retrouvailles verte)
+      endpoint = `${GRAPH_API_BASE}/${pageId}/photos`;
+      const params = new URLSearchParams({
+        url: resolutionCardURL,
+        caption: message,
+        access_token: pageToken,
+      });
+      response = await fetchWithRetry(`${endpoint}?${params}`, {
+        method: "POST",
+        timeoutMs: FACEBOOK_TIMEOUT_MS,
+        maxRetries: 2,
+      });
+    } else {
+      // Fallback: post texte seul si génération image échoue
+      logger.warn("Resolution card generation failed, posting text only", { docId });
+      endpoint = `${GRAPH_API_BASE}/${pageId}/feed`;
+      const params = new URLSearchParams({
+        message,
+        access_token: pageToken,
+      });
+      response = await fetchWithRetry(`${endpoint}?${params}`, {
+        method: "POST",
+        timeoutMs: FACEBOOK_TIMEOUT_MS,
+        maxRetries: 2,
+      });
+    }
 
     if (!response.ok) {
       const error = await response.text();
-      logger.error("Facebook resolution post failed", { error });
+      logger.error("Facebook resolution post failed", { error, status: response.status });
       return null;
     }
 
     const data = (await response.json()) as FacebookPostResponse;
-    logger.info("Facebook resolution post created", { postId: data.id, docId });
+    logger.info("Facebook resolution post created", {
+      postId: data.id,
+      docId,
+      hasImage: !!resolutionCardURL
+    });
     return data.id;
   } catch (error) {
     logger.error("Facebook resolution post error", { error, docId });

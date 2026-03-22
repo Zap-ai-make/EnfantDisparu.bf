@@ -14,6 +14,8 @@ const MOBILE_CARD_HEIGHT = 1350;
 const COLORS = {
   redPrimary: "#DC2626",
   redDark: "#991B1B",
+  greenPrimary: "#16A34A",
+  greenDark: "#15803D",
   white: "#FFFFFF",
   black: "#1F2937",
   gray: "#6B7280",
@@ -440,6 +442,352 @@ export async function generateAlertCard(
       docId,
       errorMessage,
       errorStack,
+    });
+    return null;
+  }
+}
+
+// ─── Carte de Retrouvailles (enfant retrouvé) ──────────────────────────────────
+
+function buildResolutionCardElement(
+  announcement: AnnouncementDoc,
+  childPhotoBase64: string | null,
+  resolvedDate: string
+) {
+  const genderLetter = announcement.childGender === "M" ? "M" : "F";
+
+  // Photo ou placeholder
+  const photoElement = childPhotoBase64
+    ? {
+        type: "img",
+        props: {
+          src: childPhotoBase64,
+          width: 350,
+          height: 350,
+          style: {
+            borderRadius: 20,
+            border: "8px solid " + COLORS.greenPrimary,
+            objectFit: "cover",
+          },
+        },
+      }
+    : {
+        type: "div",
+        props: {
+          style: {
+            width: 350,
+            height: 350,
+            backgroundColor: "#F3F4F6",
+            borderRadius: 20,
+            border: "8px solid " + COLORS.greenPrimary,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 100,
+            color: COLORS.gray,
+          },
+          children: genderLetter,
+        },
+      };
+
+  return {
+    type: "div",
+    props: {
+      style: {
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: COLORS.white,
+        fontFamily: "Inter",
+      },
+      children: [
+        // Header vert
+        {
+          type: "div",
+          props: {
+            style: {
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "24px 40px",
+              backgroundColor: COLORS.greenPrimary,
+            },
+            children: [
+              {
+                type: "div",
+                props: {
+                  style: { fontSize: 36, fontWeight: 700, color: COLORS.white },
+                  children: "EnfentDisparu.bf",
+                },
+              },
+              {
+                type: "div",
+                props: {
+                  style: {
+                    fontSize: 24,
+                    color: COLORS.white,
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    padding: "10px 20px",
+                    borderRadius: 10,
+                  },
+                  children: "BONNE NOUVELLE!",
+                },
+              },
+            ],
+          },
+        },
+        // Title band
+        {
+          type: "div",
+          props: {
+            style: {
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "20px",
+              backgroundColor: COLORS.greenDark,
+            },
+            children: [
+              {
+                type: "div",
+                props: {
+                  style: {
+                    fontSize: 48,
+                    fontWeight: 700,
+                    color: COLORS.white,
+                    letterSpacing: 4,
+                  },
+                  children: "ENFANT RETROUVE",
+                },
+              },
+            ],
+          },
+        },
+        // Body
+        {
+          type: "div",
+          props: {
+            style: {
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: 1,
+              padding: "40px",
+              gap: 24,
+            },
+            children: [
+              // Emoji celebration
+              {
+                type: "div",
+                props: {
+                  style: {
+                    fontSize: 64,
+                    textAlign: "center",
+                  },
+                  children: "🎉✨",
+                },
+              },
+              // Photo
+              photoElement,
+              // Nom
+              {
+                type: "div",
+                props: {
+                  style: {
+                    fontSize: 52,
+                    fontWeight: 700,
+                    color: COLORS.black,
+                    textAlign: "center",
+                  },
+                  children: announcement.childName.toUpperCase(),
+                },
+              },
+              // Message
+              {
+                type: "div",
+                props: {
+                  style: {
+                    fontSize: 28,
+                    color: COLORS.greenPrimary,
+                    textAlign: "center",
+                    fontWeight: 700,
+                  },
+                  children: "A ETE RETROUVE(E) SAIN(E) ET SAUF(VE)!",
+                },
+              },
+              // Zone
+              {
+                type: "div",
+                props: {
+                  style: {
+                    fontSize: 24,
+                    color: COLORS.gray,
+                    textAlign: "center",
+                  },
+                  children: announcement.zoneName,
+                },
+              },
+              // Date retrouvé
+              {
+                type: "div",
+                props: {
+                  style: {
+                    fontSize: 22,
+                    color: COLORS.white,
+                    fontWeight: 700,
+                    backgroundColor: COLORS.greenPrimary,
+                    padding: "12px 24px",
+                    borderRadius: 12,
+                    marginTop: 10,
+                  },
+                  children: "RETROUVE LE " + resolvedDate,
+                },
+              },
+            ],
+          },
+        },
+        // Footer
+        {
+          type: "div",
+          props: {
+            style: {
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "24px 40px",
+              borderTop: "4px solid " + COLORS.greenPrimary,
+              backgroundColor: "#FAFAFA",
+            },
+            children: [
+              {
+                type: "div",
+                props: {
+                  style: {
+                    fontSize: 26,
+                    fontWeight: 700,
+                    color: COLORS.greenPrimary,
+                    textAlign: "center",
+                  },
+                  children: "MERCI A TOUS POUR VOS PARTAGES!",
+                },
+              },
+            ],
+          },
+        },
+        // Bottom bar
+        {
+          type: "div",
+          props: {
+            style: {
+              display: "flex",
+              justifyContent: "center",
+              padding: 16,
+              backgroundColor: COLORS.greenPrimary,
+            },
+            children: [
+              {
+                type: "div",
+                props: {
+                  style: { fontSize: 18, color: COLORS.white, fontWeight: 700 },
+                  children: "EnfentDisparu.bf - Retrouvons-les ensemble - Burkina Faso",
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  };
+}
+
+/**
+ * Génère une carte de retrouvailles (enfant retrouvé)
+ * Couleur verte pour la célébration
+ */
+export async function generateResolutionCard(
+  announcement: AnnouncementDoc,
+  docId: string
+): Promise<string | null> {
+  try {
+    logger.info("Starting resolution card generation", {
+      docId,
+      shortCode: announcement.shortCode,
+    });
+
+    // Charger la police
+    const fontResponse = await fetch(
+      "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hjp-Ek-_EeA.woff"
+    );
+    const fontData = await fontResponse.arrayBuffer();
+
+    // Photo de l'enfant
+    const childPhotoBase64 = announcement.childPhotoURL
+      ? await fetchImageAsBase64(announcement.childPhotoURL)
+      : null;
+
+    // Date de résolution
+    const resolvedDate = formatDate(Timestamp.now());
+
+    logger.info("Creating resolution card SVG");
+
+    const element = buildResolutionCardElement(
+      announcement,
+      childPhotoBase64,
+      resolvedDate
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const svg = await satori(element as any, {
+      width: MOBILE_CARD_WIDTH,
+      height: MOBILE_CARD_HEIGHT,
+      fonts: [
+        {
+          name: "Inter",
+          data: fontData,
+          weight: 700,
+          style: "normal",
+        },
+      ],
+    });
+
+    const resvg = new Resvg(svg, {
+      background: COLORS.white,
+      fitTo: { mode: "width", value: MOBILE_CARD_WIDTH },
+    });
+    const pngData = resvg.render();
+    const pngBuffer = pngData.asPng();
+
+    logger.info("Resolution PNG created", { size: pngBuffer.length });
+
+    const bucket = storage.bucket();
+    const fileName = "resolution-cards/" + docId + ".png";
+    const file = bucket.file(fileName);
+
+    await file.save(pngBuffer, {
+      metadata: {
+        contentType: "image/png",
+        cacheControl: "public, max-age=31536000",
+      },
+    });
+
+    await file.makePublic();
+
+    const publicUrl = "https://storage.googleapis.com/" + bucket.name + "/" + fileName;
+
+    // Stocker l'URL de la carte de résolution
+    await db.collection(COLLECTIONS.ANNOUNCEMENTS).doc(docId).update({
+      resolutionCardURL: publicUrl,
+    });
+
+    logger.info("Resolution card generated", { docId, publicUrl });
+    return publicUrl;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error("Resolution card generation failed", {
+      docId,
+      errorMessage,
     });
     return null;
   }
