@@ -17,7 +17,7 @@ export const ONESIGNAL_APP_ID = defineString("ONESIGNAL_APP_ID", {
 
 export const BASE_URL = defineString("BASE_URL", {
   description: "Base URL for the website",
-  default: "https://enfantdisparu.bf",
+  default: "https://enfentdisparu.bf",
 });
 
 // Secrets (Firebase Secret Manager)

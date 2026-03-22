@@ -1,15 +1,14 @@
 /**
  * Cloud Functions pour EnfantDisparu.bf
  *
- * VERSION SIMPLIFIÉE - Sans secrets externes
- *
  * Functions actives:
- * - onAnnouncementCreate: Génère l'affiche d'alerte
+ * - onAnnouncementCreate: Génère l'affiche d'alerte + post Facebook
+ * - onAnnouncementUpdate: Gère résolution (enfant retrouvé) + post Facebook
  * - regenerateAlertCard: Régénère une carte d'alerte
  * - healthCheck: Vérifie l'état des services
+ * - postToTikTok: Publie sur TikTok
  *
- * Functions désactivées (secrets non configurés):
- * - onAnnouncementUpdate
+ * Functions désactivées:
  * - onSightingCreate
  * - scheduledReminders
  * - scheduledArchival
@@ -20,8 +19,9 @@
 // Configuration (initialise Firebase Admin)
 import "./config";
 
-// Trigger Firestore (version simplifiée - sans secrets)
+// Triggers Firestore
 export { onAnnouncementCreate } from "./triggers/onAnnouncementCreate";
+export { onAnnouncementUpdate } from "./triggers/onAnnouncementUpdate";
 
 // Endpoints HTTP
 export { regenerateAlertCard } from "./http/regenerateAlertCard";
@@ -32,8 +32,7 @@ export { postToTikTok } from "./http/postToTikTok";
 export { oneSignalWebhook } from "./http/oneSignalWebhook";
 export { submitAmbassadorApplication } from "./http/submitAmbassadorApplication";
 
-// Temporairement désactivé - secrets non configurés
-// export { onAnnouncementUpdate } from "./triggers/onAnnouncementUpdate";
+// Temporairement désactivé
 // export { onSightingCreate } from "./triggers/onSightingCreate";
 // export { scheduledReminders, scheduledArchival } from "./scheduled/reminders";
 // export { syncFacebookStats } from "./scheduled/facebookSync";

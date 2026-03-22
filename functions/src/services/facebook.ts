@@ -192,7 +192,7 @@ export async function postResolutionToFacebook(
 ❤️ Chaque partage compte, chaque action sauve des vies.
 
 ━━━━━━━━━━━━━━━━━━━━━
-💚 ${toBold("EnfantDisparu.bf")} — Retrouvons nos enfants ensemble
+💚 ${toBold("EnfentDisparu.bf")} — Retrouvons nos enfants ensemble
 ━━━━━━━━━━━━━━━━━━━━━
 
 #Retrouvailles #BonneNouvelle #BurkinaFaso #Victoire #Ensemble

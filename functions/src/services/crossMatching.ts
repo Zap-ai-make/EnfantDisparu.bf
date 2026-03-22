@@ -233,7 +233,7 @@ export function generateCrossMatchMessage(
   newAnnouncement: AnnouncementDoc,
   newDocId: string
 ): string {
-  const baseUrl = BASE_URL.value() || "https://enfantdisparu.bf";
+  const baseUrl = BASE_URL.value() || "https://enfentdisparu.bf";
   const newAnnouncementUrl = `${baseUrl}/annonce/${newAnnouncement.shortCode}`;
 
   if (newAnnouncement.type === "found") {
@@ -250,7 +250,7 @@ Un enfant vient d'être trouvé à ${newAnnouncement.zoneName} !
 
 Si ce n'est pas votre enfant, vous pouvez ignorer ce message. Nous continuons les recherches pour ${recipientAnnouncement.childName}.
 
-— EnfantDisparu.bf`;
+— EnfentDisparu.bf`;
   } else {
     // Message pour quelqu'un qui a trouvé un enfant
     return `🔔 *ALERTE CORRESPONDANCE POSSIBLE*
@@ -265,6 +265,6 @@ Un parent vient de signaler la disparition d'un enfant à ${newAnnouncement.zone
 
 Si cela correspond, contactez immédiatement le parent via l'annonce.
 
-— EnfantDisparu.bf`;
+— EnfentDisparu.bf`;
   }
 }

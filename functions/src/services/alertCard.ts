@@ -139,7 +139,7 @@ function buildMobileCardElement(
                 type: "div",
                 props: {
                   style: { fontSize: 36, fontWeight: 700, color: COLORS.white },
-                  children: "EnfantDisparu.bf",
+                  children: "EnfentDisparu.bf",
                 },
               },
               {
@@ -299,7 +299,7 @@ function buildMobileCardElement(
                           color: COLORS.redPrimary,
                           fontWeight: 700,
                         },
-                        children: "enfantdisparu.bf/" + announcement.shortCode,
+                        children: "enfentdisparu.bf/" + announcement.shortCode,
                       },
                     },
                   ],
@@ -331,7 +331,7 @@ function buildMobileCardElement(
                 type: "div",
                 props: {
                   style: { fontSize: 18, color: COLORS.white, fontWeight: 700 },
-                  children: "EnfantDisparu.bf - Retrouvons-les ensemble - Burkina Faso",
+                  children: "EnfentDisparu.bf - Retrouvons-les ensemble - Burkina Faso",
                 },
               },
             ],

@@ -87,7 +87,7 @@ export async function notifyZoneVigies(
     return { notified: 0, total: allVigies.length };
   }
 
-  const baseUrl = BASE_URL.value() || "https://enfantdisparu.bf";
+  const baseUrl = BASE_URL.value() || "https://enfentdisparu.bf";
   const announcementUrl = `${baseUrl}/annonce/${announcement.shortCode}`;
 
   // Construire le message selon le type d'annonce
@@ -112,7 +112,7 @@ ${actionText}
 🔗 ${announcementUrl}
 
 _Vous recevez ce message car vous êtes vigie dans cette zone._
-— EnfantDisparu.bf`;
+— EnfentDisparu.bf`;
 
   let notified = 0;
 

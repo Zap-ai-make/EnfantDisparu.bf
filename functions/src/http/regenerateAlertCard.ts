@@ -6,8 +6,8 @@ import { logger } from "firebase-functions";
 
 // Domaines autorisés pour CORS
 const ALLOWED_ORIGINS = [
-  "https://enfantdisparu.bf",
-  "https://www.enfantdisparu.bf",
+  "https://enfentdisparu.bf",
+  "https://www.enfentdisparu.bf",
   // Localhost pour le développement
   "http://localhost:3000",
   "http://localhost:3001",

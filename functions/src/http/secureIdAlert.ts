@@ -7,9 +7,9 @@ import { AnnouncementDoc, AnnouncementStats } from "../types";
 
 // Domaines autorisés pour CORS
 const ALLOWED_ORIGINS = [
-  "https://enfantdisparu.bf",
-  "https://www.enfantdisparu.bf",
-  "https://secureid.enfantdisparu.bf",
+  "https://enfentdisparu.bf",
+  "https://www.enfentdisparu.bf",
+  "https://secureid.enfentdisparu.bf",
   // Localhost pour le développement
   "http://localhost:3000",
   "http://localhost:3001",
@@ -165,8 +165,8 @@ export const secureIdAlert = onRequest(
         announcementId: docRef.id,
         shortCode,
         secretToken,
-        managementUrl: `https://enfantdisparu.bf/gestion/${secretToken}`,
-        publicUrl: `https://enfantdisparu.bf/annonce/${shortCode}`,
+        managementUrl: `https://enfentdisparu.bf/gestion/${secretToken}`,
+        publicUrl: `https://enfentdisparu.bf/annonce/${shortCode}`,
       });
     } catch (error) {
       logger.error("SecureID alert error", { error });

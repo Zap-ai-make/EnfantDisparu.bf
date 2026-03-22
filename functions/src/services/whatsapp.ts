@@ -148,7 +148,7 @@ export async function sendResolutionToParent(announcement: AnnouncementDoc): Pro
       type: "body",
       parameters: [
         { type: "text", text: announcement.childName },
-        { type: "text", text: "Merci d'avoir utilisé EnfantDisparu.bf!" },
+        { type: "text", text: "Merci d'avoir utilisé EnfentDisparu.bf!" },
       ],
     },
   ]);
@@ -201,7 +201,7 @@ export async function sendCrossMatchNotification(
   newAnnouncement: AnnouncementDoc,
   newDocId: string
 ): Promise<boolean> {
-  const baseUrl = BASE_URL.value() || "https://enfantdisparu.bf";
+  const baseUrl = BASE_URL.value() || "https://enfentdisparu.bf";
   const newAnnouncementUrl = `${baseUrl}/annonce/${newAnnouncement.shortCode}`;
 
   // Pour l'instant, on envoie un message texte simple
@@ -233,7 +233,7 @@ Un enfant vient d'être trouvé à *${newAnnouncement.zoneName}* !
 
 _Si ce n'est pas votre enfant, ignorez ce message. Nous continuons les recherches._
 
-— EnfantDisparu.bf`;
+— EnfentDisparu.bf`;
   } else {
     // Le destinataire a trouvé un enfant, on lui dit qu'un parent cherche son enfant
     message = `🔔 *CORRESPONDANCE POSSIBLE*
@@ -248,7 +248,7 @@ Un parent recherche son enfant à *${newAnnouncement.zoneName}* !
 
 _Si cela correspond, contactez immédiatement le parent via l'annonce._
 
-— EnfantDisparu.bf`;
+— EnfentDisparu.bf`;
   }
 
   try {

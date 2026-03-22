@@ -241,7 +241,7 @@ export async function postResolutionToTikTok(
 🙏 Merci à tous pour vos partages!
 💪 Ensemble, nous faisons la différence!
 
-💚 ${toBold("EnfantDisparu.bf")} — Retrouvons nos enfants ensemble
+💚 ${toBold("EnfentDisparu.bf")} — Retrouvons nos enfants ensemble
 
 #Retrouvailles #BonneNouvelle #BurkinaFaso #MissingChildFound #Victoire
 `.trim();
