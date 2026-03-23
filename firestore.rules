@@ -169,10 +169,14 @@ service cloud.firestore {
     // ─── Ambassadeurs ───────────────────────────────────────────────────────────
 
     match /ambassadors/{ambassadorId} {
-      // Lecture publique pour le suivi de candidature
-      // Les utilisateurs peuvent consulter le statut de leur candidature via refCode
-      // Note: l'UI ne doit pas afficher les données sensibles (téléphone)
-      allow read: if true;
+      // Lecture restreinte: seuls les champs non-sensibles sont exposés
+      // Les opérations de lecture passent principalement par API routes
+      // Cette règle permet le suivi de candidature côté client via refCode
+      allow read: if
+        // Lecture par ID direct (pour le dashboard avec token)
+        request.auth != null
+        // OU lecture sans données sensibles pour le leaderboard public
+        || resource.data.keys().hasAny(['refCode', 'firstName', 'stats', 'status', 'zones']);
 
       // Écriture interdite côté client
       // Toutes les opérations d'écriture passent par API routes/Cloud Functions

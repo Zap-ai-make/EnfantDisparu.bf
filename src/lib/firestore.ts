@@ -115,6 +115,9 @@ export async function createAnnouncement(
   // Upload photo d'abord
   const childPhotoURL = await uploadAnnouncementPhoto(input.childPhoto, shortCode);
 
+  // Normaliser le téléphone pour stockage cohérent
+  const normalizedPhone = normalizePhone(input.parentPhone);
+
   const now = serverTimestamp();
 
   const docRef = await addDoc(collection(db, "announcements"), {
@@ -137,8 +140,8 @@ export async function createAnnouncement(
     lastSeenPlace: input.lastSeenPlace.trim(),
     lastSeenAt: new Date(input.lastSeenAt),
 
-    parentPhone: input.parentPhone,
-    parentPhoneDisplay: maskPhone(input.parentPhone),
+    parentPhone: normalizedPhone,
+    parentPhoneDisplay: maskPhone(normalizedPhone),
 
     isSecureID: false,
     linkedProfileId: null,
@@ -190,6 +193,9 @@ export async function createFoundChildAnnouncement(
   // Nom : soit ce que l'enfant a dit, soit "Enfant trouvé"
   const childName = input.childSaidName?.trim() || "Enfant trouvé";
 
+  // Normaliser le téléphone pour stockage cohérent
+  const normalizedPhone = normalizePhone(input.finderPhone);
+
   const docRef = await addDoc(collection(db, "announcements"), {
     shortCode,
     secretToken,
@@ -211,8 +217,8 @@ export async function createFoundChildAnnouncement(
     lastSeenAt: new Date(input.foundAt),
 
     // Le "finder" (celui qui a trouvé) prend la place du "parent"
-    parentPhone: input.finderPhone,
-    parentPhoneDisplay: maskPhone(input.finderPhone),
+    parentPhone: normalizedPhone,
+    parentPhoneDisplay: maskPhone(normalizedPhone),
     finderName: input.finderName?.trim() || null,
 
     isSecureID: false,
@@ -434,14 +440,44 @@ export async function getGlobalStats(): Promise<{
 export async function getAnnouncementsByPhone(
   phone: string
 ): Promise<Announcement[]> {
-  const q = query(
-    collection(db, "announcements"),
-    where("parentPhone", "==", phone),
-    where("status", "==", "active"),
-    orderBy("createdAt", "desc")
-  );
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Announcement));
+  // Normaliser le numéro pour correspondre au format stocké
+  const normalizedPhone = normalizePhone(phone);
+
+  // Chercher avec le numéro normalisé ET le numéro original (fallback ancien format)
+  const [normalizedResults, originalResults] = await Promise.all([
+    getDocs(
+      query(
+        collection(db, "announcements"),
+        where("parentPhone", "==", normalizedPhone),
+        where("status", "==", "active"),
+        orderBy("createdAt", "desc")
+      )
+    ),
+    // Fallback: chercher aussi avec le format original si différent
+    normalizedPhone !== phone
+      ? getDocs(
+          query(
+            collection(db, "announcements"),
+            where("parentPhone", "==", phone),
+            where("status", "==", "active"),
+            orderBy("createdAt", "desc")
+          )
+        )
+      : Promise.resolve({ docs: [] }),
+  ]);
+
+  // Combiner et dédupliquer les résultats
+  const seen = new Set<string>();
+  const results: Announcement[] = [];
+
+  for (const doc of [...normalizedResults.docs, ...originalResults.docs]) {
+    if (!seen.has(doc.id)) {
+      seen.add(doc.id);
+      results.push({ id: doc.id, ...doc.data() } as Announcement);
+    }
+  }
+
+  return results;
 }
 
 // ─── Signalements (Sightings) ────────────────────────────────────────────────

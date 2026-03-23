@@ -57,13 +57,6 @@
         { "fieldPath": "zoneId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" }
       ]
-    },
-    {
-      "collectionGroup": "vigies",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "phone", "order": "ASCENDING" }
-      ]
     }
   ],
   "fieldOverrides": []

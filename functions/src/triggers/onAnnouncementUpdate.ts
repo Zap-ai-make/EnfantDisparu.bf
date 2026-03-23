@@ -6,7 +6,15 @@ import {
 } from "firebase-functions/v2/firestore";
 import { logger } from "firebase-functions";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { db, COLLECTIONS } from "../config";
+import {
+  db,
+  COLLECTIONS,
+  FACEBOOK_PAGE_TOKEN,
+  FACEBOOK_PAGE_ID,
+  WHATSAPP_PHONE_NUMBER_ID,
+  WHATSAPP_API_TOKEN,
+  ONESIGNAL_API_KEY,
+} from "../config";
 import { AnnouncementDoc } from "../types";
 import { postResolutionToFacebook } from "../services/facebook";
 import { sendResolutionToParent } from "../services/whatsapp";
@@ -33,10 +41,11 @@ export const onAnnouncementUpdate = onDocumentUpdated(
     document: `${COLLECTIONS.ANNOUNCEMENTS}/{docId}`,
     region: "europe-west1",
     secrets: [
-      "FACEBOOK_PAGE_TOKEN",
-      "WHATSAPP_PHONE_NUMBER_ID",
-      "WHATSAPP_API_TOKEN",
-      "ONESIGNAL_API_KEY",
+      FACEBOOK_PAGE_TOKEN,
+      FACEBOOK_PAGE_ID,
+      WHATSAPP_PHONE_NUMBER_ID,
+      WHATSAPP_API_TOKEN,
+      ONESIGNAL_API_KEY,
     ],
   },
   async (

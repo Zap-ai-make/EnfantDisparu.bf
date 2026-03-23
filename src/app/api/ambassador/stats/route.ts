@@ -61,6 +61,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate amount (must be a positive integer, max 100)
+    if (typeof amount !== "number" || !Number.isInteger(amount) || amount < 1 || amount > 100) {
+      return NextResponse.json(
+        { success: false, error: "invalid_amount" },
+        { status: 400 }
+      );
+    }
+
     // Find ambassador by refCode
     const snapshot = await db
       .collection("ambassadors")
