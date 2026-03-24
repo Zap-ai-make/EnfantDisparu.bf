@@ -40,6 +40,8 @@ export const onAnnouncementUpdate = onDocumentUpdated(
   {
     document: `${COLLECTIONS.ANNOUNCEMENTS}/{docId}`,
     region: "europe-west1",
+    memory: "512MiB",
+    timeoutSeconds: 120, // 2 minutes (génération image + notifications)
     secrets: [
       FACEBOOK_PAGE_TOKEN,
       FACEBOOK_PAGE_ID,

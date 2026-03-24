@@ -50,6 +50,8 @@ export const onAnnouncementCreate = onDocumentCreated(
   {
     document: `${COLLECTIONS.ANNOUNCEMENTS}/{docId}`,
     region: "europe-west1",
+    memory: "1GiB",
+    timeoutSeconds: 540, // 9 minutes (génération vidéo + uploads multiples)
     secrets: [FACEBOOK_PAGE_TOKEN, FACEBOOK_PAGE_ID, TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, INSTAGRAM_USER_ID],
   },
   async (event: FirestoreEvent<QueryDocumentSnapshot | undefined>) => {
