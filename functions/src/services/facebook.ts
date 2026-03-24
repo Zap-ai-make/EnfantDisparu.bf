@@ -105,8 +105,7 @@ export async function postAnnouncementToFacebook(
 📝 ${announcement.description}
 ${announcement.distinctiveSign ? `✨ 𝗦𝗶𝗴𝗻𝗲 𝗱𝗶𝘀𝘁𝗶𝗻𝗰𝘁𝗶𝗳: ${announcement.distinctiveSign}` : ""}
 
-👁️ 𝗦𝗶 𝘃𝗼𝘂𝘀 𝗹'𝗮𝘃𝗲𝘇 𝘃𝘂, 𝘀𝗶𝗴𝗻𝗮𝗹𝗲𝘇 𝗶𝗺𝗺𝗲́𝗱𝗶𝗮𝘁𝗲𝗺𝗲𝗻𝘁:
-🔗 ${announcementUrl}
+👁️ 𝗦𝗶 𝘃𝗼𝘂𝘀 𝗹'𝗮𝘃𝗲𝘇 𝘃𝘂, 𝘀𝗶𝗴𝗻𝗮𝗹𝗲𝘇 𝘀𝘂𝗿 𝗲𝗻𝗳𝗮𝗻𝘁𝗱𝗶𝘀𝗽𝗮𝗿𝘂.𝗯𝗳
 
 📱 𝗣𝗮𝗿𝘁𝗮𝗴𝗲𝘇 𝗺𝗮𝘀𝘀𝗶𝘃𝗲𝗺𝗲𝗻𝘁 pour aider à retrouver cet enfant!
 
