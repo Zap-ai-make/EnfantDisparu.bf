@@ -78,6 +78,26 @@ service cloud.firestore {
       allow write: if false; // Admin uniquement via Cloud Functions
     }
 
+    // ─── Zones personnalisées ───────────────────────────────────────────────────
+
+    match /customZones/{zoneId} {
+      // Lecture publique (pour suggérer les zones personnalisées)
+      allow read: if true;
+
+      // Création et mise à jour autorisées (pour sauvegarder les zones personnalisées)
+      allow create, update: if
+        request.resource.data.keys().hasAll(['countryCode', 'countryName', 'city', 'neighborhood', 'usageCount'])
+        && validStringLength(request.resource.data.countryCode, 10)
+        && validStringLength(request.resource.data.countryName, 100)
+        && validStringLength(request.resource.data.city, 100)
+        && validStringLength(request.resource.data.neighborhood, 100)
+        && request.resource.data.usageCount is number
+        && request.resource.data.usageCount >= 0;
+
+      // Suppression interdite côté client
+      allow delete: if false;
+    }
+
     // ─── Signalements ───────────────────────────────────────────────────────────
 
     match /sightings/{sightingId} {

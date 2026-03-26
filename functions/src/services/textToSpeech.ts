@@ -3,30 +3,74 @@ import { logger } from "firebase-functions";
 import { writeFile } from "fs/promises";
 import { AnnouncementDoc } from "../types";
 
-const client = new TextToSpeechClient();
+// Lazy initialization pour éviter les timeouts au déploiement
+let client: TextToSpeechClient | null = null;
+
+function getClient(): TextToSpeechClient {
+  if (!client) {
+    client = new TextToSpeechClient();
+  }
+  return client;
+}
 
 /**
- * Génère le script de voix-off pour une annonce
+ * Génère le script de voix-off pour une annonce avec SSML
+ * SSML permet d'ajouter des pauses dramatiques et de l'emphase
  */
 export function createVoiceoverScript(announcement: AnnouncementDoc): string {
-  const childGender = announcement.childGender === "M" ? "Garçon" : "Fille";
+  const childGender = announcement.childGender === "M" ? "un garçon" : "une fille";
+  const pronounCap = announcement.childGender === "M" ? "Il" : "Elle";
   const dateStr = formatDateForSpeech(announcement.lastSeenAt.toDate());
+  const isFound = announcement.type === "found";
 
-  const script = `
-    Alerte. Enfant disparu.
-    ${announcement.childName}, ${announcement.childAge} ans.
-    ${childGender}.
+  // Script adapté selon le type d'annonce (disparu ou trouvé)
+  let script: string;
 
-    Vu pour la dernière fois, ${announcement.lastSeenPlace}.
+  if (isFound) {
+    script = `<speak>
+    <emphasis level="strong">Enfant trouvé. Cherche sa famille.</emphasis>
+    <break time="800ms"/>
+
+    ${announcement.childName}. <break time="500ms"/> ${childGender} de ${announcement.childAge} ans.
+    <break time="800ms"/>
+
+    ${pronounCap} a été trouvé <break time="300ms"/>
+    à ${announcement.lastSeenPlace}. <break time="500ms"/>
     Le ${dateStr}.
+    <break time="1s"/>
 
-    ${announcement.distinctiveSign ? `Signe distinctif: ${announcement.distinctiveSign}.` : ""}
+    ${announcement.distinctiveSign ? `<prosody rate="slow">${pronounCap} présente un signe distinctif: ${announcement.distinctiveSign}.</prosody><break time="800ms"/>` : ""}
 
-    Si vous l'avez vu, signalez immédiatement.
-    Sur enfent disparu point b f.
+    <prosody pitch="+1st">Si vous reconnaissez cet enfant,</prosody> <break time="500ms"/>
+    <emphasis level="strong">signalez immédiatement</emphasis> <break time="300ms"/>
+    sur enfant disparu point b f.
+    <break time="1s"/>
 
-    Chaque partage compte.
-  `.trim();
+    <prosody rate="85%" pitch="-1st">Chaque partage compte. Aidez-nous à réunir ${announcement.childName} avec sa famille.</prosody>
+  </speak>`.trim();
+  } else {
+    script = `<speak>
+    <emphasis level="strong">Alerte enfant disparu.</emphasis>
+    <break time="800ms"/>
+
+    ${announcement.childName}. <break time="500ms"/> ${childGender} de ${announcement.childAge} ans.
+    <break time="800ms"/>
+
+    ${pronounCap} a été vu <break time="300ms"/> pour la dernière fois <break time="300ms"/>
+    à ${announcement.lastSeenPlace}. <break time="500ms"/>
+    Le ${dateStr}.
+    <break time="1s"/>
+
+    ${announcement.distinctiveSign ? `<prosody rate="slow">${pronounCap} présente un signe distinctif: ${announcement.distinctiveSign}.</prosody><break time="800ms"/>` : ""}
+
+    <prosody pitch="+1st">Si vous avez des informations,</prosody> <break time="500ms"/>
+    <emphasis level="strong">signalez immédiatement</emphasis> <break time="300ms"/>
+    sur enfant disparu point b f.
+    <break time="1s"/>
+
+    <prosody rate="85%" pitch="-1st">Chaque partage compte. Aidez-nous à retrouver ${announcement.childName}.</prosody>
+  </speak>`.trim();
+  }
 
   return script;
 }
@@ -41,19 +85,19 @@ export async function generateVoiceover(
   try {
     logger.info("Generating voiceover", { textLength: text.length });
 
-    const [response] = await client.synthesizeSpeech({
-      input: { text },
+    const [response] = await getClient().synthesizeSpeech({
+      input: { ssml: text }, // Utiliser SSML au lieu de text pour pauses et emphase
       voice: {
         languageCode: "fr-FR",
-        name: "fr-FR-Wavenet-A", // Voix féminine de haute qualité
+        name: "fr-FR-Neural2-A", // Voix Neural2 plus naturelle et captivante
         ssmlGender: "FEMALE",
       },
       audioConfig: {
         audioEncoding: "MP3",
-        speakingRate: 0.95,    // Légèrement plus lent pour clarté
-        pitch: -2.0,           // Ton légèrement plus grave (sérieux)
-        volumeGainDb: 2.0,     // Volume augmenté
-        effectsProfileId: ["handset-class-device"], // Optimisé pour mobile
+        speakingRate: 0.92,    // Plus lent pour clarté dramatique
+        pitch: -1.0,           // Moins grave, plus naturel
+        volumeGainDb: 3.0,     // Volume augmenté pour meilleure présence
+        effectsProfileId: ["large-home-entertainment-class-device"], // Meilleure qualité audio
       },
     });
 

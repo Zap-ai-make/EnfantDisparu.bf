@@ -21,6 +21,24 @@ const COLORS = {
   gray: "#6B7280",
 };
 
+// Cache de la police pour éviter de la re-télécharger à chaque génération
+let cachedFontData: ArrayBuffer | null = null;
+
+async function getFontData(): Promise<ArrayBuffer> {
+  if (cachedFontData) {
+    logger.info("Using cached font data (performance optimization)");
+    return cachedFontData;
+  }
+
+  logger.info("Fetching font data (first time)");
+  const fontResponse = await fetch(
+    "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hjp-Ek-_EeA.woff"
+  );
+  cachedFontData = await fontResponse.arrayBuffer();
+  logger.info("Font loaded and cached", { size: cachedFontData.byteLength });
+  return cachedFontData;
+}
+
 async function fetchImageAsBase64(url: string): Promise<string | null> {
   try {
     const response = await fetch(url);
@@ -354,12 +372,8 @@ export async function generateAlertCard(
       shortCode: announcement.shortCode,
     });
 
-    // Charger la police
-    const fontResponse = await fetch(
-      "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hjp-Ek-_EeA.woff"
-    );
-    const fontData = await fontResponse.arrayBuffer();
-    logger.info("Font loaded", { size: fontData.byteLength });
+    // Charger la police (avec cache pour performance)
+    const fontData = await getFontData();
 
     const baseUrl = BASE_URL.value();
     const announcementUrl = baseUrl + "/annonce/" + announcement.shortCode;

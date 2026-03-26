@@ -77,24 +77,25 @@ async function createMediaContainer(
   caption: string,
   coverUrl?: string
 ): Promise<string> {
-  const params: Record<string, string> = {
+  const body: Record<string, string | boolean> = {
     media_type: "REELS",
     video_url: videoUrl,
     caption,
-    share_to_feed: "true", // Partager aussi dans le feed principal
-    access_token: accessToken,
+    share_to_feed: true, // Partager aussi dans le feed principal
   };
 
   if (coverUrl) {
-    params.cover_url = coverUrl;
+    body.cover_url = coverUrl;
   }
 
-  const queryString = new URLSearchParams(params).toString();
-
   const response = await fetch(
-    `https://graph.facebook.com/v21.0/${igUserId}/media?${queryString}`,
+    `https://graph.facebook.com/v21.0/${igUserId}/media?access_token=${accessToken}`,
     {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     }
   );
 
@@ -231,7 +232,21 @@ export function createInstagramCaption(announcement: {
   childName: string;
   childAge: number;
   lastSeenPlace: string;
+  announcementType: "missing" | "found";
 }): string {
+  if (announcement.announcementType === "found") {
+    return `🟢 ENFANT TROUVÉ - CHERCHE SA FAMILLE
+
+${announcement.childName}, ${announcement.childAge} ans
+Trouvé à: ${announcement.lastSeenPlace}
+
+⚠️ SI VOUS RECONNAISSEZ CET ENFANT, SIGNALEZ SUR enfantdisparu.bf
+
+Aidons cet enfant à retrouver sa famille! 🙏
+
+#EnfantTrouvé #EnfantPerdu #BurkinaFaso #RechercheParents #Ouagadougou #BF`;
+  }
+
   return `🚨 ALERTE ENFANT DISPARU
 
 ${announcement.childName}, ${announcement.childAge} ans

@@ -8,12 +8,27 @@ export interface AnnouncementStats {
   facebookLikes: number;    // Likes / réactions Facebook
   facebookShares: number;   // Partages Facebook
   facebookClicks: number;   // Clics vers le site
+  // Instagram
+  instagramPostId?: string | null;
+  instagramReach?: number;   // Vues du post Instagram
+  instagramLikes?: number;   // Likes Instagram
+  instagramShares?: number;  // Partages Instagram
+  instagramComments?: number; // Commentaires Instagram
+  // Twitter/X
+  twitterPostId?: string | null;
+  twitterImpressions?: number; // Vues du tweet
+  twitterLikes?: number;      // Likes Twitter
+  twitterRetweets?: number;   // Retweets
+  twitterReplies?: number;    // Réponses
+  // WhatsApp
   whatsappChannelReach: number; // Abonnés de la chaîne WhatsApp qui ont vu l'annonce
   whatsappSent: number;     // Messages WA envoyés (lien gestion au parent)
   whatsappDelivered: number;
   whatsappRead: number;
+  // Push notifications
   pushSent: number;         // Notifications OneSignal envoyées aux abonnés du secteur
   pushClicked: number;
+  // Page analytics
   pageViews: number;
   alertSubscribers: number; // Personnes abonnées aux alertes de cette annonce
   // TikTok

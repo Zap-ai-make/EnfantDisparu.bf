@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { MapPin } from "lucide-react";
 import { COUNTRIES, CITIES_BY_COUNTRY, ZONES_BY_CITY } from "@/lib/zones";
+import { saveCustomZone } from "@/lib/firestore";
 import { cn } from "@/lib/utils";
 
 interface ZonePickerProps {
@@ -65,10 +66,18 @@ export function ZonePicker({ onChange, error }: ZonePickerProps) {
   const handleCustomCity = (value: string) => {
     setCustomCity(value);
     if (value && customNeighborhood && countryCode) {
-      notify(
-        `other-${countryCode.toLowerCase()}`,
-        `${customNeighborhood} — ${value}, ${country?.name ?? countryCode}`
-      );
+      const zoneName = `${customNeighborhood} — ${value}, ${country?.name ?? countryCode}`;
+      notify(`other-${countryCode.toLowerCase()}`, zoneName);
+
+      // Sauvegarder la zone personnalisée pour future utilisation
+      saveCustomZone(
+        countryCode,
+        country?.name ?? countryCode,
+        value,
+        customNeighborhood
+      ).catch((error) => {
+        console.error("Error saving custom zone:", error);
+      });
     } else {
       notify("", "");
     }
@@ -77,10 +86,18 @@ export function ZonePicker({ onChange, error }: ZonePickerProps) {
   const handleCustomNeighborhood = (value: string) => {
     setCustomNeighborhood(value);
     if (customCity && value && countryCode) {
-      notify(
-        `other-${countryCode.toLowerCase()}`,
-        `${value} — ${customCity}, ${country?.name ?? countryCode}`
-      );
+      const zoneName = `${value} — ${customCity}, ${country?.name ?? countryCode}`;
+      notify(`other-${countryCode.toLowerCase()}`, zoneName);
+
+      // Sauvegarder la zone personnalisée pour future utilisation
+      saveCustomZone(
+        countryCode,
+        country?.name ?? countryCode,
+        customCity,
+        value
+      ).catch((error) => {
+        console.error("Error saving custom zone:", error);
+      });
     } else {
       notify("", "");
     }

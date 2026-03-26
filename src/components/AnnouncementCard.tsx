@@ -201,23 +201,92 @@ export const AnnouncementCard = memo(function AnnouncementCard({ announcement: a
             )}
           </div>
 
-          {/* Stats de diffusion - Compact et visuel */}
-          {totalReach > 0 && (
-            <div className="mt-3 flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-1.5 text-gray-500">
-                <Eye className="w-4 h-4" />
-                <span className="font-semibold text-gray-700">{formatK(totalReach)}</span>
-                <span>personnes touchées</span>
+          {/* Stats des réseaux sociaux */}
+          {(a.stats.facebookReach > 0 || a.stats.instagramReach || a.stats.twitterImpressions) && (
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <Eye className="w-3.5 h-3.5" />
+                <span className="font-medium">Statistiques des réseaux sociaux</span>
               </div>
-              {(a.stats.facebookShares > 0 || a.stats.whatsappChannelReach > 0) && (
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <Users className="w-4 h-4" />
-                  <span className="font-semibold text-gray-700">
-                    {formatK(a.stats.facebookShares + Math.floor(a.stats.whatsappChannelReach / 10))}
-                  </span>
-                  <span>partages</span>
-                </div>
-              )}
+              <div className="grid grid-cols-3 gap-2">
+                {/* Facebook */}
+                {a.stats.facebookReach > 0 && (
+                  <div className="bg-blue-50 rounded-lg p-2 border border-blue-100">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold">
+                        f
+                      </div>
+                      <span className="text-[10px] font-medium text-blue-700">Facebook</span>
+                    </div>
+                    <div className="space-y-0.5 text-[11px]">
+                      {a.stats.facebookReach > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Portée:</span>
+                          <span className="font-semibold text-blue-700">{formatK(a.stats.facebookReach)}</span>
+                        </div>
+                      )}
+                      {a.stats.facebookShares > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Partages:</span>
+                          <span className="font-semibold text-blue-700">{formatK(a.stats.facebookShares)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Instagram */}
+                {(a.stats.instagramReach ?? 0) > 0 && (
+                  <div className="bg-pink-50 rounded-lg p-2 border border-pink-100">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-5 h-5 rounded bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 flex items-center justify-center text-white text-[10px] font-bold">
+                        ig
+                      </div>
+                      <span className="text-[10px] font-medium text-pink-700">Instagram</span>
+                    </div>
+                    <div className="space-y-0.5 text-[11px]">
+                      {(a.stats.instagramReach ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Portée:</span>
+                          <span className="font-semibold text-pink-700">{formatK(a.stats.instagramReach ?? 0)}</span>
+                        </div>
+                      )}
+                      {(a.stats.instagramShares ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Partages:</span>
+                          <span className="font-semibold text-pink-700">{formatK(a.stats.instagramShares ?? 0)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Twitter/X */}
+                {(a.stats.twitterImpressions ?? 0) > 0 && (
+                  <div className="bg-gray-900 rounded-lg p-2 border border-gray-700">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-5 h-5 rounded bg-black flex items-center justify-center text-white text-[10px] font-bold">
+                        𝕏
+                      </div>
+                      <span className="text-[10px] font-medium text-white">X (Twitter)</span>
+                    </div>
+                    <div className="space-y-0.5 text-[11px]">
+                      {(a.stats.twitterImpressions ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Vues:</span>
+                          <span className="font-semibold text-white">{formatK(a.stats.twitterImpressions ?? 0)}</span>
+                        </div>
+                      )}
+                      {(a.stats.twitterRetweets ?? 0) > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Retweets:</span>
+                          <span className="font-semibold text-white">{formatK(a.stats.twitterRetweets ?? 0)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

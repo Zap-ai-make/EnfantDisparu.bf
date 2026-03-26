@@ -84,6 +84,19 @@ function ConfirmationContent() {
           pour gérer votre annonce (modifier, marquer comme retrouvé).
         </p>
 
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
+          <p className="text-sm text-blue-900 font-medium">
+            💡 Astuce : Retrouvez vos annonces à tout moment
+          </p>
+          <p className="text-xs text-blue-700">
+            Rendez-vous dans la section{" "}
+            <Link href="/retrouver-mon-annonce" className="font-semibold underline hover:text-blue-900">
+              &quot;Retrouver mon annonce&quot;
+            </Link>
+            {" "}avec votre numéro WhatsApp pour accéder à toutes vos annonces actives.
+          </p>
+        </div>
+
         {/* Lien de gestion affiché si WhatsApp non reçu */}
         <details className="text-xs text-gray-400">
           <summary className="cursor-pointer hover:text-gray-600">

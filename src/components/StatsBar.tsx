@@ -59,29 +59,88 @@ export function StatsBar({ stats, compact = false }: StatsBarProps) {
       </div>
 
       {/* Facebook */}
-      <div className="rounded-xl bg-blue-50 p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xl">📘</span>
-          <p className="font-bold text-blue-800">Facebook</p>
+      {stats.facebookReach > 0 && (
+        <div className="rounded-xl bg-blue-50 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">📘</span>
+            <p className="font-bold text-blue-800">Facebook</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <StatItem
+              value={stats.facebookReach}
+              label="Portée"
+              colorClass="text-blue-700"
+            />
+            <StatItem
+              value={stats.facebookShares}
+              label="Partages"
+              colorClass="text-blue-700"
+            />
+            <StatItem
+              value={stats.facebookLikes}
+              label="Likes ❤️"
+              colorClass="text-blue-700"
+            />
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <StatItem
-            value={stats.facebookReach}
-            label="Vues"
-            colorClass="text-blue-700"
-          />
-          <StatItem
-            value={stats.facebookShares}
-            label="Partages"
-            colorClass="text-blue-700"
-          />
-          <StatItem
-            value={stats.facebookLikes}
-            label="Likes ❤️"
-            colorClass="text-blue-700"
-          />
+      )}
+
+      {/* Instagram */}
+      {(stats.instagramReach ?? 0) > 0 && (
+        <div className="rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">📸</span>
+            <p className="font-bold text-pink-800">Instagram</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <StatItem
+              value={stats.instagramReach ?? 0}
+              label="Portée"
+              colorClass="text-pink-700"
+            />
+            <StatItem
+              value={stats.instagramShares ?? 0}
+              label="Partages"
+              colorClass="text-pink-700"
+            />
+            <StatItem
+              value={stats.instagramLikes ?? 0}
+              label="Likes ❤️"
+              colorClass="text-pink-700"
+            />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Twitter/X */}
+      {(stats.twitterImpressions ?? 0) > 0 && (
+        <div className="rounded-xl bg-gray-900 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl text-white">𝕏</span>
+            <p className="font-bold text-white">X (Twitter)</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div>
+              <p className="text-lg font-extrabold leading-none text-white">
+                {(stats.twitterImpressions ?? 0) > 0 ? formatK(stats.twitterImpressions ?? 0) : "—"}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">Vues</p>
+            </div>
+            <div>
+              <p className="text-lg font-extrabold leading-none text-white">
+                {(stats.twitterRetweets ?? 0) > 0 ? formatK(stats.twitterRetweets ?? 0) : "—"}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">Retweets</p>
+            </div>
+            <div>
+              <p className="text-lg font-extrabold leading-none text-white">
+                {(stats.twitterLikes ?? 0) > 0 ? formatK(stats.twitterLikes ?? 0) : "—"}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">Likes ❤️</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* WhatsApp communauté */}
       <div className="rounded-xl bg-green-50 p-4 flex items-center justify-between">

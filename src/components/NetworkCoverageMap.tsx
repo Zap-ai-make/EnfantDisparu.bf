@@ -130,7 +130,7 @@ export function NetworkCoverageMap() {
       strokeColor: "#D97706",
       strokeWeight: 1.5,
       scale: size / 12,
-      anchor: { x: 12, y: 12 } as google.maps.Point,
+      anchor: new google.maps.Point(12, 12),
     };
   };
 
@@ -232,8 +232,8 @@ export function NetworkCoverageMap() {
             <Marker
               key={`amb-${data.city}`}
               position={{
-                lat: data.position.lat + 0.08,
-                lng: data.position.lng + 0.05,
+                lat: data.position.lat + 0.03,
+                lng: data.position.lng + 0.02,
               }}
               icon={getAmbassadorIcon(data.ambassadors)}
               onClick={() => setSelectedCity(data)}

@@ -10,12 +10,27 @@ export interface AnnouncementStats {
   facebookLikes: number;
   facebookShares: number;
   facebookClicks: number;
+  // Instagram
+  instagramPostId?: string | null;
+  instagramReach?: number;
+  instagramLikes?: number;
+  instagramShares?: number;
+  instagramComments?: number;
+  // Twitter/X
+  twitterPostId?: string | null;
+  twitterImpressions?: number;
+  twitterLikes?: number;
+  twitterRetweets?: number;
+  twitterReplies?: number;
+  // WhatsApp
   whatsappChannelReach: number;
   whatsappSent: number;
   whatsappDelivered: number;
   whatsappRead: number;
+  // Push notifications
   pushSent: number;
   pushClicked: number;
+  // Page analytics
   pageViews: number;
   alertSubscribers: number;
   // TikTok

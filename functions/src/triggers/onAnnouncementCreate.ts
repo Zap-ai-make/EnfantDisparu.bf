@@ -5,7 +5,7 @@ import {
 } from "firebase-functions/v2/firestore";
 import { logger } from "firebase-functions";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { db, COLLECTIONS, REMINDER_SCHEDULE, FACEBOOK_PAGE_TOKEN, FACEBOOK_PAGE_ID, TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, INSTAGRAM_USER_ID } from "../config";
+import { db, COLLECTIONS, REMINDER_SCHEDULE, FACEBOOK_PAGE_TOKEN, FACEBOOK_SYSTEM_USER_TOKEN, FACEBOOK_PAGE_ID, TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, INSTAGRAM_USER_ID, LINKEDIN_ACCESS_TOKEN, LINKEDIN_PERSON_URN, TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET } from "../config";
 import { AnnouncementDoc } from "../types";
 import { generateAlertCard } from "../services/alertCard";
 import { postAnnouncementToFacebook } from "../services/facebook";
@@ -13,6 +13,9 @@ import { generateAlertReel } from "../services/reelGenerator";
 import { publishFacebookReel, createReelCaption } from "../services/facebookReels";
 import { publishInstagramReel, createInstagramCaption } from "../services/instagramReels";
 import { publishInstagramPost, createInstagramPostCaption } from "../services/instagramPosts";
+// DÉSACTIVÉ: LinkedIn temporairement désactivé (nécessite Community Management API)
+// import { publishLinkedInPost, createLinkedInCaption } from "../services/linkedin";
+import { publishTwitterPost, createTwitterText } from "../services/twitter";
 import { storage } from "../config";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -36,10 +39,12 @@ import { createWriteStream } from "fs";
  * 2b. Poster sur Instagram (post classique avec image) ✅
  * 3. Poster sur Facebook Reels (vidéo) ✅
  * 4. Poster sur Instagram Reels (vidéo) ✅
- * 5. Incrémenter le compteur de zone ✅
- * 6. Programmer le premier rappel ✅
+ * 5. Poster sur X/Twitter (tweet avec image) ✅
+ * 6. Incrémenter le compteur de zone ✅
+ * 7. Programmer le premier rappel ✅
  *
- * Actions désactivées (secrets manquants):
+ * Actions désactivées:
+ * - LinkedIn (nécessite Community Management API pour publier sur la page)
  * - TikTok (nécessite OAuth user token)
  * - Envoyer WhatsApp au parent
  * - Push notifications OneSignal
@@ -51,8 +56,8 @@ export const onAnnouncementCreate = onDocumentCreated(
     document: `${COLLECTIONS.ANNOUNCEMENTS}/{docId}`,
     region: "europe-west1",
     memory: "1GiB",
-    timeoutSeconds: 540, // 9 minutes (génération vidéo + uploads multiples)
-    secrets: [FACEBOOK_PAGE_TOKEN, FACEBOOK_PAGE_ID, TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, INSTAGRAM_USER_ID],
+    timeoutSeconds: 300, // 5 minutes (optimisé avec parallélisation)
+    secrets: [FACEBOOK_PAGE_TOKEN, FACEBOOK_SYSTEM_USER_TOKEN, FACEBOOK_PAGE_ID, TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, INSTAGRAM_USER_ID, LINKEDIN_ACCESS_TOKEN, LINKEDIN_PERSON_URN, TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET],
   },
   async (event: FirestoreEvent<QueryDocumentSnapshot | undefined>) => {
     const snapshot = event.data;
@@ -94,150 +99,288 @@ export const onAnnouncementCreate = onDocumentCreated(
       }
     }
 
-    // 2. Poster sur Facebook (avec l'image d'alerte)
-    let facebookPostId: string | null = null;
-    try {
-      // On passe l'annonce mise à jour avec l'URL de l'alertCard
-      const announcementWithCard = { ...announcement, alertCardURL };
-      facebookPostId = await postAnnouncementToFacebook(announcementWithCard, docId);
-      if (facebookPostId) {
-        logger.info("Facebook post created", { docId, facebookPostId });
-      }
-    } catch (error) {
-      logger.error("Facebook post failed", { error, docId });
-    }
+    // 2. Publier sur toutes les plateformes en PARALLÈLE (optimisation performance)
+    logger.info("Starting parallel social media publishing", { docId });
 
-    // 2b. Poster sur Instagram (post classique avec l'image)
-    let instagramPostId: string | null = null;
-    if (alertCardURL && INSTAGRAM_USER_ID.value() && FACEBOOK_PAGE_TOKEN.value()) {
-      try {
-        const igUserId = INSTAGRAM_USER_ID.value();
-        const accessToken = FACEBOOK_PAGE_TOKEN.value();
+    const socialMediaPublishingPromises = [];
 
-        const caption = createInstagramPostCaption({
-          childName: announcement.childName,
-          childAge: announcement.childAge,
-          lastSeenPlace: announcement.lastSeenPlace,
-        });
-
-        const result = await publishInstagramPost({
-          imageUrl: alertCardURL,
-          igUserId,
-          accessToken,
-          caption,
-        });
-
-        if (result.success && result.mediaId) {
-          instagramPostId = result.mediaId;
-          logger.info("Instagram post created", { docId, instagramPostId });
-        } else {
-          logger.warn("Instagram post failed", { docId, error: result.error });
-        }
-      } catch (error) {
-        logger.error("Instagram post failed", { error, docId });
-      }
-    }
-
-    // 3. Poster sur TikTok (avec l'image d'alerte)
-    // Note: Pour l'instant, on ne poste pas automatiquement car on n'a pas d'access token
-    // L'access token sera obtenu via OAuth et stocké dans un document utilisateur
-    // Pour la démo, on utilisera un endpoint HTTP manuel
-    let tiktokVideoId: string | null = null;
-    // Temporairement désactivé - nécessite OAuth user access token
-    // try {
-    //   const announcementWithCard = { ...announcement, alertCardURL };
-    //   tiktokVideoId = await postAnnouncementToTikTok(announcementWithCard, docId, userAccessToken);
-    //   if (tiktokVideoId) {
-    //     logger.info("TikTok post created", { docId, tiktokVideoId });
-    //   }
-    // } catch (error) {
-    //   logger.error("TikTok post failed", { error, docId });
-    // }
-
-    // 3b. Poster sur Facebook Reels (avec la vidéo)
-    let facebookReelId: string | null = null;
-    if (reelVideoURL && FACEBOOK_PAGE_ID.value() && FACEBOOK_PAGE_TOKEN.value()) {
-      try {
-        const pageId = FACEBOOK_PAGE_ID.value();
-        const pageAccessToken = FACEBOOK_PAGE_TOKEN.value();
-
-        if (pageId && pageAccessToken) {
-          // Télécharger la vidéo depuis Cloud Storage
-          const localVideoPath = await downloadVideoFromStorage(reelVideoURL, docId);
-
-          // Créer la caption
-          const caption = createReelCaption({
-            childName: announcement.childName,
-            childAge: announcement.childAge,
-            lastSeenPlace: announcement.lastSeenPlace,
-          });
-
-          // Uploader vers Facebook Reels
-          const result = await publishFacebookReel({
-            videoPath: localVideoPath,
-            pageId,
-            pageAccessToken,
-            caption,
-          });
-
-          if (result.success && result.videoId) {
-            facebookReelId = result.videoId;
-            logger.info("Facebook Reel posted", { docId, facebookReelId });
-          } else {
-            logger.warn("Facebook Reel posting failed", {
-              docId,
-              error: result.error,
-            });
-          }
-
-          // Nettoyer le fichier temporaire
+    // 2a. Facebook Post
+    if (alertCardURL) {
+      socialMediaPublishingPromises.push(
+        (async () => {
           try {
-            unlinkSync(localVideoPath);
-            logger.info("Temporary video file deleted", { localVideoPath });
-          } catch (cleanupError) {
-            logger.warn("Failed to delete temporary video file", { cleanupError });
+            const announcementWithCard = { ...announcement, alertCardURL };
+            const postId = await postAnnouncementToFacebook(announcementWithCard, docId);
+            if (postId) {
+              logger.info("Facebook post created", { docId, facebookPostId: postId });
+              return { platform: "facebook_post", success: true, id: postId };
+            }
+            return { platform: "facebook_post", success: false, id: null };
+          } catch (error) {
+            logger.error("Facebook post failed", { error, docId });
+            return { platform: "facebook_post", success: false, id: null, error };
           }
-        }
-      } catch (error) {
-        logger.error("Facebook Reel upload failed", { error, docId });
-      }
+        })()
+      );
     }
 
-    // 3c. Poster sur Instagram Reels (avec la vidéo)
-    let instagramReelId: string | null = null;
-    if (reelVideoURL && INSTAGRAM_USER_ID.value()) {
-      try {
-        const igUserId = INSTAGRAM_USER_ID.value();
-        const accessToken = FACEBOOK_PAGE_TOKEN.value();
+    // 2b. Instagram Post
+    if (alertCardURL && INSTAGRAM_USER_ID.value() && FACEBOOK_PAGE_TOKEN.value()) {
+      socialMediaPublishingPromises.push(
+        (async () => {
+          try {
+            const igUserId = INSTAGRAM_USER_ID.value();
+            const accessToken = FACEBOOK_PAGE_TOKEN.value();
 
-        if (igUserId && accessToken) {
-          const caption = createInstagramCaption({
-            childName: announcement.childName,
-            childAge: announcement.childAge,
-            lastSeenPlace: announcement.lastSeenPlace,
-          });
-
-          const result = await publishInstagramReel({
-            videoUrl: reelVideoURL,
-            igUserId,
-            accessToken,
-            caption,
-          });
-
-          if (result.success && result.mediaId) {
-            instagramReelId = result.mediaId;
-            logger.info("Instagram Reel posted", { docId, instagramReelId });
-          } else {
-            logger.warn("Instagram Reel posting failed", {
-              docId,
-              error: result.error,
+            const caption = createInstagramPostCaption({
+              childName: announcement.childName,
+              childAge: announcement.childAge,
+              lastSeenPlace: announcement.lastSeenPlace,
+              announcementType: announcement.type,
             });
+
+            const result = await publishInstagramPost({
+              imageUrl: alertCardURL!,
+              igUserId,
+              accessToken,
+              caption,
+            });
+
+            if (result.success && result.mediaId) {
+              logger.info("Instagram post created", { docId, instagramPostId: result.mediaId });
+              return { platform: "instagram_post", success: true, id: result.mediaId };
+            } else {
+              logger.warn("Instagram post failed", { docId, error: result.error });
+              return { platform: "instagram_post", success: false, id: null, error: result.error };
+            }
+          } catch (error) {
+            logger.error("Instagram post failed", { error, docId });
+            return { platform: "instagram_post", success: false, id: null, error };
           }
-        }
-      } catch (error) {
-        logger.error("Instagram Reel upload failed", { error, docId });
-      }
+        })()
+      );
     }
+
+    // 2c. Facebook Reel
+    if (reelVideoURL && FACEBOOK_PAGE_ID.value() && FACEBOOK_PAGE_TOKEN.value()) {
+      socialMediaPublishingPromises.push(
+        (async () => {
+          try {
+            const pageId = FACEBOOK_PAGE_ID.value();
+            const pageAccessToken = FACEBOOK_SYSTEM_USER_TOKEN.value();
+
+            if (pageId && pageAccessToken) {
+              const localVideoPath = await downloadVideoFromStorage(reelVideoURL!, docId);
+
+              const caption = createReelCaption({
+                childName: announcement.childName,
+                childAge: announcement.childAge,
+                lastSeenPlace: announcement.lastSeenPlace,
+                announcementType: announcement.type,
+              });
+
+              const result = await publishFacebookReel({
+                videoPath: localVideoPath,
+                pageId,
+                pageAccessToken,
+                caption,
+              });
+
+              // Nettoyer le fichier temporaire
+              try {
+                unlinkSync(localVideoPath);
+                logger.info("Temporary video file deleted", { localVideoPath });
+              } catch (cleanupError) {
+                logger.warn("Failed to delete temporary video file", { cleanupError });
+              }
+
+              if (result.success && result.videoId) {
+                logger.info("Facebook Reel posted", { docId, facebookReelId: result.videoId });
+                return { platform: "facebook_reel", success: true, id: result.videoId };
+              } else {
+                logger.warn("Facebook Reel posting failed", { docId, error: result.error });
+                return { platform: "facebook_reel", success: false, id: null, error: result.error };
+              }
+            }
+            return { platform: "facebook_reel", success: false, id: null };
+          } catch (error) {
+            logger.error("Facebook Reel upload failed", { error, docId });
+            return { platform: "facebook_reel", success: false, id: null, error };
+          }
+        })()
+      );
+    }
+
+    // 2d. Instagram Reel
+    if (reelVideoURL && INSTAGRAM_USER_ID.value()) {
+      socialMediaPublishingPromises.push(
+        (async () => {
+          try {
+            const igUserId = INSTAGRAM_USER_ID.value();
+            const accessToken = FACEBOOK_PAGE_TOKEN.value();
+
+            if (igUserId && accessToken) {
+              const caption = createInstagramCaption({
+                childName: announcement.childName,
+                childAge: announcement.childAge,
+                lastSeenPlace: announcement.lastSeenPlace,
+                announcementType: announcement.type,
+              });
+
+              const result = await publishInstagramReel({
+                videoUrl: reelVideoURL!,
+                igUserId,
+                accessToken,
+                caption,
+              });
+
+              if (result.success && result.mediaId) {
+                logger.info("Instagram Reel posted", { docId, instagramReelId: result.mediaId });
+                return { platform: "instagram_reel", success: true, id: result.mediaId };
+              } else {
+                logger.warn("Instagram Reel posting failed", { docId, error: result.error });
+                return { platform: "instagram_reel", success: false, id: null, error: result.error };
+              }
+            }
+            return { platform: "instagram_reel", success: false, id: null };
+          } catch (error) {
+            logger.error("Instagram Reel upload failed", { error, docId });
+            return { platform: "instagram_reel", success: false, id: null, error };
+          }
+        })()
+      );
+    }
+
+    // 2e. LinkedIn Post
+    // DÉSACTIVÉ: Publie actuellement sur le profil personnel au lieu de la page EnfantDisparu.bf
+    // TODO: Réactiver quand l'accès au Community Management API sera approuvé par LinkedIn
+    // Cela permettra d'utiliser w_organization_social au lieu de w_member_social
+    /*
+    if (alertCardURL && LINKEDIN_ACCESS_TOKEN.value() && LINKEDIN_PERSON_URN.value()) {
+      socialMediaPublishingPromises.push(
+        (async () => {
+          try {
+            const accessToken = LINKEDIN_ACCESS_TOKEN.value();
+            const personUrn = LINKEDIN_PERSON_URN.value();
+
+            if (accessToken && personUrn) {
+              const caption = createLinkedInCaption({
+                childName: announcement.childName,
+                childAge: announcement.childAge,
+                lastSeenPlace: announcement.lastSeenPlace,
+              });
+
+              const result = await publishLinkedInPost({
+                imageUrl: alertCardURL!,
+                personUrn,
+                accessToken,
+                caption,
+              });
+
+              if (result.success && result.postId) {
+                logger.info("LinkedIn post created", { docId, linkedinPostId: result.postId });
+                return { platform: "linkedin_post", success: true, id: result.postId };
+              } else {
+                logger.warn("LinkedIn post failed", { docId, error: result.error });
+                return { platform: "linkedin_post", success: false, id: null, error: result.error };
+              }
+            }
+            return { platform: "linkedin_post", success: false, id: null };
+          } catch (error) {
+            logger.error("LinkedIn post failed", { error, docId });
+            return { platform: "linkedin_post", success: false, id: null, error };
+          }
+        })()
+      );
+    }
+    */
+
+    // 2f. X (Twitter) Post
+    if (alertCardURL && TWITTER_API_KEY.value() && TWITTER_ACCESS_TOKEN.value()) {
+      socialMediaPublishingPromises.push(
+        (async () => {
+          try {
+            const credentials = {
+              apiKey: TWITTER_API_KEY.value(),
+              apiSecret: TWITTER_API_SECRET.value(),
+              accessToken: TWITTER_ACCESS_TOKEN.value(),
+              accessSecret: TWITTER_ACCESS_SECRET.value(),
+            };
+
+            if (credentials.apiKey && credentials.accessToken) {
+              const text = createTwitterText({
+                childName: announcement.childName,
+                childAge: announcement.childAge,
+                lastSeenPlace: announcement.lastSeenPlace,
+                announcementType: announcement.type,
+              });
+
+              const result = await publishTwitterPost({
+                imageUrl: alertCardURL!,
+                credentials,
+                text,
+              });
+
+              if (result.success && result.tweetId) {
+                logger.info("X (Twitter) post created", { docId, twitterPostId: result.tweetId });
+                return { platform: "twitter_post", success: true, id: result.tweetId };
+              } else {
+                logger.warn("X (Twitter) post failed", { docId, error: result.error });
+                return { platform: "twitter_post", success: false, id: null, error: result.error };
+              }
+            }
+            return { platform: "twitter_post", success: false, id: null };
+          } catch (error) {
+            logger.error("X (Twitter) post failed", { error, docId });
+            return { platform: "twitter_post", success: false, id: null, error };
+          }
+        })()
+      );
+    }
+
+    // Attendre que toutes les publications se terminent (en parallèle)
+    const publishingResults = await Promise.allSettled(socialMediaPublishingPromises);
+
+    // Extraire les IDs des résultats
+    let facebookPostId: string | null = null;
+    let instagramPostId: string | null = null;
+    let facebookReelId: string | null = null;
+    let instagramReelId: string | null = null;
+    let linkedinPostId: string | null = null;
+    let twitterPostId: string | null = null;
+    let tiktokVideoId: string | null = null; // Pour compatibilité future
+
+    publishingResults.forEach((result) => {
+      if (result.status === "fulfilled" && result.value.success) {
+        switch (result.value.platform) {
+          case "facebook_post":
+            facebookPostId = result.value.id;
+            break;
+          case "instagram_post":
+            instagramPostId = result.value.id;
+            break;
+          case "facebook_reel":
+            facebookReelId = result.value.id;
+            break;
+          case "instagram_reel":
+            instagramReelId = result.value.id;
+            break;
+          // DÉSACTIVÉ: LinkedIn temporairement désactivé
+          // case "linkedin_post":
+          //   linkedinPostId = result.value.id;
+          //   break;
+          case "twitter_post":
+            twitterPostId = result.value.id;
+            break;
+        }
+      }
+    });
+
+    logger.info("Social media publishing completed", {
+      docId,
+      platforms: publishingResults.length,
+      successful: publishingResults.filter(r => r.status === "fulfilled" && r.value.success).length,
+    });
 
     // 4. Incrémenter le compteur de zone
     try {
@@ -262,6 +405,8 @@ export const onAnnouncementCreate = onDocumentCreated(
         "stats.instagramPostId": instagramPostId,
         "stats.facebookReelId": facebookReelId,
         "stats.instagramReelId": instagramReelId,
+        "stats.linkedinPostId": linkedinPostId,
+        "stats.twitterPostId": twitterPostId,
         "stats.tiktokVideoId": tiktokVideoId,
         nextReminderAt,
         updatedAt: FieldValue.serverTimestamp(),
@@ -278,6 +423,8 @@ export const onAnnouncementCreate = onDocumentCreated(
       instagramPost: !!instagramPostId,
       facebookReel: !!facebookReelId,
       instagramReel: !!instagramReelId,
+      linkedinPost: !!linkedinPostId,
+      twitterPost: !!twitterPostId,
       tiktokPost: !!tiktokVideoId,
     });
   }

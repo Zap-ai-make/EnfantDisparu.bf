@@ -8,6 +8,7 @@ import { Upload, ChevronRight, ChevronLeft } from "lucide-react";
 import { createAnnouncement } from "@/lib/firestore";
 import { ZonePicker } from "@/components/ZonePicker";
 import { Field, inputClass } from "@/components/forms";
+import { ImageCropUpload } from "@/components/ImageCropUpload";
 import { cn } from "@/lib/utils";
 import type { CreateAnnouncementInput } from "@/types/announcement";
 
@@ -22,7 +23,7 @@ export default function SignalerPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [childPhotoFile, setChildPhotoFile] = useState<File | null>(null);
 
   const {
     register,
@@ -33,17 +34,15 @@ export default function SignalerPage() {
     formState: { errors },
   } = useForm<FormData>({ mode: "onChange" });
 
-  const watchPhoto = watch("childPhotoFile");
-
-  // Prévisualisation photo
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setPreviewUrl(URL.createObjectURL(file));
-  };
-
   const nextStep = async () => {
+    // Validate photo on step 1
+    if (step === 0 && !childPhotoFile) {
+      toast.error("Veuillez ajouter une photo de l'enfant");
+      return;
+    }
+
     const fields: (keyof FormData)[][] = [
-      ["childName", "childAge", "childGender", "childPhotoFile", "description"],
+      ["childName", "childAge", "childGender", "description"],
       ["zoneId", "lastSeenPlace", "lastSeenAt"],
       ["parentPhone"],
     ];
@@ -52,13 +51,18 @@ export default function SignalerPage() {
   };
 
   const onSubmit = async (data: FormData) => {
+    if (!childPhotoFile) {
+      toast.error("Veuillez ajouter une photo de l'enfant");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const { shortCode, secretToken, docId } = await createAnnouncement({
         childName: data.childName,
         childAge: Number(data.childAge),
         childGender: data.childGender,
-        childPhoto: data.childPhotoFile[0],
+        childPhoto: childPhotoFile,
         description: data.description,
         distinctiveSign: data.distinctiveSign ?? "",
         zoneId: data.zoneId,
@@ -110,37 +114,18 @@ export default function SignalerPage() {
             <>
               <h2 className="font-bold text-xl text-gray-900">Informations sur l&apos;enfant</h2>
 
-              {/* Photo */}
+              {/* Photo avec recadrage et amélioration */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Photo de l&apos;enfant <span className="text-red-500">*</span>
                 </label>
-                <label className="cursor-pointer block">
-                  {previewUrl ? (
-                    <div className="relative w-32 h-32 rounded-2xl overflow-hidden border-2 border-red-200">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={previewUrl} alt="Prévisualisation" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <span className="text-white text-xs">Changer</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-red-400 transition-colors">
-                      <Upload className="w-6 h-6" />
-                      <span className="text-xs">Ajouter photo</span>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    {...register("childPhotoFile", { required: "La photo est requise" })}
-                    onChange={handlePhotoChange}
-                  />
-                </label>
-                {errors.childPhotoFile && (
-                  <p className="text-red-500 text-xs mt-1">{errors.childPhotoFile.message}</p>
-                )}
+                <ImageCropUpload
+                  onImageCropped={(file) => setChildPhotoFile(file)}
+                  error={step === 0 && !childPhotoFile ? "La photo est requise" : undefined}
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  💡 Vous pourrez recadrer et améliorer la qualité de la photo après sélection
+                </p>
               </div>
 
               {/* Nom */}

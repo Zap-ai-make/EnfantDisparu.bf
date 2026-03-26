@@ -22,6 +22,7 @@ export const BASE_URL = defineString("BASE_URL", {
 
 // Secrets (Firebase Secret Manager)
 export const FACEBOOK_PAGE_TOKEN = defineSecret("FACEBOOK_PAGE_TOKEN");
+export const FACEBOOK_SYSTEM_USER_TOKEN = defineSecret("FACEBOOK_SYSTEM_USER_TOKEN");
 export const FACEBOOK_PAGE_ID = defineSecret("FACEBOOK_PAGE_ID");
 export const WHATSAPP_PHONE_NUMBER_ID = defineSecret("WHATSAPP_PHONE_NUMBER_ID");
 export const WHATSAPP_API_TOKEN = defineSecret("WHATSAPP_API_TOKEN");
@@ -29,6 +30,16 @@ export const ONESIGNAL_API_KEY = defineSecret("ONESIGNAL_API_KEY");
 export const TIKTOK_CLIENT_KEY = defineSecret("TIKTOK_CLIENT_KEY");
 export const TIKTOK_CLIENT_SECRET = defineSecret("TIKTOK_CLIENT_SECRET");
 export const INSTAGRAM_USER_ID = defineSecret("INSTAGRAM_USER_ID");
+
+// LinkedIn API credentials
+export const LINKEDIN_ACCESS_TOKEN = defineSecret("LINKEDIN_ACCESS_TOKEN");
+export const LINKEDIN_PERSON_URN = defineSecret("LINKEDIN_PERSON_URN");
+
+// X (Twitter) API credentials
+export const TWITTER_API_KEY = defineSecret("TWITTER_API_KEY");
+export const TWITTER_API_SECRET = defineSecret("TWITTER_API_SECRET");
+export const TWITTER_ACCESS_TOKEN = defineSecret("TWITTER_ACCESS_TOKEN");
+export const TWITTER_ACCESS_SECRET = defineSecret("TWITTER_ACCESS_SECRET");
 
 // Constants
 export const COLLECTIONS = {

@@ -104,30 +104,27 @@ async function createReelVideo(options: {
       .outputOptions([
         // Video codec
         "-c:v libx264",
-        "-preset fast",
+        "-preset veryfast", // Plus rapide pour génération (-20% temps)
         "-profile:v high",
         "-level 4.0",
         "-pix_fmt yuv420p",
 
-        // Résolution verticale (Reels format)
-        `-vf scale=${REEL_WIDTH}:${REEL_HEIGHT}:force_original_aspect_ratio=increase,crop=${REEL_WIDTH}:${REEL_HEIGHT},zoompan=z='min(zoom+0.002,1.2)':d=${duration * FPS}:s=${REEL_WIDTH}x${REEL_HEIGHT}:fps=${FPS}`,
+        // Résolution verticale (Reels format) avec effets documentaire
+        // Effets: fade in/out, Ken Burns amélioré, vignette, correction couleur
+        `-vf scale=${REEL_WIDTH}:${REEL_HEIGHT}:force_original_aspect_ratio=increase,crop=${REEL_WIDTH}:${REEL_HEIGHT},zoompan=z='if(lte(on,${FPS}*5),zoom+0.003,if(lte(on,${FPS}*12),1.15,1.15-0.003*(on-${FPS}*12)))':d=${duration * FPS}:s=${REEL_WIDTH}x${REEL_HEIGHT}:fps=${FPS},fade=t=in:st=0:d=0.5,fade=t=out:st=${duration - 0.5}:d=0.5,vignette=PI/4,eq=contrast=1.1:brightness=0.02:saturation=1.05`,
 
         // Audio
         "-c:a aac",
         "-b:a 128k",
         "-shortest", // Arrêter quand l'audio se termine
 
-        // Bitrate
-        "-b:v 5000k",
-        "-maxrate 5500k",
-        "-bufsize 10000k",
+        // Bitrate optimisé pour Instagram (qualité/taille)
+        "-b:v 2500k",
+        "-maxrate 3000k",
+        "-bufsize 5000k",
 
         // Framerate
         `-r ${FPS}`,
-
-        // Métadonnées
-        '-metadata title="Alerte Enfant Disparu"',
-        '-metadata description="EnfentDisparu.bf"',
       ])
       .output(outputPath)
       .on("start", (commandLine) => {

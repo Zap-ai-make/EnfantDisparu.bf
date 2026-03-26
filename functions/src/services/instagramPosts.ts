@@ -44,6 +44,9 @@ export async function publishInstagramPost(
 
     logger.info("Instagram media container created", { containerId });
 
+    // Attendre que le container soit prêt (Instagram processing)
+    await waitForContainerReady(accessToken, containerId);
+
     // Étape 2: Publier le média
     const mediaId = await publishMedia(igUserId, accessToken, containerId);
 
@@ -101,6 +104,59 @@ async function createMediaContainer(
 }
 
 /**
+ * Attendre que le container soit prêt pour publication
+ * Instagram doit d'abord télécharger et traiter l'image
+ */
+async function waitForContainerReady(
+  accessToken: string,
+  containerId: string,
+  maxAttempts = 10 // Max ~50 secondes (5 sec * 10)
+): Promise<void> {
+  logger.info("Waiting for container to be ready", { containerId });
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const response = await fetch(
+      `${GRAPH_API_BASE}/${containerId}?fields=status_code,status&access_token=${accessToken}`
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `Failed to check container status: ${JSON.stringify(errorData)}`
+      );
+    }
+
+    const data = await response.json();
+
+    logger.info("Container status check", {
+      attempt: attempt + 1,
+      status: data.status,
+      statusCode: data.status_code,
+    });
+
+    if (data.status_code === "FINISHED") {
+      logger.info("Container ready for publishing", { containerId });
+      return;
+    }
+
+    if (data.status_code === "ERROR") {
+      throw new Error(`Container processing error: ${data.status}`);
+    }
+
+    if (data.status_code === "EXPIRED") {
+      throw new Error("Container expired before publishing");
+    }
+
+    // Attendre 5 secondes avant le prochain check
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+
+  throw new Error(
+    `Container not ready after ${maxAttempts} attempts (timeout)`
+  );
+}
+
+/**
  * Publie un container média
  */
 async function publishMedia(
@@ -137,8 +193,22 @@ export function createInstagramPostCaption(data: {
   childName: string;
   childAge: number;
   lastSeenPlace: string;
+  announcementType: "missing" | "found";
 }): string {
-  const { childName, childAge, lastSeenPlace } = data;
+  const { childName, childAge, lastSeenPlace, announcementType } = data;
+
+  if (announcementType === "found") {
+    return `🟢 ENFANT TROUVÉ - CHERCHE SA FAMILLE 🟢
+
+👤 ${childName}, ${childAge} ans
+📍 Trouvé à: ${lastSeenPlace}
+
+Si vous reconnaissez cet enfant, signalez sur enfantdisparu.bf
+
+Aidons cet enfant à retrouver sa famille ! 🙏
+
+#EnfantTrouvé #EnfantPerdu #BurkinaFaso #RechercheParents #AidezNous #Partage #${childName.replace(/\s+/g, "")}`;
+  }
 
   return `🚨 ALERTE ENFANT DISPARU 🚨
 

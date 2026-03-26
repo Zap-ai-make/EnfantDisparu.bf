@@ -214,7 +214,22 @@ export function createReelCaption(announcement: {
   childName: string;
   childAge: number;
   lastSeenPlace: string;
+  announcementType: "missing" | "found";
 }): string {
+  if (announcement.announcementType === "found") {
+    return `🟢 ENFANT TROUVÉ - CHERCHE SA FAMILLE
+
+${announcement.childName}, ${announcement.childAge} ans
+Trouvé à: ${announcement.lastSeenPlace}
+
+⚠️ SI VOUS RECONNAISSEZ CET ENFANT, SIGNALEZ SUR enfantdisparu.bf
+
+Aidons cet enfant à retrouver sa famille! 🙏
+
+#EnfantTrouvé #EnfantPerdu #BurkinaFaso #RechercheParents
+Chaque partage compte. Merci de diffuser.`;
+  }
+
   return `🚨 ALERTE ENFANT DISPARU
 
 ${announcement.childName}, ${announcement.childAge} ans

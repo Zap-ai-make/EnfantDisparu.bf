@@ -42,6 +42,7 @@ export function ChatBot() {
   const [hasUnread, setHasUnread] = useState(false);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
   const [displayedText, setDisplayedText] = useState("");
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -360,6 +361,8 @@ export function ChatBot() {
           setIsOpen(!isOpen);
           if (!isOpen) setIsMinimized(false);
         }}
+        onMouseEnter={() => setIsButtonHovered(true)}
+        onMouseLeave={() => setIsButtonHovered(false)}
         className={cn(
           "fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110",
           isOpen
@@ -384,7 +387,10 @@ export function ChatBot() {
 
       {/* Quick Actions (when closed) */}
       {!isOpen && (
-        <div className="fixed bottom-20 right-4 z-40 opacity-0 hover:opacity-100 transition-opacity">
+        <div className={cn(
+          "fixed bottom-20 right-4 z-40 transition-opacity pointer-events-none",
+          isButtonHovered ? "opacity-100" : "opacity-0"
+        )}>
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-3 text-sm text-gray-600 max-w-[200px]">
             <p className="font-medium text-gray-800 mb-1">Besoin d&apos;aide ?</p>
             <p className="text-xs">Cliquez pour discuter avec notre assistant.</p>
