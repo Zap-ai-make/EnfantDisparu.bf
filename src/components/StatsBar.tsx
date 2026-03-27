@@ -165,14 +165,13 @@ export function StatsBar({ stats, compact = false }: StatsBarProps) {
           <span className="text-xl">🔔</span>
           <div>
             <p className="font-bold text-orange-800">Notifications push</p>
-            <p className="text-xs text-orange-600">Habitants du secteur</p>
+            <p className="text-xs text-orange-600">personnes notifiées</p>
           </div>
         </div>
         <div className="text-right">
           <p className="text-2xl font-extrabold text-orange-700">
             {stats.pushSent > 0 ? stats.pushSent : "—"}
           </p>
-          <p className="text-xs text-orange-600">alertés</p>
           {stats.pushClicked > 0 && (
             <p className="text-xs text-orange-500 mt-0.5">
               {stats.pushClicked} clics

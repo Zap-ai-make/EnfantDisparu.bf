@@ -17,7 +17,7 @@ type FormData = Omit<CreateAnnouncementInput, "childPhoto"> & {
   zoneName: string;
 };
 
-const STEPS = ["L'enfant", "Où & quand", "Votre contact"];
+const STEPS = ["L'enfant", "Où & quand", "Votre contact", "Validation"];
 
 export default function SignalerPage() {
   const router = useRouter();
@@ -267,6 +267,126 @@ export default function SignalerPage() {
             </>
           )}
 
+          {/* ÉTAPE 3 — Validation finale */}
+          {step === 3 && (
+            <>
+              <h2 className="font-bold text-xl text-gray-900">Vérification finale</h2>
+
+              {/* Warning Banner */}
+              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 space-y-2">
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <p className="font-bold text-red-800 text-sm">Attention</p>
+                    <p className="text-sm text-red-700 mt-1">
+                      Une fois validée, l&apos;annonce sera <strong>automatiquement diffusée</strong> sur tous nos canaux (réseaux sociaux, notifications push, etc.).
+                      Il n&apos;y aura pas de retour en arrière possible.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recap - L'enfant */}
+              <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <span>👤</span>
+                  Informations sur l&apos;enfant
+                </h3>
+
+                {childPhotoFile && (
+                  <div className="relative w-32 h-32 mx-auto rounded-lg overflow-hidden border-2 border-gray-200">
+                    <img
+                      src={URL.createObjectURL(childPhotoFile)}
+                      alt="Photo de l'enfant"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-gray-500">Nom</p>
+                    <p className="font-medium text-gray-900">{watch("childName")}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Âge</p>
+                    <p className="font-medium text-gray-900">{watch("childAge")} ans</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Genre</p>
+                    <p className="font-medium text-gray-900">{watch("childGender") === "F" ? "Fille" : "Garçon"}</p>
+                  </div>
+                </div>
+
+                <div className="text-sm">
+                  <p className="text-gray-500 mb-1">Description</p>
+                  <p className="text-gray-900 bg-gray-50 rounded-lg p-3">{watch("description")}</p>
+                </div>
+
+                {watch("distinctiveSign") && (
+                  <div className="text-sm">
+                    <p className="text-gray-500 mb-1">Signe distinctif</p>
+                    <p className="text-gray-900 bg-gray-50 rounded-lg p-3">{watch("distinctiveSign")}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Recap - Localisation */}
+              <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <span>📍</span>
+                  Localisation et date
+                </h3>
+
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <p className="text-gray-500">Zone</p>
+                    <p className="font-medium text-gray-900">{watch("zoneName") || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Lieu précis</p>
+                    <p className="font-medium text-gray-900">{watch("lastSeenPlace")}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Dernière vue</p>
+                    <p className="font-medium text-gray-900">
+                      {watch("lastSeenAt") ? new Date(watch("lastSeenAt")).toLocaleString("fr-FR", {
+                        dateStyle: "long",
+                        timeStyle: "short"
+                      }) : "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recap - Contact */}
+              <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <span>📱</span>
+                  Contact
+                </h3>
+
+                <div className="text-sm">
+                  <p className="text-gray-500">Numéro WhatsApp</p>
+                  <p className="font-medium text-gray-900">{watch("parentPhone")}</p>
+                </div>
+              </div>
+
+              {/* Info diffusion */}
+              <div className="bg-blue-50 rounded-xl p-4 text-sm text-blue-700">
+                <p className="font-medium mb-2">📢 Canaux de diffusion</p>
+                <ul className="space-y-1 text-xs">
+                  <li>✓ Page Facebook EnfantDisparu.bf</li>
+                  <li>✓ Instagram @enfantdisparu.bf</li>
+                  <li>✓ X (Twitter) @Enfantdisparubf</li>
+                  <li>✓ Chaîne WhatsApp EnfantDisparu.bf</li>
+                  <li>✓ Notifications push (membres du secteur)</li>
+                  <li>✓ Affiche d&apos;alerte générée automatiquement</li>
+                </ul>
+              </div>
+            </>
+          )}
+
           {/* Navigation - larger touch targets */}
           <div className="flex gap-3 pt-3">
             {step > 0 && (
@@ -286,7 +406,7 @@ export default function SignalerPage() {
                 onClick={nextStep}
                 className="flex-1 flex items-center justify-center gap-1 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white py-3.5 rounded-xl font-semibold transition-colors active:scale-[0.98]"
               >
-                Suivant
+                {step === 2 ? "Vérifier et valider" : "Suivant"}
                 <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
@@ -295,7 +415,7 @@ export default function SignalerPage() {
                 disabled={submitting}
                 className="flex-1 bg-red-600 hover:bg-red-700 active:bg-red-800 disabled:bg-red-400 text-white py-4 rounded-xl font-bold text-base sm:text-lg transition-colors active:scale-[0.98]"
               >
-                {submitting ? "Publication..." : "🚨 Publier l'annonce"}
+                {submitting ? "Publication..." : "✅ Valider et publier"}
               </button>
             )}
           </div>

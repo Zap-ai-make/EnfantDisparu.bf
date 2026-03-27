@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { doc, deleteDoc, getDoc } from "firebase/firestore";
+import { getAdminDb } from "@/lib/firebase-admin";
 import { verifyAdminPassword, isAdminPasswordConfigured } from "@/lib/auth";
 
 /**
@@ -37,19 +36,20 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Vérifier que l'annonce existe
-    const announcementRef = doc(db, "announcements", announcementId);
-    const announcementSnap = await getDoc(announcementRef);
+    // Utiliser Firebase Admin SDK (bypass les règles de sécurité)
+    const adminDb = getAdminDb();
+    const announcementRef = adminDb.collection("announcements").doc(announcementId);
+    const announcementSnap = await announcementRef.get();
 
-    if (!announcementSnap.exists()) {
+    if (!announcementSnap.exists) {
       return NextResponse.json(
         { success: false, error: "Announcement not found" },
         { status: 404 }
       );
     }
 
-    // Supprimer l'annonce
-    await deleteDoc(announcementRef);
+    // Supprimer l'annonce (Admin SDK bypass les règles de sécurité)
+    await announcementRef.delete();
 
     return NextResponse.json({
       success: true,

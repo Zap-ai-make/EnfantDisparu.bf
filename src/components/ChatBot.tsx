@@ -19,7 +19,7 @@ const INITIAL_MESSAGE: Message = {
 };
 
 // API OpenClaw VPS
-const CHATBOT_API_URL = "https://openclaw.srv1066171.hstgr.cloud/chat";
+const CHATBOT_API_URL = process.env.NEXT_PUBLIC_CHATBOT_API_URL || "https://openclaw.srv1066171.hstgr.cloud/chat";
 
 // Générer ou récupérer un sessionId unique par utilisateur
 function getSessionId(): string {

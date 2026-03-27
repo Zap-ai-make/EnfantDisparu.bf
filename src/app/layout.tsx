@@ -125,6 +125,78 @@ export default function RootLayout({
             <p className="font-medium text-gray-500">EnfantDisparu.bf</p>
             <p>Retrouvons les enfants disparus ensemble — Burkina Faso</p>
 
+            {/* Section Contact & Réseaux sociaux */}
+            <div className="space-y-3">
+              <p className="font-semibold text-gray-600 text-sm">Nous contacter</p>
+
+              {/* Email */}
+              <a
+                href="mailto:contact@enfentdisparu.bf"
+                className="flex items-center justify-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <span>📧</span>
+                <span>contact@enfentdisparu.bf</span>
+              </a>
+
+              {/* Réseaux sociaux */}
+              <div className="flex flex-wrap justify-center gap-3 pt-2">
+                <a
+                  href="https://www.facebook.com/profile.php?id=61583711643429"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors"
+                  aria-label="Facebook"
+                >
+                  <span>📘</span>
+                  <span>Facebook</span>
+                </a>
+
+                <a
+                  href="https://www.instagram.com/enfantdisparu.bf/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 text-pink-700 rounded-lg text-xs font-medium transition-colors"
+                  aria-label="Instagram"
+                >
+                  <span>📸</span>
+                  <span>Instagram</span>
+                </a>
+
+                <a
+                  href="https://x.com/Enfantdisparubf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-xs font-medium transition-colors"
+                  aria-label="X (Twitter)"
+                >
+                  <span>𝕏</span>
+                  <span>X</span>
+                </a>
+
+                <a
+                  href="https://www.tiktok.com/@enfantdisparu.bf?is_from_webapp=1&sender_device=pc"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-xs font-medium transition-colors"
+                  aria-label="TikTok"
+                >
+                  <span>🎵</span>
+                  <span>TikTok</span>
+                </a>
+
+                <a
+                  href="https://www.linkedin.com/company/enfantdisparu-bf/?viewAsMember=true"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-medium transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <span>💼</span>
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+            </div>
+
             {/* Liens footer - wrap sur petits écrans */}
             <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-1">
               <Link href="/retrouver-mon-annonce" className="hover:text-gray-600 underline py-1">
