@@ -47,7 +47,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.googleapis.com",
-              "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://onesignal.com https://*.onesignal.com",
+              "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com https://onesignal.com https://*.onesignal.com https://*.hstgr.cloud",
               "frame-src 'self' https://*.firebaseapp.com",
               "worker-src 'self' blob:",
             ].join("; "),
