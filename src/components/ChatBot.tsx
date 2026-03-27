@@ -124,6 +124,14 @@ export function ChatBot() {
 
     try {
       const sessionId = getSessionId();
+
+      // Debug: Log de la requête
+      console.log("🤖 ChatBot - Envoi requête:", {
+        url: CHATBOT_API_URL,
+        sessionId,
+        message: userMessage.content,
+      });
+
       const response = await fetch(CHATBOT_API_URL, {
         method: "POST",
         headers: {
@@ -135,11 +143,23 @@ export function ChatBot() {
         }),
       });
 
+      // Debug: Log de la réponse brute
+      console.log("🤖 ChatBot - Réponse HTTP:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+      });
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error("🤖 ChatBot - Erreur serveur:", errorText);
         throw new Error("Erreur de communication");
       }
 
       const data = await response.json();
+
+      // Debug: Log des données reçues
+      console.log("🤖 ChatBot - Données reçues:", data);
 
       const messageId = `assistant-${Date.now()}`;
       const assistantMessage: Message = {
@@ -160,7 +180,15 @@ export function ChatBot() {
         setHasUnread(true);
       }
     } catch (error) {
-      console.error("Chatbot error:", error);
+      console.error("🤖 ChatBot - Erreur complète:", error);
+
+      // Détails de l'erreur pour diagnostic
+      if (error instanceof TypeError) {
+        console.error("🤖 ChatBot - TypeError (probablement CORS ou réseau):", error.message);
+      } else if (error instanceof Error) {
+        console.error("🤖 ChatBot - Error:", error.message);
+      }
+
       const errorId = `error-${Date.now()}`;
       const errorMessage: Message = {
         id: errorId,
