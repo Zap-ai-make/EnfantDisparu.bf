@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Shield, Trash2, Eye, Search, RefreshCw, Lock, AlertCircle } from "lucide-react";
+import { Shield, Trash2, Eye, Search, RefreshCw, Lock, AlertCircle, ArrowLeft } from "lucide-react";
 import { collection, getDocs, query, orderBy, limit, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { cn, timeAgo, formatDate } from "@/lib/utils";
@@ -237,6 +237,13 @@ export default function AdminAnnoncesPage() {
       {/* Header */}
       <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-6 text-white">
         <div className="flex items-center gap-3 mb-2">
+          <a
+            href="/admin"
+            className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center transition-colors"
+            title="Retour au tableau de bord"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </a>
           <Shield className="w-8 h-8" />
           <div>
             <h1 className="text-2xl font-extrabold">Administration - Annonces</h1>

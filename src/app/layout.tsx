@@ -143,7 +143,7 @@ export default function RootLayout({
 
             {/* Lien admin discret */}
             <div className="pt-2">
-              <Link href="/admin/ambassadeurs" className="text-gray-300 hover:text-gray-500 text-[10px]">
+              <Link href="/admin" className="text-gray-300 hover:text-gray-500 text-[10px]">
                 Admin
               </Link>
             </div>

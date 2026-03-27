@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Shield, Check, X, Clock, RefreshCw, ExternalLink, Calendar, Cat, Phone, User, Lock, Bell, Share2, Users, Eye, TrendingUp } from "lucide-react";
+import { Shield, Check, X, Clock, RefreshCw, ExternalLink, Calendar, Cat, Phone, User, Lock, Bell, Share2, Users, Eye, TrendingUp, ArrowLeft } from "lucide-react";
 import { getAmbassadorsByStatus, getAmbassadorGlobalStats, type AmbassadorGlobalStats } from "@/lib/firestore";
 import { ZONES_BY_CITY } from "@/lib/zones";
 import { cn } from "@/lib/utils";
@@ -226,6 +226,13 @@ export default function AdminAmbassadeursPage() {
       <div className="bg-gradient-to-br from-gray-700 to-gray-900 rounded-2xl p-5 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <a
+              href="/admin"
+              className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center transition-colors"
+              title="Retour au tableau de bord"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </a>
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
               <Shield className="w-5 h-5" />
             </div>
