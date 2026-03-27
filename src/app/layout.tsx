@@ -139,60 +139,60 @@ export default function RootLayout({
               </a>
 
               {/* Réseaux sociaux */}
-              <div className="flex flex-wrap justify-center gap-3 pt-2">
+              <div className="flex flex-wrap justify-center gap-2 pt-2">
                 <a
                   href="https://www.facebook.com/profile.php?id=61583711643429"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-blue-50 hover:bg-blue-100 rounded-lg text-xl transition-colors"
                   aria-label="Facebook"
+                  title="Facebook"
                 >
-                  <span>📘</span>
-                  <span>Facebook</span>
+                  📘
                 </a>
 
                 <a
                   href="https://www.instagram.com/enfantdisparu.bf/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 text-pink-700 rounded-lg text-xs font-medium transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 rounded-lg text-xl transition-colors"
                   aria-label="Instagram"
+                  title="Instagram"
                 >
-                  <span>📸</span>
-                  <span>Instagram</span>
+                  📸
                 </a>
 
                 <a
                   href="https://x.com/Enfantdisparubf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-xs font-medium transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-gray-900 hover:bg-gray-800 rounded-lg text-xl transition-colors"
                   aria-label="X (Twitter)"
+                  title="X (Twitter)"
                 >
-                  <span>𝕏</span>
-                  <span>X</span>
+                  𝕏
                 </a>
 
                 <a
                   href="https://www.tiktok.com/@enfantdisparu.bf?is_from_webapp=1&sender_device=pc"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-xs font-medium transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-gray-900 hover:bg-gray-800 rounded-lg text-xl transition-colors"
                   aria-label="TikTok"
+                  title="TikTok"
                 >
-                  <span>🎵</span>
-                  <span>TikTok</span>
+                  🎵
                 </a>
 
                 <a
                   href="https://www.linkedin.com/company/enfantdisparu-bf/?viewAsMember=true"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-medium transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-blue-700 hover:bg-blue-800 rounded-lg text-xl transition-colors"
                   aria-label="LinkedIn"
+                  title="LinkedIn"
                 >
-                  <span>💼</span>
-                  <span>LinkedIn</span>
+                  💼
                 </a>
               </div>
             </div>
