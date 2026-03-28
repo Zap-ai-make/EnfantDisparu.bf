@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { OneSignalInit } from "@/components/OneSignalInit";
 import { AmbassadorRefTracker } from "@/components/AmbassadorRefTracker";
 import { ChatBot } from "@/components/ChatBot";
+import { Facebook, Instagram, Twitter, Music, Linkedin } from "lucide-react";
 
 export const metadata: Metadata = {
   title: {
@@ -144,55 +145,55 @@ export default function RootLayout({
                   href="https://www.facebook.com/profile.php?id=61583711643429"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 flex items-center justify-center bg-blue-50 hover:bg-blue-100 rounded-lg text-xl transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-white"
                   aria-label="Facebook"
                   title="Facebook"
                 >
-                  📘
+                  <Facebook className="w-5 h-5" />
                 </a>
 
                 <a
                   href="https://www.instagram.com/enfantdisparu.bf/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 rounded-lg text-xl transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg transition-colors text-white"
                   aria-label="Instagram"
                   title="Instagram"
                 >
-                  📸
+                  <Instagram className="w-5 h-5" />
                 </a>
 
                 <a
                   href="https://x.com/Enfantdisparubf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 flex items-center justify-center bg-gray-900 hover:bg-gray-800 rounded-lg text-xl transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-black hover:bg-gray-900 rounded-lg transition-colors text-white"
                   aria-label="X (Twitter)"
                   title="X (Twitter)"
                 >
-                  𝕏
+                  <Twitter className="w-5 h-5" />
                 </a>
 
                 <a
                   href="https://www.tiktok.com/@enfantdisparu.bf?is_from_webapp=1&sender_device=pc"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 flex items-center justify-center bg-gray-900 hover:bg-gray-800 rounded-lg text-xl transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-black hover:bg-gray-900 rounded-lg transition-colors text-white"
                   aria-label="TikTok"
                   title="TikTok"
                 >
-                  🎵
+                  <Music className="w-5 h-5" />
                 </a>
 
                 <a
                   href="https://www.linkedin.com/company/enfantdisparu-bf/?viewAsMember=true"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 flex items-center justify-center bg-blue-700 hover:bg-blue-800 rounded-lg text-xl transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors text-white"
                   aria-label="LinkedIn"
                   title="LinkedIn"
                 >
-                  💼
+                  <Linkedin className="w-5 h-5" />
                 </a>
               </div>
             </div>
