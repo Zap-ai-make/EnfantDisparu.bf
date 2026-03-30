@@ -13,15 +13,14 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [cropMode, setCropMode] = useState(false);
-  const [cropArea, setCropArea] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
+  const [position, setPosition] = useState({ x: 0, y: 0 }); // Position de l'image (en %)
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,20 +32,28 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
       img.onload = () => {
         setOriginalImage(img);
         setCropMode(true);
-
-        // Initialize crop area to center square
-        const size = Math.min(img.width, img.height);
-        setCropArea({
-          x: (img.width - size) / 2,
-          y: (img.height - size) / 2,
-          width: size,
-          height: size,
-        });
+        setZoom(1);
+        setRotation(0);
+        setPosition({ x: 50, y: 50 }); // Centré par défaut
       };
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
+
+  // Calculer le zoom minimum pour couvrir le carré
+  const getMinZoom = useCallback(() => {
+    if (!originalImage) return 1;
+    const aspectRatio = originalImage.width / originalImage.height;
+    // Le zoom minimum doit faire en sorte que l'image couvre tout le carré
+    if (aspectRatio > 1) {
+      // Image paysage : la hauteur doit couvrir le carré
+      return 1;
+    } else {
+      // Image portrait : la largeur doit couvrir le carré
+      return 1 / aspectRatio;
+    }
+  }, [originalImage]);
 
   const handleCrop = useCallback(async () => {
     if (!originalImage || !canvasRef.current) return;
@@ -55,144 +62,128 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set canvas size to cropped area
-    const targetSize = 800; // Max dimension
-    const scale = Math.min(targetSize / cropArea.width, targetSize / cropArea.height);
-    canvas.width = cropArea.width * scale;
-    canvas.height = cropArea.height * scale;
+    // Taille de sortie
+    const outputSize = 800;
+    canvas.width = outputSize;
+    canvas.height = outputSize;
 
-    // Apply rotation
-    if (rotation !== 0) {
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate((rotation * Math.PI) / 180);
-      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    // Calculer les dimensions de l'image zoomée
+    const aspectRatio = originalImage.width / originalImage.height;
+    let imgWidth: number, imgHeight: number;
+
+    if (aspectRatio > 1) {
+      // Image paysage
+      imgHeight = outputSize * zoom;
+      imgWidth = imgHeight * aspectRatio;
+    } else {
+      // Image portrait
+      imgWidth = outputSize * zoom;
+      imgHeight = imgWidth / aspectRatio;
     }
 
-    // Draw cropped image with zoom
-    ctx.drawImage(
-      originalImage,
-      cropArea.x / zoom,
-      cropArea.y / zoom,
-      cropArea.width / zoom,
-      cropArea.height / zoom,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
+    // Position de l'image basée sur le pourcentage
+    const maxOffsetX = (imgWidth - outputSize) / 2;
+    const maxOffsetY = (imgHeight - outputSize) / 2;
+    const offsetX = ((position.x - 50) / 50) * maxOffsetX;
+    const offsetY = ((position.y - 50) / 50) * maxOffsetY;
 
-    // Reset transformation
+    // Position pour centrer puis décaler
+    const drawX = (outputSize - imgWidth) / 2 - offsetX;
+    const drawY = (outputSize - imgHeight) / 2 - offsetY;
+
+    // Appliquer la rotation si nécessaire
+    if (rotation !== 0) {
+      ctx.translate(outputSize / 2, outputSize / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.translate(-outputSize / 2, -outputSize / 2);
+    }
+
+    // Dessiner l'image
+    ctx.drawImage(originalImage, drawX, drawY, imgWidth, imgHeight);
+
+    // Réinitialiser la transformation
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-    // Apply image enhancements
+    // Amélioration de l'image
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const enhanced = enhanceImage(imageData);
     ctx.putImageData(enhanced, 0, 0);
 
-    // Convert to blob
+    // Convertir en blob
     canvas.toBlob(
       (blob) => {
         if (!blob) return;
 
-        // Create File from blob
         const file = new File([blob], "child-photo.jpg", {
           type: "image/jpeg",
           lastModified: Date.now(),
         });
 
-        // Set preview
         setPreviewUrl(URL.createObjectURL(blob));
         setCropMode(false);
-
-        // Callback
         onImageCropped(file);
       },
       "image/jpeg",
-      0.92 // High quality JPEG
+      0.92
     );
-  }, [originalImage, cropArea, zoom, rotation, onImageCropped]);
+  }, [originalImage, zoom, rotation, position, onImageCropped]);
 
-  // Image enhancement: increase contrast and sharpness
+  // Amélioration d'image
   const enhanceImage = (imageData: ImageData): ImageData => {
     const data = imageData.data;
     const width = imageData.width;
     const height = imageData.height;
 
-    // Create a copy
     const enhanced = new ImageData(width, height);
     const enhancedData = enhanced.data;
 
-    // Apply contrast enhancement
-    const contrastFactor = 1.15; // 15% increase
+    const contrastFactor = 1.15;
     const intercept = 128 * (1 - contrastFactor);
 
     for (let i = 0; i < data.length; i += 4) {
-      // Enhance contrast on RGB channels
-      enhancedData[i] = Math.min(255, Math.max(0, data[i] * contrastFactor + intercept)); // R
-      enhancedData[i + 1] = Math.min(255, Math.max(0, data[i + 1] * contrastFactor + intercept)); // G
-      enhancedData[i + 2] = Math.min(255, Math.max(0, data[i + 2] * contrastFactor + intercept)); // B
-      enhancedData[i + 3] = data[i + 3]; // A (alpha)
-    }
-
-    // Apply simple sharpening using unsharp mask
-    for (let y = 1; y < height - 1; y++) {
-      for (let x = 1; x < width - 1; x++) {
-        const idx = (y * width + x) * 4;
-
-        for (let c = 0; c < 3; c++) {
-          // Get neighboring pixels
-          const center = enhancedData[idx + c];
-          const top = enhancedData[((y - 1) * width + x) * 4 + c];
-          const bottom = enhancedData[((y + 1) * width + x) * 4 + c];
-          const left = enhancedData[(y * width + (x - 1)) * 4 + c];
-          const right = enhancedData[(y * width + (x + 1)) * 4 + c];
-
-          // Sharpen kernel
-          const sharpened = center * 5 - (top + bottom + left + right);
-          enhancedData[idx + c] = Math.min(255, Math.max(0, sharpened));
-        }
-      }
+      enhancedData[i] = Math.min(255, Math.max(0, data[i] * contrastFactor + intercept));
+      enhancedData[i + 1] = Math.min(255, Math.max(0, data[i + 1] * contrastFactor + intercept));
+      enhancedData[i + 2] = Math.min(255, Math.max(0, data[i + 2] * contrastFactor + intercept));
+      enhancedData[i + 3] = data[i + 3];
     }
 
     return enhanced;
   };
 
   const handleZoomChange = (delta: number) => {
-    setZoom((prev) => Math.min(2, Math.max(0.5, prev + delta)));
+    const minZoom = getMinZoom();
+    setZoom((prev) => Math.min(3, Math.max(minZoom, prev + delta)));
   };
 
   const handleRotate = () => {
     setRotation((prev) => (prev + 90) % 360);
   };
 
-  // Drag handlers pour déplacer la zone de recadrage
+  // Drag pour déplacer l'image
   const handleDragStart = (clientX: number, clientY: number) => {
     setIsDragging(true);
     setDragStart({ x: clientX, y: clientY });
   };
 
   const handleDragMove = useCallback((clientX: number, clientY: number) => {
-    if (!isDragging || !originalImage || !containerRef.current) return;
+    if (!isDragging || !containerRef.current) return;
 
     const container = containerRef.current;
     const rect = container.getBoundingClientRect();
 
-    // Calculer le déplacement en pixels relatifs à l'image
     const deltaX = clientX - dragStart.x;
     const deltaY = clientY - dragStart.y;
 
-    // Convertir le déplacement écran en déplacement image
-    const scaleX = originalImage.width / rect.width;
-    const scaleY = originalImage.height / rect.height;
+    // Sensibilité du déplacement (plus de zoom = moins de mouvement nécessaire)
+    const sensitivity = 100 / zoom;
 
-    setCropArea((prev) => {
-      const newX = Math.max(0, Math.min(originalImage.width - prev.width, prev.x - deltaX * scaleX));
-      const newY = Math.max(0, Math.min(originalImage.height - prev.height, prev.y - deltaY * scaleY));
-      return { ...prev, x: newX, y: newY };
-    });
+    setPosition((prev) => ({
+      x: Math.max(0, Math.min(100, prev.x - (deltaX / rect.width) * sensitivity)),
+      y: Math.max(0, Math.min(100, prev.y - (deltaY / rect.height) * sensitivity)),
+    }));
 
     setDragStart({ x: clientX, y: clientY });
-  }, [isDragging, dragStart, originalImage]);
+  }, [isDragging, dragStart, zoom]);
 
   const handleDragEnd = () => {
     setIsDragging(false);
@@ -229,7 +220,7 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
     handleDragEnd();
   }, []);
 
-  // Effect pour gérer les événements globaux de drag
+  // Effect pour les événements globaux
   useEffect(() => {
     if (isDragging) {
       window.addEventListener("mousemove", handleMouseMove);
@@ -244,6 +235,47 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
       window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
+
+  // Ajuster le zoom minimum quand l'image change
+  useEffect(() => {
+    if (originalImage) {
+      const minZoom = getMinZoom();
+      if (zoom < minZoom) {
+        setZoom(minZoom);
+      }
+    }
+  }, [originalImage, getMinZoom, zoom]);
+
+  // Calculer le style de l'image pour l'affichage
+  const getImageStyle = useCallback(() => {
+    if (!originalImage) return {};
+
+    const aspectRatio = originalImage.width / originalImage.height;
+
+    // Calculer la taille pour couvrir le conteneur
+    let width: string, height: string;
+    if (aspectRatio > 1) {
+      // Image paysage : hauteur = 100%, largeur proportionnelle
+      height = `${zoom * 100}%`;
+      width = `${zoom * 100 * aspectRatio}%`;
+    } else {
+      // Image portrait : largeur = 100%, hauteur proportionnelle
+      width = `${zoom * 100}%`;
+      height = `${zoom * 100 / aspectRatio}%`;
+    }
+
+    // Position basée sur le pourcentage
+    const left = `${50 - position.x}%`;
+    const top = `${50 - position.y}%`;
+
+    return {
+      width,
+      height,
+      left,
+      top,
+      transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+    };
+  }, [originalImage, zoom, position, rotation]);
 
   if (cropMode && originalImage) {
     return (
@@ -274,53 +306,60 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
           </div>
         </div>
 
-        {/* Crop preview */}
+        {/* Zone de recadrage fixe avec image mobile */}
         <div
           ref={containerRef}
           className={cn(
-            "relative w-full aspect-square max-w-md mx-auto bg-gray-100 rounded-xl overflow-hidden",
+            "relative w-full aspect-square max-w-md mx-auto bg-black rounded-xl overflow-hidden",
             isDragging ? "cursor-grabbing" : "cursor-grab"
           )}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
         >
+          {/* Image déplaçable */}
           <img
-            ref={imageRef}
             src={originalImage.src}
             alt="Original"
-            className="w-full h-full object-contain pointer-events-none select-none"
+            className="absolute pointer-events-none select-none"
             draggable={false}
-            style={{
-              transform: `scale(${zoom}) rotate(${rotation}deg)`,
-              transformOrigin: "center",
-            }}
+            style={getImageStyle()}
           />
-          <div
-            className="absolute border-2 border-red-500 bg-red-500/10 pointer-events-none"
-            style={{
-              left: `${(cropArea.x / originalImage.width) * 100}%`,
-              top: `${(cropArea.y / originalImage.height) * 100}%`,
-              width: `${(cropArea.width / originalImage.width) * 100}%`,
-              height: `${(cropArea.height / originalImage.height) * 100}%`,
-            }}
-          >
-            <div className="absolute inset-0 border-2 border-white/50" />
-            {/* Indicateur de déplacement */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-white/80 rounded-full p-2 shadow-lg">
-                <Move className="w-5 h-5 text-red-600" />
-              </div>
+
+          {/* Overlay avec zone de crop visible */}
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Bordure de la zone de crop */}
+            <div className="absolute inset-4 border-2 border-white/70 rounded-lg shadow-lg" />
+
+            {/* Grille de composition (règle des tiers) */}
+            <div className="absolute inset-4 grid grid-cols-3 grid-rows-3">
+              <div className="border-r border-b border-white/30" />
+              <div className="border-r border-b border-white/30" />
+              <div className="border-b border-white/30" />
+              <div className="border-r border-b border-white/30" />
+              <div className="border-r border-b border-white/30" />
+              <div className="border-b border-white/30" />
+              <div className="border-r border-white/30" />
+              <div className="border-r border-white/30" />
+              <div />
             </div>
           </div>
+
+          {/* Indicateur de déplacement */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/80 rounded-full p-2 shadow-lg">
+              <Move className="w-5 h-5 text-red-600" />
+            </div>
+          </div>
+
           {/* Instructions */}
-          <div className="absolute bottom-2 left-0 right-0 text-center">
+          <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none">
             <span className="bg-black/60 text-white text-xs px-3 py-1 rounded-full">
-              Glissez pour déplacer la zone
+              Glissez pour repositionner
             </span>
           </div>
         </div>
 
-        {/* Controls */}
+        {/* Contrôles */}
         <div className="flex flex-wrap gap-3 justify-center">
           <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
             <button
@@ -356,10 +395,10 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
         </div>
 
         <p className="text-xs text-gray-500 text-center">
-          La photo sera automatiquement optimisée pour une meilleure qualité
+          Zoomez et déplacez l&apos;image pour cadrer le visage
         </p>
 
-        {/* Hidden canvas for processing */}
+        {/* Canvas caché pour le traitement */}
         <canvas ref={canvasRef} className="hidden" />
       </div>
     );
