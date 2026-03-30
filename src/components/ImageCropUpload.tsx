@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { Upload, Crop, Check, X, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Upload, Crop, Check, X, ZoomIn, ZoomOut, RotateCw, Move } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ImageCropUploadProps {
@@ -16,9 +16,12 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
   const [cropArea, setCropArea] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -154,27 +157,6 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
     return enhanced;
   };
 
-  const handleCropAreaChange = (direction: "up" | "down" | "left" | "right", amount: number) => {
-    setCropArea((prev) => {
-      const newArea = { ...prev };
-      switch (direction) {
-        case "up":
-          newArea.y = Math.max(0, prev.y - amount);
-          break;
-        case "down":
-          newArea.y = Math.min((originalImage?.height || 0) - prev.height, prev.y + amount);
-          break;
-        case "left":
-          newArea.x = Math.max(0, prev.x - amount);
-          break;
-        case "right":
-          newArea.x = Math.min((originalImage?.width || 0) - prev.width, prev.x + amount);
-          break;
-      }
-      return newArea;
-    });
-  };
-
   const handleZoomChange = (delta: number) => {
     setZoom((prev) => Math.min(2, Math.max(0.5, prev + delta)));
   };
@@ -182,6 +164,86 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
   const handleRotate = () => {
     setRotation((prev) => (prev + 90) % 360);
   };
+
+  // Drag handlers pour déplacer la zone de recadrage
+  const handleDragStart = (clientX: number, clientY: number) => {
+    setIsDragging(true);
+    setDragStart({ x: clientX, y: clientY });
+  };
+
+  const handleDragMove = useCallback((clientX: number, clientY: number) => {
+    if (!isDragging || !originalImage || !containerRef.current) return;
+
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+
+    // Calculer le déplacement en pixels relatifs à l'image
+    const deltaX = clientX - dragStart.x;
+    const deltaY = clientY - dragStart.y;
+
+    // Convertir le déplacement écran en déplacement image
+    const scaleX = originalImage.width / rect.width;
+    const scaleY = originalImage.height / rect.height;
+
+    setCropArea((prev) => {
+      const newX = Math.max(0, Math.min(originalImage.width - prev.width, prev.x - deltaX * scaleX));
+      const newY = Math.max(0, Math.min(originalImage.height - prev.height, prev.y - deltaY * scaleY));
+      return { ...prev, x: newX, y: newY };
+    });
+
+    setDragStart({ x: clientX, y: clientY });
+  }, [isDragging, dragStart, originalImage]);
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  // Mouse events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleDragStart(e.clientX, e.clientY);
+  };
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    handleDragMove(e.clientX, e.clientY);
+  }, [handleDragMove]);
+
+  const handleMouseUp = useCallback(() => {
+    handleDragEnd();
+  }, []);
+
+  // Touch events
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (e.touches.length === 1) {
+      handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, [handleDragMove]);
+
+  const handleTouchEnd = useCallback(() => {
+    handleDragEnd();
+  }, []);
+
+  // Effect pour gérer les événements globaux de drag
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchmove", handleTouchMove);
+      window.addEventListener("touchend", handleTouchEnd);
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   if (cropMode && originalImage) {
     return (
@@ -213,19 +275,28 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
         </div>
 
         {/* Crop preview */}
-        <div className="relative w-full aspect-square max-w-md mx-auto bg-gray-100 rounded-xl overflow-hidden">
+        <div
+          ref={containerRef}
+          className={cn(
+            "relative w-full aspect-square max-w-md mx-auto bg-gray-100 rounded-xl overflow-hidden",
+            isDragging ? "cursor-grabbing" : "cursor-grab"
+          )}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+        >
           <img
             ref={imageRef}
             src={originalImage.src}
             alt="Original"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain pointer-events-none select-none"
+            draggable={false}
             style={{
               transform: `scale(${zoom}) rotate(${rotation}deg)`,
               transformOrigin: "center",
             }}
           />
           <div
-            className="absolute border-2 border-red-500 bg-red-500/10"
+            className="absolute border-2 border-red-500 bg-red-500/10 pointer-events-none"
             style={{
               left: `${(cropArea.x / originalImage.width) * 100}%`,
               top: `${(cropArea.y / originalImage.height) * 100}%`,
@@ -234,6 +305,18 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
             }}
           >
             <div className="absolute inset-0 border-2 border-white/50" />
+            {/* Indicateur de déplacement */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-white/80 rounded-full p-2 shadow-lg">
+                <Move className="w-5 h-5 text-red-600" />
+              </div>
+            </div>
+          </div>
+          {/* Instructions */}
+          <div className="absolute bottom-2 left-0 right-0 text-center">
+            <span className="bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+              Glissez pour déplacer la zone
+            </span>
           </div>
         </div>
 
