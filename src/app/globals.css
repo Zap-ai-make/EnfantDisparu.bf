@@ -111,3 +111,104 @@ input, select, textarea {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ─── Custom animations for LiveCounter and DiffusionCheckList ────────────── */
+
+@keyframes scale-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* Stagger animation delays for bounce dots */
+[animation-delay\:0ms] {
+  animation-delay: 0ms;
+}
+
+[animation-delay\:150ms] {
+  animation-delay: 150ms;
+}
+
+[animation-delay\:300ms] {
+  animation-delay: 300ms;
+}
+
+/* ─── WCAG AA Reduced Motion Support ──────────────────────────────────────── */
+
+/**
+ * Critical for accessibility: Users with vestibular disorders, motion sensitivity,
+ * or certain neurological conditions can experience nausea, dizziness, or discomfort
+ * from animations. This media query is a WCAG AA requirement.
+ *
+ * When a user enables "Reduce Motion" in their system preferences:
+ * - All animations are either disabled or reduced to instant transitions
+ * - Essential transitions (e.g., focus states) remain but with minimal duration
+ * - Auto-playing videos and GIFs should be paused (future enhancement)
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* Disable all animations */
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    /* Disable all transitions */
+    transition-duration: 0.01ms !important;
+    /* Disable smooth scrolling */
+    scroll-behavior: auto !important;
+  }
+
+  /* Specifically disable our custom animations */
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce,
+  .animate-scale-in,
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+
+  /* Ensure CountUp animations are instant */
+  .tabular-nums {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Keep essential visual feedback but make it instant */
+  button:active,
+  a:active {
+    transition: none;
+  }
+
+  /* Disable auto-play for future video content */
+  video {
+    animation: none !important;
+  }
+}

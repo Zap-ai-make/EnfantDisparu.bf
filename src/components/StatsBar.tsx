@@ -2,6 +2,7 @@
 
 import type { AnnouncementStats } from "@/types/announcement";
 import { formatK } from "@/lib/utils";
+import CountUp from "react-countup";
 
 interface StatsBarProps {
   stats: AnnouncementStats;
@@ -44,17 +45,30 @@ export function StatsBar({ stats, compact = false }: StatsBarProps) {
         Portée de l&apos;annonce
       </h3>
 
-      {/* Total reach */}
-      <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
+      {/* Total reach avec animation */}
+      <div className="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3">
         <span className="text-3xl">📡</span>
         <div className="flex-1">
-          <p className="text-2xl font-extrabold text-gray-900">
-            {hasDiffusion ? totalReach.toLocaleString() : "—"}
+          <p className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 tabular-nums">
+            {hasDiffusion ? (
+              <CountUp
+                start={0}
+                end={totalReach}
+                duration={2}
+                separator=" "
+                useEasing={true}
+              />
+            ) : (
+              "—"
+            )}
           </p>
-          <p className="text-xs text-gray-500">personnes atteintes au total</p>
+          <p className="text-xs text-gray-600 font-medium">personnes atteintes au total</p>
         </div>
         {!hasDiffusion && (
-          <p className="text-xs text-gray-400 italic">En cours de diffusion…</p>
+          <p className="text-xs text-orange-600 italic flex items-center gap-1">
+            <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+            Diffusion en cours…
+          </p>
         )}
       </div>
 
@@ -250,8 +264,16 @@ function StatItem({
 }) {
   return (
     <div>
-      <p className={`text-lg font-extrabold leading-none ${colorClass}`}>
-        {value > 0 ? formatK(value) : "—"}
+      <p className={`text-lg font-extrabold leading-none tabular-nums ${colorClass}`}>
+        {value > 0 ? (
+          value > 1000 ? (
+            formatK(value)
+          ) : (
+            <CountUp start={0} end={value} duration={1.5} separator=" " />
+          )
+        ) : (
+          "—"
+        )}
       </p>
       <p className="text-xs text-blue-500 mt-0.5 opacity-70">{label}</p>
     </div>

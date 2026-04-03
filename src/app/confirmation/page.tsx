@@ -7,6 +7,9 @@ import { buildWhatsAppLink } from "@/lib/utils";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Image from "next/image";
+import { LiveCounter } from "@/components/LiveCounter";
+import { DiffusionCheckList } from "@/components/DiffusionCheckList";
+import { DiffusionTimeline, DiffusionSummary } from "@/components/DiffusionTimeline";
 
 function ConfirmationContent() {
   const params = useSearchParams();
@@ -16,6 +19,7 @@ function ConfirmationContent() {
 
   const [alertCardURL, setAlertCardURL] = useState<string | null>(null);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
+  const [announcementData, setAnnouncementData] = useState<any>(null);
 
   // Écouter les changements sur le document pour détecter quand alertCardURL est disponible
   useEffect(() => {
@@ -29,6 +33,7 @@ function ConfirmationContent() {
       (snapshot) => {
         if (snapshot.exists()) {
           const data = snapshot.data();
+          setAnnouncementData(data);
           if (data.alertCardURL) {
             setAlertCardURL(data.alertCardURL);
             setIsLoadingCard(false);
@@ -70,6 +75,70 @@ function ConfirmationContent() {
           des membres de votre secteur.
         </p>
       </div>
+
+      {/* Compteurs animés de mobilisation */}
+      <div className="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-6 space-y-4">
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            🔥 La mobilisation s&apos;étend en ce moment même
+          </h2>
+          <p className="text-sm text-gray-600">
+            Voici l&apos;impact de votre alerte en temps réel
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <LiveCounter
+            value={announcementData?.stats?.pushSent || 0}
+            label="Notifications envoyées"
+            icon="🔔"
+            color="orange"
+            size="sm"
+          />
+          <LiveCounter
+            value={announcementData?.stats?.facebookReach || 0}
+            label="Portée Facebook"
+            icon="📘"
+            color="blue"
+            size="sm"
+          />
+          <LiveCounter
+            value={announcementData?.stats?.whatsappChannelReach || 0}
+            label="Abonnés WhatsApp"
+            icon="💬"
+            color="green"
+            size="sm"
+          />
+          <LiveCounter
+            value={announcementData?.stats?.pageViews || 0}
+            label="Vues de l&apos;annonce"
+            icon="👁️"
+            color="red"
+            size="sm"
+          />
+        </div>
+
+        <div className="mt-4 p-4 bg-white/70 backdrop-blur rounded-xl">
+          <DiffusionCheckList />
+        </div>
+
+        <div className="text-center mt-4 p-3 bg-white rounded-xl border border-orange-200">
+          <p className="text-sm font-semibold text-orange-800">
+            🚀 Votre alerte touche des milliers de personnes
+          </p>
+          <p className="text-xs text-orange-600 mt-1">
+            Chaque partage supplémentaire multiplie les chances de retrouvailles
+          </p>
+        </div>
+      </div>
+
+      {/* Diffusion Timeline */}
+      {announcementData?.stats?.diffusionTimeline && announcementData.stats.diffusionTimeline.length > 0 && (
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+          <DiffusionSummary timeline={announcementData.stats.diffusionTimeline} />
+          <DiffusionTimeline timeline={announcementData.stats.diffusionTimeline} />
+        </div>
+      )}
 
       {/* Code de référence */}
       <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-3">

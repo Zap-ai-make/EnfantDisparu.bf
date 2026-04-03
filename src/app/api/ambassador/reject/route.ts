@@ -3,7 +3,8 @@ import { getAdminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { isAdminAuthorized } from "@/lib/auth";
 
-const db = getAdminDb();
+// Force dynamic rendering to avoid build-time initialization
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const db = getAdminDb();
     const ambassadorRef = db.collection("ambassadors").doc(ambassadorId);
     const doc = await ambassadorRef.get();
 

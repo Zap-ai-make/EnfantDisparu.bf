@@ -239,6 +239,16 @@ export default function DevenirAmbassadeurPage() {
             >
               Continuer ma candidature
             </button>
+
+            {/* Lien connexion ambassadeur */}
+            <div className="text-center pt-3 border-t border-gray-100">
+              <a
+                href="/ambassadeur/connexion"
+                className="text-sm text-gray-600 hover:text-amber-600 transition-colors"
+              >
+                Déjà ambassadeur ? <span className="font-semibold">Se connecter</span>
+              </a>
+            </div>
           </div>
 
           {/* Stats */}

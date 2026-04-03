@@ -201,6 +201,32 @@ service cloud.firestore {
       // Écriture interdite côté client
       // Toutes les opérations d'écriture passent par API routes/Cloud Functions
       allow write: if false;
+
+      // Sous-collection des statistiques quotidiennes
+      match /dailyStats/{date} {
+        // Lecture autorisée pour le propriétaire ou publique pour les stats agrégées
+        allow read: if request.auth != null && request.auth.uid == ambassadorId;
+        // Écriture uniquement via Cloud Functions
+        allow write: if false;
+      }
+    }
+
+    // ─── Phase 2: Collections d'engagement ─────────────────────────────────────
+
+    // Stats globales du système
+    match /system/{document} {
+      // Lecture publique (pour LiveStatusBar)
+      allow read: if true;
+      // Écriture uniquement via Cloud Functions
+      allow write: if false;
+    }
+
+    // Fil d'activité communautaire
+    match /activityFeed/{eventId} {
+      // Lecture publique (pour ActivityFeed component)
+      allow read: if true;
+      // Écriture uniquement via Cloud Functions (triggers)
+      allow write: if false;
     }
   }
 }

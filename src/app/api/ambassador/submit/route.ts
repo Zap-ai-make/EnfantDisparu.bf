@@ -10,7 +10,8 @@ import { getAdminDb } from "@/lib/firebase-admin";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { rateLimit, getClientIdentifier } from "@/lib/rate-limit";
 
-const db = getAdminDb();
+// Force dynamic rendering to avoid build-time initialization
+export const dynamic = 'force-dynamic';
 
 // Rate limit: 3 submissions per hour
 const RATE_LIMIT = { windowMs: 60 * 60 * 1000, max: 3 };
@@ -85,6 +86,8 @@ export async function POST(request: NextRequest) {
     if (!isMinimumAge(dob, 20)) {
       return NextResponse.json({ success: false, error: "too_young" });
     }
+
+    const db = getAdminDb();
 
     // Check for duplicates
     const existingSnap = await db

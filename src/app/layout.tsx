@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { OneSignalInit } from "@/components/OneSignalInit";
 import { AmbassadorRefTracker } from "@/components/AmbassadorRefTracker";
 import { ChatBot } from "@/components/ChatBot";
+import { LiveStatusBar } from "@/components/LiveStatusBar";
 
 // Icônes SVG des réseaux sociaux
 const FacebookIcon = () => (
@@ -145,6 +146,9 @@ export default function RootLayout({
           </div>
         </header>
 
+        {/* Live Status Bar - Impact global en temps réel */}
+        <LiveStatusBar variant="compact" showInsight={true} refreshInterval={10000} />
+
         {/* Contenu - padding optimisé pour mobile */}
         <main className="flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6">
           {children}
@@ -238,6 +242,9 @@ export default function RootLayout({
               </Link>
               <Link href="/devenir-ambassadeur" className="hover:text-gray-600 underline py-1">
                 Devenir Ambassadeur
+              </Link>
+              <Link href="/ambassadeur/connexion" className="hover:text-gray-600 underline py-1">
+                Connexion Ambassadeur
               </Link>
               <Link href="/candidature" className="hover:text-gray-600 underline py-1">
                 Suivre ma candidature

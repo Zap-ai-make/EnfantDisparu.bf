@@ -2,6 +2,21 @@ export type AnnouncementStatus = "active" | "resolved" | "archived";
 export type AnnouncementType = "missing" | "found"; // missing = enfant disparu, found = enfant trouvé
 export type ChildGender = "M" | "F";
 
+// ─── Diffusion Timeline Types ─────────────────────────────────────────────────
+
+export type DiffusionChannel = 'facebook' | 'instagram' | 'whatsapp' | 'twitter' | 'linkedin' | 'push' | 'tiktok';
+export type DiffusionStatus = 'pending' | 'success' | 'failed';
+
+export interface DiffusionEvent {
+  channel: DiffusionChannel;
+  status: DiffusionStatus;
+  timestamp: Date;
+  details?: string; // Ex: "Post ID: 123456", "Error: Rate limit"
+  reach?: number; // Portée initiale si disponible
+  postId?: string; // ID du post sur la plateforme
+  error?: string; // Message d'erreur si échec
+}
+
 export interface AnnouncementStats {
   facebookPostId: string | null;
   facebookReach: number;    // Vues du post Facebook
@@ -37,6 +52,8 @@ export interface AnnouncementStats {
   tiktokLikes: number;
   tiktokShares: number;
   tiktokComments: number;
+  // Diffusion timeline
+  diffusionTimeline?: DiffusionEvent[]; // Historique de diffusion sur chaque canal
 }
 
 export interface Announcement {
@@ -121,4 +138,32 @@ export interface CreateAnnouncementInput {
   lastSeenPlace: string;
   lastSeenAt: string; // ISO string du datetime-local input
   parentPhone: string;
+}
+
+// ─── Global Platform Stats ────────────────────────────────────────────────────
+
+export interface GlobalStats {
+  // Core metrics
+  totalAnnouncements: number;       // Total d'annonces créées
+  activeAnnouncements: number;      // Annonces en cours (active)
+  resolvedAnnouncements: number;    // Annonces résolues (retrouvés)
+  totalAmbassadors: number;         // Nombre d'ambassadeurs actifs
+
+  // Engagement metrics
+  totalShares: number;              // Total de partages (tous canaux)
+  totalViews: number;               // Total de vues (tous canaux)
+  totalPushSent: number;            // Total notifications envoyées
+  totalSightings: number;           // Total d'observations signalées
+
+  // Success rate
+  resolutionRate: number;           // % d'annonces résolues
+  avgResolutionTime: number;        // Temps moyen de résolution (heures)
+
+  // Real-time velocity
+  last24hAnnouncements: number;     // Nouvelles annonces dernières 24h
+  last24hShares: number;            // Partages dernières 24h
+  last24hViews: number;             // Vues dernières 24h
+
+  // Timestamp
+  lastUpdated: Date;                // Dernière mise à jour des stats
 }

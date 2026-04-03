@@ -33,8 +33,10 @@ export default function AdminAmbassadeursPage() {
   // Check if already authenticated (session storage)
   useEffect(() => {
     const auth = sessionStorage.getItem(AUTH_KEY);
-    if (auth === "true") {
+    const savedPassword = sessionStorage.getItem(AUTH_KEY + "_password");
+    if (auth === "true" && savedPassword) {
       setIsAuthenticated(true);
+      setAdminPassword(savedPassword);
     }
   }, []);
 
@@ -56,6 +58,7 @@ export default function AdminAmbassadeursPage() {
         setAdminPassword(password);
         setIsAuthenticated(true);
         sessionStorage.setItem(AUTH_KEY, "true");
+        sessionStorage.setItem(AUTH_KEY + "_password", password);
       } else {
         setPasswordError(true);
       }

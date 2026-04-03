@@ -3,7 +3,8 @@ import { getAdminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { rateLimit, getClientIdentifier } from "@/lib/rate-limit";
 
-const db = getAdminDb();
+// Force dynamic rendering to avoid build-time initialization
+export const dynamic = 'force-dynamic';
 
 // Rate limit: 60 requests per minute (prevent stat inflation abuse)
 const RATE_LIMIT = { windowMs: 60 * 1000, max: 60 };
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const db = getAdminDb();
     // Find ambassador by refCode
     const snapshot = await db
       .collection("ambassadors")

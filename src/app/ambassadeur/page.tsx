@@ -2,12 +2,18 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Shield, Users, Bell, Share2, Eye, Copy, Check, QrCode, MapPin, Plus, Trophy, Medal, Award } from "lucide-react";
-import { getAmbassadorByAccessToken, addZoneToAmbassador, getAmbassadorRank, getAmbassadorLeaderboard, calculateAmbassadorScore } from "@/lib/firestore";
+import { Shield, Users, Bell, Share2, Eye, Copy, Check, QrCode, MapPin, Plus, Trophy, Medal, Award, BarChart3 } from "lucide-react";
+import { addZoneToAmbassador, getAmbassadorRank, getAmbassadorLeaderboard } from "@/lib/firestore";
 import { SHARE_MESSAGES, getShareUrl } from "@/lib/ambassador-utils";
 import { ZONES_BY_CITY, CITIES_BY_COUNTRY } from "@/lib/zones";
 import { cn } from "@/lib/utils";
 import { AmbassadorQRCode } from "@/components/AmbassadorQRCode";
+import { BadgeGrid, BadgeProgress } from "@/components/BadgeDisplay";
+import { AVAILABLE_BADGES, getBadgeProgress, sortBadgesByTier } from "@/lib/badge-utils";
+import { MorningBriefingModal } from "@/components/MorningBriefingModal";
+import { ActivityFeed } from "@/components/ActivityFeed";
+import { MissionControlDashboard } from "@/components/MissionControlDashboard";
+import { isSameDay } from "date-fns";
 import type { Ambassador } from "@/types/ambassador";
 
 function DashboardContent() {
@@ -27,22 +33,39 @@ function DashboardContent() {
   const [rankInfo, setRankInfo] = useState<{ rank: number; total: number; score: number } | null>(null);
   const [leaderboard, setLeaderboard] = useState<{ ambassador: Ambassador; rank: number; totalScore: number }[]>([]);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showBriefing, setShowBriefing] = useState(false);
+  const [showMissionControl, setShowMissionControl] = useState(false);
 
   useEffect(() => {
     if (!token) {
-      setError("Lien invalide. Veuillez utiliser le lien reçu par WhatsApp.");
+      setError("Lien invalide. Veuillez utiliser le lien de connexion ambassadeur.");
       setLoading(false);
       return;
     }
 
-    getAmbassadorByAccessToken(token)
+    // Utiliser l'API pour vérifier le token (côté serveur)
+    fetch("/api/ambassador/verify-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    })
+      .then((res) => res.json())
       .then((result) => {
-        if (!result.ambassador) {
-          setError("Lien invalide.");
-        } else if (result.expired) {
+        if (result.success && result.ambassador) {
+          // Convertir les dates ISO en objets Date pour la compatibilité
+          const ambassador = {
+            ...result.ambassador,
+            createdAt: result.ambassador.createdAt ? new Date(result.ambassador.createdAt) : null,
+            approvedAt: result.ambassador.approvedAt ? new Date(result.ambassador.approvedAt) : null,
+            lastBriefingDate: result.ambassador.lastBriefingDate ? new Date(result.ambassador.lastBriefingDate) : null,
+          };
+          setAmbassador(ambassador);
+        } else if (result.error === "token_expired") {
           setError("Votre lien a expiré. Contactez un administrateur pour en obtenir un nouveau.");
+        } else if (result.error === "invalid_token") {
+          setError("Lien invalide.");
         } else {
-          setAmbassador(result.ambassador);
+          setError("Erreur lors du chargement. Veuillez réessayer.");
         }
       })
       .catch(() => {
@@ -64,6 +87,28 @@ function DashboardContent() {
     getAmbassadorLeaderboard(10).then(setLeaderboard);
   }, [ambassador]);
 
+  // Vérifier si modal briefing doit être affiché
+  useEffect(() => {
+    if (!ambassador) return;
+
+    // Vérifier si modal déjà vue aujourd'hui
+    if (ambassador.lastBriefingDate) {
+      // lastBriefingDate est déjà converti en Date par l'API
+      const lastViewed = ambassador.lastBriefingDate instanceof Date
+        ? ambassador.lastBriefingDate
+        : new Date(ambassador.lastBriefingDate as unknown as string);
+      const today = new Date();
+
+      if (!isSameDay(lastViewed, today)) {
+        // Pas encore vue aujourd'hui → afficher
+        setShowBriefing(true);
+      }
+    } else {
+      // Jamais vue → afficher
+      setShowBriefing(true);
+    }
+  }, [ambassador]);
+
   const copyShareLink = async () => {
     if (!ambassador) return;
     const url = getShareUrl(ambassador.refCode);
@@ -81,15 +126,38 @@ function DashboardContent() {
     window.open(url, "_blank");
   };
 
+  // Helper function to refresh ambassador data via API
+  const refreshAmbassadorData = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch("/api/ambassador/verify-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const result = await res.json();
+      if (result.success && result.ambassador) {
+        const updated = {
+          ...result.ambassador,
+          createdAt: result.ambassador.createdAt ? new Date(result.ambassador.createdAt) : null,
+          approvedAt: result.ambassador.approvedAt ? new Date(result.ambassador.approvedAt) : null,
+          lastBriefingDate: result.ambassador.lastBriefingDate ? new Date(result.ambassador.lastBriefingDate) : null,
+        };
+        setAmbassador(updated);
+      }
+    } catch (err) {
+      console.error("Error refreshing ambassador data:", err);
+    }
+  };
+
   const handleAddZone = async () => {
     if (!ambassador || !selectedZone || addingZone) return;
     setAddingZone(true);
     try {
       const result = await addZoneToAmbassador(ambassador.id, selectedZone);
       if (result.success) {
-        // Refresh ambassador data
-        const { ambassador: updated } = await getAmbassadorByAccessToken(token!);
-        if (updated) setAmbassador(updated);
+        // Refresh ambassador data via API
+        await refreshAmbassadorData();
         setShowAddZone(false);
         setSelectedCity("");
         setSelectedZone("");
@@ -100,6 +168,34 @@ function DashboardContent() {
       setError("Erreur lors de l'ajout de la zone");
     } finally {
       setAddingZone(false);
+    }
+  };
+
+  const handleCloseBriefing = async () => {
+    setShowBriefing(false);
+
+    // Update Firestore
+    if (ambassador) {
+      try {
+        const response = await fetch('/api/ambassador/update-briefing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ambassadorId: ambassador.id,
+            timestamp: new Date().toISOString(),
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Briefing updated:', data);
+
+          // Refresh ambassador data to get updated streak
+          await refreshAmbassadorData();
+        }
+      } catch (error) {
+        console.error('Error updating briefing:', error);
+      }
     }
   };
 
@@ -138,9 +234,18 @@ function DashboardContent() {
     .filter(Boolean);
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white">
+    <>
+      {/* Morning Briefing Modal */}
+      {showBriefing && ambassador && (
+        <MorningBriefingModal
+          ambassador={ambassador}
+          onClose={handleCloseBriefing}
+        />
+      )}
+
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
             <Shield className="w-6 h-6" />
@@ -198,6 +303,69 @@ function DashboardContent() {
           </button>
         </div>
       )}
+
+      {/* Badges Section */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            🏅 Mes Badges
+            {ambassador.badges && ambassador.badges.length > 0 && (
+              <span className="text-sm font-normal text-gray-500">
+                ({ambassador.badges.length})
+              </span>
+            )}
+          </h2>
+        </div>
+
+        {/* Badges débloqués */}
+        {ambassador.badges && ambassador.badges.length > 0 ? (
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <BadgeGrid badges={sortBadgesByTier(ambassador.badges)} size="md" />
+          </div>
+        ) : (
+          <div className="text-center py-6 bg-gray-50 rounded-xl">
+            <p className="text-3xl mb-2">🎯</p>
+            <p className="text-sm text-gray-600 font-medium">
+              Aucun badge débloqué pour le moment
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Continuez vos actions pour en gagner !
+            </p>
+          </div>
+        )}
+
+        {/* Progression vers prochains badges */}
+        {(() => {
+          const badgeProgress = getBadgeProgress(ambassador);
+          const nextBadges = Object.entries(badgeProgress)
+            .sort((a, b) => b[1].percentage - a[1].percentage)
+            .slice(0, 3); // Top 3 badges les plus proches
+
+          if (nextBadges.length === 0) return null;
+
+          return (
+            <div className="border-t pt-4">
+              <h3 className="font-semibold text-sm text-gray-600 mb-3 flex items-center gap-2">
+                🎯 Prochains badges à débloquer
+              </h3>
+              <div className="space-y-3">
+                {nextBadges.map(([badgeId, progress]) => {
+                  const badge = AVAILABLE_BADGES[badgeId];
+                  return (
+                    <BadgeProgress
+                      key={badgeId}
+                      badge={badge}
+                      current={progress.current}
+                      target={progress.target}
+                      percentage={progress.percentage}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+      </div>
 
       {/* Leaderboard */}
       {showLeaderboard && leaderboard.length > 0 && (
@@ -350,6 +518,39 @@ function DashboardContent() {
         )}
       </div>
 
+      {/* Mission Control Toggle */}
+      <button
+        onClick={() => setShowMissionControl(!showMissionControl)}
+        className={cn(
+          "w-full flex items-center justify-between gap-3 py-4 px-5 rounded-2xl text-sm font-semibold transition-all border-2",
+          showMissionControl
+            ? "bg-gradient-to-r from-indigo-500 to-purple-600 border-indigo-600 text-white shadow-lg"
+            : "bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:shadow-md"
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <BarChart3 className="w-5 h-5" />
+          <span>{showMissionControl ? "Masquer Mission Control" : "📊 Mission Control"}</span>
+        </div>
+        <span className="text-xs opacity-80">Analytics avancés</span>
+      </button>
+
+      {/* Mission Control Dashboard */}
+      {showMissionControl && (
+        <MissionControlDashboard
+          ambassador={ambassador}
+          leaderboard={leaderboard}
+        />
+      )}
+
+      {/* Activity Feed */}
+      <ActivityFeed
+        maxItems={15}
+        showFilters={true}
+        showVelocity={true}
+        refreshInterval={30000}
+      />
+
       {/* Share Actions */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
         <h2 className="font-bold text-gray-900 mb-3">Partager</h2>
@@ -389,7 +590,8 @@ function DashboardContent() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
