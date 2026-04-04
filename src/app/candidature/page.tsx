@@ -178,7 +178,7 @@ export default function CandidaturePage() {
             <p className="text-xs text-gray-500 leading-relaxed">
               {ambassador.status === "pending" && (
                 <>
-                  <strong>Que faire en attendant ?</strong> Activez les notifications push pour
+                  <strong>Que faire en attendant ?</strong> Activez les notifications pour
                   recevoir les alertes d'enfants disparus dès maintenant. Vous n'avez pas besoin
                   d'attendre l'approbation pour aider !
                 </>
@@ -194,7 +194,7 @@ export default function CandidaturePage() {
                   <strong>Pourquoi ?</strong>{" "}
                   {ambassador.rejectionReason ||
                     "Vous pouvez nous contacter pour plus d'informations."}{" "}
-                  Vous pouvez toujours aider en activant les notifications push !
+                  Vous pouvez toujours aider en activant les notifications !
                 </>
               )}
             </p>

@@ -14,7 +14,7 @@ const CHANNEL_INFO = {
   whatsapp: { name: 'WhatsApp', icon: '💬', color: 'green' },
   twitter: { name: 'X (Twitter)', icon: '🐦', color: 'gray' },
   linkedin: { name: 'LinkedIn', icon: '💼', color: 'blue' },
-  push: { name: 'Notifications Push', icon: '🔔', color: 'orange' },
+  push: { name: 'Notifications', icon: '🔔', color: 'orange' },
   tiktok: { name: 'TikTok', icon: '🎵', color: 'black' },
 } as const;
 

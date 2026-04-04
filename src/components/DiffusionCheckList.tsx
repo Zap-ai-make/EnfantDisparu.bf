@@ -40,7 +40,7 @@ const DEFAULT_CHANNELS: Omit<DiffusionChannel, 'done'>[] = [
   { name: 'WhatsApp', icon: '💬', delay: 1500 },
   { name: 'X (Twitter)', icon: '🐦', delay: 2000 },
   { name: 'LinkedIn', icon: '💼', delay: 2500 },
-  { name: 'Notifications Push', icon: '🔔', delay: 3000 },
+  { name: 'Notifications', icon: '🔔', delay: 3000 },
 ];
 
 export function DiffusionCheckList({
@@ -63,7 +63,7 @@ export function DiffusionCheckList({
         WhatsApp: actualStatus.whatsapp ?? false,
         'X (Twitter)': actualStatus.twitter ?? false,
         LinkedIn: actualStatus.linkedin ?? false,
-        'Notifications Push': actualStatus.push ?? false,
+        'Notifications': actualStatus.push ?? false,
       };
 
       setChannels((prev) =>
@@ -213,7 +213,7 @@ export function DiffusionCheckListCompact({
     { key: 'whatsapp', icon: '💬', label: 'WA' },
     { key: 'twitter', icon: '🐦', label: 'X' },
     { key: 'linkedin', icon: '💼', label: 'LI' },
-    { key: 'push', icon: '🔔', label: 'Push' },
+    { key: 'push', icon: '🔔', label: 'Notif' },
   ];
 
   return (

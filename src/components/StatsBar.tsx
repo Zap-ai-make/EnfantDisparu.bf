@@ -178,7 +178,7 @@ export function StatsBar({ stats, compact = false }: StatsBarProps) {
         <div className="flex items-center gap-2">
           <span className="text-xl">🔔</span>
           <div>
-            <p className="font-bold text-orange-800">Notifications push</p>
+            <p className="font-bold text-orange-800">Notifications</p>
             <p className="text-xs text-orange-600">personnes notifiées</p>
           </div>
         </div>

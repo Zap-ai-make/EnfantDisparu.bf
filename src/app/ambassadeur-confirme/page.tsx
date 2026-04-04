@@ -65,7 +65,7 @@ function ConfirmationContent() {
       {/* Info box */}
       <div className="bg-amber-50 rounded-2xl border border-amber-100 p-4">
         <p className="text-sm text-amber-800">
-          <strong>En attendant :</strong> Activez les notifications push pour recevoir les alertes
+          <strong>En attendant :</strong> Activez les notifications pour recevoir les alertes
           d&apos;enfants disparus dans votre zone dès maintenant.
         </p>
       </div>

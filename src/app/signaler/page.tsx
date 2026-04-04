@@ -279,7 +279,7 @@ export default function SignalerPage() {
                   <div>
                     <p className="font-bold text-red-800 text-sm">Attention</p>
                     <p className="text-sm text-red-700 mt-1">
-                      Une fois validée, l&apos;annonce sera <strong>automatiquement diffusée</strong> sur tous nos canaux (réseaux sociaux, notifications push, etc.).
+                      Une fois validée, l&apos;annonce sera <strong>automatiquement diffusée</strong> sur tous nos canaux (réseaux sociaux, notifications, etc.).
                       Il n&apos;y aura pas de retour en arrière possible.
                     </p>
                   </div>
@@ -380,7 +380,7 @@ export default function SignalerPage() {
                   <li>✓ Instagram @enfantdisparu.bf</li>
                   <li>✓ X (Twitter) @Enfantdisparubf</li>
                   <li>✓ Chaîne WhatsApp EnfantDisparu.bf</li>
-                  <li>✓ Notifications push (membres du secteur)</li>
+                  <li>✓ Notifications (membres du secteur)</li>
                   <li>✓ Affiche d&apos;alerte générée automatiquement</li>
                 </ul>
               </div>
