@@ -1,12 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase-client';
 import { GlobalStats } from '@/types/announcement';
 import {
   generateMockGlobalStats,
-  incrementStatsLive,
   formatNumber,
   formatNumberCompact,
   formatPercentage,
@@ -48,32 +45,33 @@ export function LiveStatusBar({
   const [error, setError] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  // Real-time Firestore listener
+  // Fetch stats from API (avoids Firestore permission issues)
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      doc(db, 'system', 'globalStats'),
-      (snapshot) => {
-        if (snapshot.exists()) {
-          setStats(snapshot.data() as GlobalStats);
-          setIsLoading(false);
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats/global');
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data as GlobalStats);
           setError(null);
         } else {
-          // If document doesn't exist yet (first run), use mock data
-          console.warn('Global stats document does not exist yet, using mock data');
+          console.warn('Failed to fetch global stats, using fallback');
           setStats(generateMockGlobalStats());
-          setIsLoading(false);
         }
-      },
-      (err) => {
+      } catch (err) {
         console.error('Error fetching global stats:', err);
-        setError(err.message);
-        setIsLoading(false);
-        // Fallback to mock data on error
+        setError(err instanceof Error ? err.message : 'Unknown error');
         setStats(generateMockGlobalStats());
+      } finally {
+        setIsLoading(false);
       }
-    );
+    };
 
-    return () => unsubscribe();
+    fetchStats();
+
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchStats, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   if (isLoading || !stats) {
@@ -276,42 +274,34 @@ function LiveStatusBarCompact({
   return (
     <div className={`bg-gradient-to-r from-orange-500 to-red-500 text-white ${className}`}>
       <div className="max-w-7xl mx-auto px-4 py-2">
-        <div className="flex items-center justify-between gap-3 text-xs">
+        <div className="flex items-center justify-center gap-4 sm:gap-6 text-xs">
           {/* Active */}
           <div className="flex items-center gap-1.5">
             <Activity className="w-3.5 h-3.5" />
             <span className="font-bold tabular-nums">{stats.activeAnnouncements}</span>
-            <span className="opacity-80 hidden sm:inline">en cours</span>
+            <span className="opacity-80">en cours</span>
           </div>
 
           {/* Resolved */}
           <div className="flex items-center gap-1.5">
             <CheckCircle className="w-3.5 h-3.5" />
             <span className="font-bold tabular-nums">{stats.resolvedAnnouncements}</span>
-            <span className="opacity-80 hidden sm:inline">retrouvés</span>
+            <span className="opacity-80">retrouvés</span>
           </div>
 
           {/* Ambassadors */}
           <div className="flex items-center gap-1.5">
             <Users className="w-3.5 h-3.5" />
             <span className="font-bold tabular-nums">{stats.totalAmbassadors}</span>
-            <span className="opacity-80 hidden md:inline">ambassadeurs</span>
+            <span className="opacity-80">ambassadeurs</span>
           </div>
 
           {/* Views */}
-          <div className="flex items-center gap-1.5 hidden lg:flex">
+          <div className="flex items-center gap-1.5">
             <Eye className="w-3.5 h-3.5" />
             <span className="font-bold tabular-nums">{formatNumberCompact(stats.totalViews)}</span>
             <span className="opacity-80">vues</span>
           </div>
-
-          {/* Insight */}
-          {insight && (
-            <div className="flex items-center gap-1.5 ml-auto">
-              <span>{insight.icon}</span>
-              <span className="font-medium hidden xl:inline">{insight.message}</span>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -322,7 +312,6 @@ function LiveStatusBarCompact({
 
 interface LiveStatusCardProps {
   showTitle?: boolean;
-  refreshInterval?: number;
 }
 
 /**
@@ -331,28 +320,31 @@ interface LiveStatusCardProps {
  */
 export function LiveStatusCard({
   showTitle = true,
-  refreshInterval = 10000, // Not used with real-time listener
 }: LiveStatusCardProps) {
   const [stats, setStats] = useState<GlobalStats | null>(null);
 
-  // Real-time Firestore listener
+  // Fetch stats from API
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      doc(db, 'system', 'globalStats'),
-      (snapshot) => {
-        if (snapshot.exists()) {
-          setStats(snapshot.data() as GlobalStats);
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats/global');
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data as GlobalStats);
         } else {
           setStats(generateMockGlobalStats());
         }
-      },
-      (err) => {
+      } catch (err) {
         console.error('Error fetching global stats:', err);
         setStats(generateMockGlobalStats());
       }
-    );
+    };
 
-    return () => unsubscribe();
+    fetchStats();
+
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchStats, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!stats) {

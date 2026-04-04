@@ -18,45 +18,24 @@ import { GlobalStats } from '@/types/announcement';
 // ─── Mock Data Generation ─────────────────────────────────────────────────────
 
 /**
- * Generate realistic mock global stats.
- * In production, this would aggregate data from Firestore collections.
+ * Generate fallback stats when Firestore data is unavailable.
+ * Returns zeros to indicate no data rather than fake numbers.
  */
 export function generateMockGlobalStats(): GlobalStats {
-  // Base realistic numbers for Burkina Faso context
-  const totalAnnouncements = 487;
-  const resolvedAnnouncements = 312;
-  const activeAnnouncements = totalAnnouncements - resolvedAnnouncements;
-
-  // Calculate derived metrics
-  const resolutionRate = (resolvedAnnouncements / totalAnnouncements) * 100;
-  const avgResolutionTime = 18.5; // hours
-
-  // Engagement metrics (scaled realistically)
-  const totalAmbassadors = 156;
-  const totalShares = totalAnnouncements * 47; // ~47 shares per announcement
-  const totalViews = totalAnnouncements * 3420; // ~3.4k views per announcement
-  const totalPushSent = totalAnnouncements * 892; // ~892 notifications per announcement
-  const totalSightings = Math.floor(totalAnnouncements * 0.38); // 38% have sightings
-
-  // Last 24h activity (10-15% of total per month, divided by 30)
-  const last24hAnnouncements = Math.floor(Math.random() * 3) + 2; // 2-4 per day
-  const last24hShares = Math.floor(totalShares * 0.004 + Math.random() * 50); // ~0.4% daily
-  const last24hViews = Math.floor(totalViews * 0.005 + Math.random() * 1000); // ~0.5% daily
-
   return {
-    totalAnnouncements,
-    activeAnnouncements,
-    resolvedAnnouncements,
-    totalAmbassadors,
-    totalShares,
-    totalViews,
-    totalPushSent,
-    totalSightings,
-    resolutionRate,
-    avgResolutionTime,
-    last24hAnnouncements,
-    last24hShares,
-    last24hViews,
+    totalAnnouncements: 0,
+    activeAnnouncements: 0,
+    resolvedAnnouncements: 0,
+    totalAmbassadors: 0,
+    totalShares: 0,
+    totalViews: 0,
+    totalPushSent: 0,
+    totalSightings: 0,
+    resolutionRate: 0,
+    avgResolutionTime: 0,
+    last24hAnnouncements: 0,
+    last24hShares: 0,
+    last24hViews: 0,
     lastUpdated: new Date(),
   };
 }
