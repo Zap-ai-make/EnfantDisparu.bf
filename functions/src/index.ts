@@ -33,7 +33,9 @@ export { oneSignalWebhook } from "./http/oneSignalWebhook";
 export { submitAmbassadorApplication } from "./http/submitAmbassadorApplication";
 
 // Phase 2: Engagement Quotidien
-export * from "./phase2";
+// Temporairement désactivé - timeout at initialization
+// TODO: Fix onSchedule imports causing deployment timeout
+// export * from "./phase2";
 
 // Temporairement désactivé
 // export { onSightingCreate } from "./triggers/onSightingCreate";
