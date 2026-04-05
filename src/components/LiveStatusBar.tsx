@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Users, UserCheck, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 interface SimpleStats {
   totalAmbassadors: number;
@@ -12,14 +12,15 @@ interface LiveStatusBarProps {
   className?: string;
 }
 
-// Social media channels (without icons)
+// Social media channels
 const SOCIAL_CHANNELS = ['Facebook', 'Instagram', 'TikTok', 'LinkedIn'];
 
 /**
  * Live Status Bar Component
  *
  * Affiche les statistiques globales : ambassadeurs et membres.
- * Barre sticky avec défilement infini des canaux de diffusion.
+ * - Desktop: statique, centré
+ * - Mobile: défilement infini (marquee)
  */
 export function LiveStatusBar({ className = '' }: LiveStatusBarProps) {
   const [stats, setStats] = useState<SimpleStats | null>(null);
@@ -35,7 +36,6 @@ export function LiveStatusBar({ className = '' }: LiveStatusBarProps) {
           setStats(data as SimpleStats);
           setError(null);
         } else {
-          console.warn('Failed to fetch global stats, using fallback');
           setStats({ totalAmbassadors: 10, totalMembers: 400 });
         }
       } catch (err) {
@@ -48,7 +48,6 @@ export function LiveStatusBar({ className = '' }: LiveStatusBarProps) {
     };
 
     fetchStats();
-
     const interval = setInterval(fetchStats, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -79,40 +78,54 @@ export function LiveStatusBar({ className = '' }: LiveStatusBarProps) {
   }
 
   return (
-    <div className={`sticky top-0 z-40 bg-gradient-to-r from-orange-500 to-red-500 text-white overflow-hidden ${className}`}>
-      <div className="py-2">
-        <div className="relative flex overflow-hidden">
-          <div className="flex animate-marquee whitespace-nowrap">
-            <MarqueeContent stats={stats} />
-          </div>
-          <div className="flex animate-marquee whitespace-nowrap" aria-hidden="true">
-            <MarqueeContent stats={stats} />
+    <div className={`sticky top-0 z-40 bg-gradient-to-r from-orange-500 to-red-500 text-white ${className}`}>
+      <div className="py-2 text-xs">
+        {/* Desktop: Static centered */}
+        <div className="hidden md:flex items-center justify-center gap-2">
+          <span className="font-bold">{stats.totalAmbassadors}</span>
+          <span className="opacity-80">ambassadeurs</span>
+          <span className="text-white/40 mx-1">•</span>
+          <span className="font-bold">{stats.totalMembers}</span>
+          <span className="opacity-80">membres</span>
+          <span className="text-white/40 mx-1">•</span>
+          {SOCIAL_CHANNELS.map((channel, idx) => (
+            <span key={idx} className="flex items-center">
+              <span className="opacity-90">{channel}</span>
+              {idx < SOCIAL_CHANNELS.length - 1 && <span className="text-white/40 mx-1">•</span>}
+            </span>
+          ))}
+        </div>
+
+        {/* Mobile: Scrolling marquee */}
+        <div className="md:hidden overflow-hidden">
+          <div className="flex">
+            <div className="flex animate-marquee whitespace-nowrap">
+              <span className="mx-3 font-bold">{stats.totalAmbassadors}</span>
+              <span className="opacity-80">ambassadeurs</span>
+              <span className="text-white/40 mx-2">•</span>
+              <span className="font-bold">{stats.totalMembers}</span>
+              <span className="opacity-80 mr-2">membres</span>
+              <span className="text-white/40 mx-2">•</span>
+              {SOCIAL_CHANNELS.map((channel, idx) => (
+                <span key={idx} className="mx-2 opacity-90">{channel}</span>
+              ))}
+              <span className="text-white/40 mx-2">•</span>
+            </div>
+            <div className="flex animate-marquee whitespace-nowrap" aria-hidden="true">
+              <span className="mx-3 font-bold">{stats.totalAmbassadors}</span>
+              <span className="opacity-80">ambassadeurs</span>
+              <span className="text-white/40 mx-2">•</span>
+              <span className="font-bold">{stats.totalMembers}</span>
+              <span className="opacity-80 mr-2">membres</span>
+              <span className="text-white/40 mx-2">•</span>
+              {SOCIAL_CHANNELS.map((channel, idx) => (
+                <span key={idx} className="mx-2 opacity-90">{channel}</span>
+              ))}
+              <span className="text-white/40 mx-2">•</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function MarqueeContent({ stats }: { stats: SimpleStats }) {
-  return (
-    <>
-      <div className="flex items-center gap-1.5 mx-4 text-xs">
-        <UserCheck className="w-3.5 h-3.5" />
-        <span className="font-bold tabular-nums">{stats.totalAmbassadors}</span>
-        <span className="opacity-80">ambassadeurs</span>
-      </div>
-      <span className="text-white/40">•</span>
-      <div className="flex items-center gap-1.5 mx-4 text-xs">
-        <Users className="w-3.5 h-3.5" />
-        <span className="font-bold tabular-nums">{stats.totalMembers}</span>
-        <span className="opacity-80">membres</span>
-      </div>
-      <span className="text-white/40">•</span>
-      {SOCIAL_CHANNELS.map((channel, idx) => (
-        <span key={idx} className="mx-4 text-xs opacity-90">{channel}</span>
-      ))}
-      <span className="text-white/40 mx-2">•</span>
-    </>
   );
 }
