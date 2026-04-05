@@ -147,7 +147,7 @@ export default function RootLayout({
         </header>
 
         {/* Live Status Bar - Impact global en temps réel */}
-        <LiveStatusBar variant="compact" showInsight={true} refreshInterval={10000} />
+        <LiveStatusBar />
 
         {/* Contenu - padding optimisé pour mobile */}
         <main className="flex-1 max-w-2xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6">

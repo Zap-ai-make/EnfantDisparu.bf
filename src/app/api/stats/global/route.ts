@@ -7,11 +7,18 @@ export const dynamic = 'force-dynamic';
 // Cache for 60 seconds
 export const revalidate = 60;
 
+// Base counts (starting point before real inscriptions)
+const BASE_AMBASSADORS = 10;
+const BASE_MEMBERS = 400;
+
 /**
  * API Route: Get Global Stats
  *
  * Agrège les statistiques globales depuis Firestore.
  * Utilisé par LiveStatusBar pour afficher des vraies données.
+ *
+ * Les compteurs ambassadeurs et membres partent d'une base de départ
+ * (10 ambassadeurs, 400 membres) et s'incrémentent avec les vraies inscriptions.
  */
 export async function GET() {
   try {
@@ -19,64 +26,27 @@ export async function GET() {
 
     // Parallel queries for performance
     const [
-      announcementsSnapshot,
       ambassadorsSnapshot,
-      sightingsSnapshot,
+      allAmbassadorsSnapshot,
     ] = await Promise.all([
-      db.collection("announcements").get(),
       db.collection("ambassadors").where("status", "==", "approved").get(),
-      db.collection("sightings").get(),
+      db.collection("ambassadors").get(), // All ambassadors (includes pending = members)
     ]);
 
-    // Process announcements
-    let activeCount = 0;
-    let resolvedCount = 0;
-    let totalShares = 0;
-    let totalViews = 0;
-    let totalPushSent = 0;
+    // Real counts from Firestore
+    const realApprovedAmbassadors = ambassadorsSnapshot.size;
+    const realTotalAmbassadors = allAmbassadorsSnapshot.size;
 
-    announcementsSnapshot.forEach((doc) => {
-      const data = doc.data();
+    // Total ambassadors = base + real approved ambassadors
+    const totalAmbassadors = BASE_AMBASSADORS + realApprovedAmbassadors;
 
-      // Status counts
-      if (data.status === "active") activeCount++;
-      if (data.status === "resolved") resolvedCount++;
-
-      // Aggregate engagement stats
-      const stats = data.stats || {};
-      totalShares += (stats.facebookShares || 0) +
-                    (stats.whatsappSent || 0) +
-                    (stats.twitterRetweets || 0);
-      totalViews += (stats.pageViews || 0) +
-                   (stats.facebookReach || 0) +
-                   (stats.instagramReach || 0);
-      totalPushSent += stats.pushSent || 0;
-    });
-
-    // Calculate metrics
-    const totalAnnouncements = announcementsSnapshot.size;
-    const totalAmbassadors = ambassadorsSnapshot.size;
-    const totalSightings = sightingsSnapshot.size;
-
-    const resolutionRate = totalAnnouncements > 0
-      ? (resolvedCount / totalAnnouncements) * 100
-      : 0;
+    // Total members = base + all ambassador applications (they are all members/vigilants)
+    const totalMembers = BASE_MEMBERS + realTotalAmbassadors;
 
     // Build response
     const stats = {
-      totalAnnouncements,
-      activeAnnouncements: activeCount,
-      resolvedAnnouncements: resolvedCount,
       totalAmbassadors,
-      totalShares,
-      totalViews,
-      totalPushSent,
-      totalSightings,
-      resolutionRate: Math.round(resolutionRate * 10) / 10,
-      avgResolutionTime: 0, // TODO: Calculate from resolved announcements
-      last24hAnnouncements: 0, // TODO: Calculate from createdAt
-      last24hShares: Math.floor(totalShares * 0.004),
-      last24hViews: Math.floor(totalViews * 0.005),
+      totalMembers,
       lastUpdated: new Date().toISOString(),
     };
 
