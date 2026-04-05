@@ -52,24 +52,47 @@ export async function POST(request: Request) {
       }
     }
 
-    // 4. Chercher directement dans "profiles" par braceletId
+    // 4. Chercher directement dans "profiles" par braceletId ou currentBraceletId
     if (!braceletDoc.exists) {
-      const profileQuery = await db.collection("profiles")
+      // Essayer braceletId
+      let profileQuery = await db.collection("profiles")
         .where("braceletId", "==", code)
         .limit(1)
         .get();
 
+      // Essayer currentBraceletId
+      if (profileQuery.empty) {
+        profileQuery = await db.collection("profiles")
+          .where("currentBraceletId", "==", code)
+          .limit(1)
+          .get();
+      }
+
       if (!profileQuery.empty) {
         const profileData = profileQuery.docs[0].data();
+
+        // Calculer l'âge à partir de dateOfBirth si disponible
+        let age = profileData.age || profileData.childAge || 0;
+        if (!age && profileData.dateOfBirth) {
+          const birthDate = profileData.dateOfBirth.toDate ? profileData.dateOfBirth.toDate() : new Date(profileData.dateOfBirth);
+          age = Math.floor((Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+        }
+
+        // Récupérer le téléphone depuis emergencyContacts si disponible
+        let parentPhone = profileData.parentPhone || profileData.phone || "";
+        if (!parentPhone && profileData.emergencyContacts && profileData.emergencyContacts.length > 0) {
+          parentPhone = profileData.emergencyContacts[0].phone || "";
+        }
+
         return NextResponse.json({
           success: true,
           profile: {
             id: profileQuery.docs[0].id,
-            childName: profileData.name || profileData.childName || "",
-            childAge: profileData.age || profileData.childAge || 0,
-            childGender: profileData.gender || profileData.childGender || "M",
-            childPhotoURL: profileData.photoURL || profileData.childPhotoURL || profileData.photo || "",
-            parentPhone: profileData.parentPhone || profileData.phone || "",
+            childName: profileData.fullName || profileData.name || profileData.childName || profileData.firstName || "",
+            childAge: age,
+            childGender: profileData.gender || profileData.childGender || profileData.sex || "M",
+            childPhotoURL: profileData.photoURL || profileData.childPhotoURL || profileData.photo || profileData.imageUrl || "",
+            parentPhone: parentPhone,
             braceletId: code,
           },
         });
@@ -185,15 +208,28 @@ export async function POST(request: Request) {
 
     const profileData = profileDoc.data();
 
+    // Calculer l'âge à partir de dateOfBirth si disponible
+    let age = profileData?.age || profileData?.childAge || 0;
+    if (!age && profileData?.dateOfBirth) {
+      const birthDate = profileData.dateOfBirth.toDate ? profileData.dateOfBirth.toDate() : new Date(profileData.dateOfBirth);
+      age = Math.floor((Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+    }
+
+    // Récupérer le téléphone depuis emergencyContacts si disponible
+    let parentPhone = profileData?.parentPhone || profileData?.phone || profileData?.contactPhone || "";
+    if (!parentPhone && profileData?.emergencyContacts && profileData.emergencyContacts.length > 0) {
+      parentPhone = profileData.emergencyContacts[0].phone || "";
+    }
+
     return NextResponse.json({
       success: true,
       profile: {
         id: profileId,
-        childName: profileData?.name || profileData?.childName || profileData?.firstName || profileData?.fullName || "",
-        childAge: profileData?.age || profileData?.childAge || 0,
+        childName: profileData?.fullName || profileData?.name || profileData?.childName || profileData?.firstName || "",
+        childAge: age,
         childGender: profileData?.gender || profileData?.childGender || profileData?.sex || "M",
         childPhotoURL: profileData?.photoURL || profileData?.photo || profileData?.childPhotoURL || profileData?.imageUrl || "",
-        parentPhone: profileData?.parentPhone || profileData?.phone || profileData?.contactPhone || "",
+        parentPhone: parentPhone,
         braceletId: code,
       },
     });
