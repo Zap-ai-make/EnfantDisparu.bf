@@ -54,7 +54,7 @@ export function LiveStatusBar({ className = '' }: LiveStatusBarProps) {
 
   if (isLoading || !stats) {
     return (
-      <div className={`sticky top-0 z-40 bg-gradient-to-r from-orange-500 to-red-500 ${className}`}>
+      <div className={`bg-gradient-to-r from-orange-500 to-red-500 ${className}`}>
         <div className="py-2">
           <div className="animate-pulse flex items-center justify-center gap-6">
             <div className="h-4 bg-white/30 rounded w-32"></div>
@@ -66,7 +66,7 @@ export function LiveStatusBar({ className = '' }: LiveStatusBarProps) {
 
   if (error && !stats) {
     return (
-      <div className={`sticky top-0 z-40 bg-red-600 ${className}`}>
+      <div className={`bg-red-600 ${className}`}>
         <div className="py-2">
           <div className="flex items-center justify-center gap-2 text-white text-sm">
             <AlertCircle className="w-4 h-4" />
@@ -78,7 +78,7 @@ export function LiveStatusBar({ className = '' }: LiveStatusBarProps) {
   }
 
   return (
-    <div className={`sticky top-0 z-40 bg-gradient-to-r from-orange-500 to-red-500 text-white ${className}`}>
+    <div className={`bg-gradient-to-r from-orange-500 to-red-500 text-white ${className}`}>
       <div className="py-2 text-xs">
         {/* Desktop: Static centered */}
         <div className="hidden md:flex items-center justify-center gap-2">
