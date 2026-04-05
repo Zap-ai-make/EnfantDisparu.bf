@@ -119,7 +119,7 @@ export async function POST(request: Request) {
 
     // Bracelet trouvé, récupérer le profil
     const braceletData = braceletDoc.data();
-    const profileId = braceletData?.profileId || braceletData?.childId || braceletData?.userId;
+    const profileId = braceletData?.linkedProfileId || braceletData?.profileId || braceletData?.childId;
 
     if (!profileId) {
       return NextResponse.json(
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Chercher le profil
+    // Chercher le profil dans plusieurs collections possibles
     let profileDoc = await db.collection("profiles").doc(profileId).get();
 
     if (!profileDoc.exists) {
@@ -139,8 +139,46 @@ export async function POST(request: Request) {
     }
 
     if (!profileDoc.exists) {
+      profileDoc = await db.collection("users").doc(profileId).get();
+    }
+
+    // Chercher aussi dans une sous-collection profiles de l'utilisateur lié
+    if (!profileDoc.exists && braceletData?.linkedUserId) {
+      const userProfilesQuery = await db
+        .collection("users")
+        .doc(braceletData.linkedUserId)
+        .collection("profiles")
+        .doc(profileId)
+        .get();
+
+      if (userProfilesQuery.exists) {
+        profileDoc = userProfilesQuery;
+      }
+    }
+
+    // Chercher le profil directement par ID dans la collection profiles (sans user)
+    if (!profileDoc.exists) {
+      // Peut-être que le profileId contient un préfixe comme "profile_"
+      const profilesQuery = await db.collection("profiles")
+        .where("__name__", "==", profileId)
+        .limit(1)
+        .get();
+
+      if (!profilesQuery.empty) {
+        profileDoc = profilesQuery.docs[0];
+      }
+    }
+
+    if (!profileDoc.exists) {
       return NextResponse.json(
-        { error: "Profil enfant introuvable" },
+        {
+          error: "Profil enfant introuvable",
+          debug: {
+            profileId,
+            linkedUserId: braceletData?.linkedUserId,
+            braceletStatus: braceletData?.status
+          }
+        },
         { status: 404 }
       );
     }
@@ -151,11 +189,11 @@ export async function POST(request: Request) {
       success: true,
       profile: {
         id: profileId,
-        childName: profileData?.name || profileData?.childName || profileData?.firstName || "",
+        childName: profileData?.name || profileData?.childName || profileData?.firstName || profileData?.fullName || "",
         childAge: profileData?.age || profileData?.childAge || 0,
-        childGender: profileData?.gender || profileData?.childGender || "M",
-        childPhotoURL: profileData?.photoURL || profileData?.photo || profileData?.childPhotoURL || "",
-        parentPhone: profileData?.parentPhone || profileData?.phone || "",
+        childGender: profileData?.gender || profileData?.childGender || profileData?.sex || "M",
+        childPhotoURL: profileData?.photoURL || profileData?.photo || profileData?.childPhotoURL || profileData?.imageUrl || "",
+        parentPhone: profileData?.parentPhone || profileData?.phone || profileData?.contactPhone || "",
         braceletId: code,
       },
     });
