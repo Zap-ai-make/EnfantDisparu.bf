@@ -253,6 +253,19 @@ export default function RootLayout({
               </Link>
             </div>
 
+            {/* Propulsé par SecureID */}
+            <div className="pt-3">
+              <a
+                href="https://secureid-app.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-700 transition-colors"
+              >
+                <span className="text-sm">🛡</span>
+                <span>Propulsé par <strong>SecureID</strong></span>
+              </a>
+            </div>
+
             {/* Lien admin discret */}
             <div className="pt-2">
               <Link href="/admin" className="text-gray-300 hover:text-gray-500 text-[10px]">
