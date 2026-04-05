@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, MapPin, User, CheckCircle, ChevronDown, Calendar, Cat, X, Heart, GraduationCap, Users, Award, Briefcase } from "lucide-react";
+import { Shield, MapPin, User, CheckCircle, ChevronDown, Calendar, Heart, Users, Briefcase } from "lucide-react";
 import { COUNTRIES, CITIES_BY_COUNTRY, ZONES_BY_CITY } from "@/lib/zones";
 import { cn } from "@/lib/utils";
 import { getAmbassadorCount } from "@/lib/firestore";
@@ -162,44 +162,6 @@ export default function DevenirAmbassadeurPage() {
               <li className="flex items-start gap-3">
                 <span className="text-amber-500 text-lg">👥</span>
                 <span className="text-gray-600"><strong>Recruter</strong> — Invite d&apos;autres personnes à devenir Ambassadeurs</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Ce que tu reçois */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-500" />
-              Ce que tu reçois
-            </h2>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-3">
-                <span className="text-amber-500 text-lg">🛡️</span>
-                <span className="text-gray-600"><strong>Badge officiel</strong> — Reconnaissance comme Ambassadeur EnfantDisparu.bf</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-amber-500 text-lg">📊</span>
-                <span className="text-gray-600"><strong>Tableau de bord</strong> — Suis ton impact en temps réel (partages, activations, recrutements)</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-amber-500 text-lg">🎓</span>
-                <span className="text-gray-600"><strong>Formations certifiantes</strong> — Protection de l&apos;enfance, premiers secours (avec nos partenaires ONG)</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-amber-500 text-lg">🤝</span>
-                <span className="text-gray-600"><strong>Missions terrain</strong> — Participe aux actions de l&apos;association</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-amber-500 text-lg">🌐</span>
-                <span className="text-gray-600"><strong>Réseau</strong> — Connexion avec d&apos;autres Ambassadeurs et acteurs de la protection de l&apos;enfance</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-amber-500 text-lg">📜</span>
-                <span className="text-gray-600"><strong>Certificat</strong> — Attestation officielle d&apos;engagement bénévole</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-amber-500 text-lg">💰</span>
-                <span className="text-gray-600"><strong>Primes partenaires</strong> — Priorité quand l&apos;association aura des sponsors</span>
               </li>
             </ul>
           </div>
@@ -511,8 +473,8 @@ export default function DevenirAmbassadeurPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <Cat className="w-4 h-4 text-amber-500" />
-                Avez-vous un chat ?
+                <Users className="w-4 h-4 text-amber-500" />
+                Avez-vous un enfant ?
               </label>
               <p className="text-xs text-gray-400 mb-2">
                 Question de vérification anti-bot
