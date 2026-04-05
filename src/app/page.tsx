@@ -158,19 +158,26 @@ export default function HomePage() {
             <span className="text-lg">💡</span>
             <span className="font-bold text-gray-900 text-sm">Comment ça marche ?</span>
           </div>
-          {showHowItWorks ? (
-            <ChevronUp className="w-4 h-4 text-gray-400" />
-          ) : (
-            <ChevronDown className="w-4 h-4 text-gray-400" />
-          )}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-gray-400">{showHowItWorks ? "Masquer" : "Afficher"}</span>
+            {showHowItWorks ? (
+              <ChevronUp className="w-4 h-4 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-gray-400" />
+            )}
+          </div>
         </button>
 
         {showHowItWorks && (
           <div className="px-4 pb-4 space-y-3">
-            {/* Mission */}
-            <div className="bg-white/60 rounded-xl p-3">
+            {/* Mission + Système autonome */}
+            <div className="bg-white/60 rounded-xl p-3 space-y-2">
               <p className="text-sm text-gray-700 leading-relaxed">
                 <strong className="text-gray-900">EnfantDisparu.bf</strong> est la plateforme nationale d&apos;alerte pour retrouver les enfants disparus au Burkina Faso.
+              </p>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                🤖 Un système <strong>autonome et indépendant</strong>, qui n&apos;appartient à personne, piloté par une intelligence artificielle.
+                Un écosystème synchronisé de bout en bout : site web, Facebook, Instagram, TikTok, X, LinkedIn — tout est lié.
               </p>
             </div>
 
@@ -178,15 +185,18 @@ export default function HomePage() {
             <div className="bg-red-50 border border-red-100 rounded-xl p-3">
               <p className="text-xs font-bold text-red-800 mb-1">⚠️ Le problème actuel</p>
               <p className="text-xs text-red-700">
-                Les annonces circulent sur 1-2 réseaux et touchent surtout les gens dans les bureaux. Mais ce n&apos;est pas eux qui vont croiser l&apos;enfant dans la rue.
+                Les annonces circulent sur 1-2 réseaux, avec souvent des informations manquantes, et touchent surtout les gens dans les bureaux.
+                Mais ce n&apos;est pas eux qui vont croiser l&apos;enfant dans la rue.
               </p>
             </div>
 
-            {/* Notre réseau */}
-            <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
-              <p className="text-xs font-bold text-amber-800 mb-1">👥 Notre réseau de vigilance</p>
-              <p className="text-xs text-amber-700">
-                Commerçants, mamans au marché, boutiquiers, vendeurs ambulants, jardiniers... <strong>Les gens dans la rue</strong> qui peuvent vraiment voir l&apos;enfant.
+            {/* Notre objectif */}
+            <div className="bg-green-50 border border-green-100 rounded-xl p-3">
+              <p className="text-xs font-bold text-green-800 mb-1">🎯 Notre objectif</p>
+              <p className="text-xs text-green-700">
+                Que les alertes atteignent <strong>les personnes qui peuvent vraiment voir l&apos;enfant</strong> : commerçants au marché,
+                mamans qui font leur commerce dans la rue, boutiquiers, vendeurs ambulants, jardiniers...
+                Les gens dans les quartiers, en milieu urbain comme rural.
               </p>
             </div>
 
@@ -197,13 +207,13 @@ export default function HomePage() {
                 <div className="flex items-start gap-2 bg-white/60 rounded-lg p-2">
                   <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">1</div>
                   <p className="text-xs text-gray-600">
-                    <strong className="text-gray-800">Un parent signale</strong> → Diffusion instantanée sur Facebook, Instagram, TikTok, X, LinkedIn
+                    <strong className="text-gray-800">Un parent signale</strong> avec toutes les informations nécessaires → Diffusion instantanée sur Facebook, Instagram, TikTok, X, LinkedIn
                   </p>
                 </div>
                 <div className="flex items-start gap-2 bg-white/60 rounded-lg p-2">
                   <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">2</div>
                   <p className="text-xs text-gray-600">
-                    <strong className="text-gray-800">Les membres reçoivent une notification</strong> avec la photo de l&apos;enfant si la disparition est dans leur quartier
+                    <strong className="text-gray-800">Les membres reçoivent une notification</strong> avec la photo de l&apos;enfant directement sur leur écran si la disparition est dans leur quartier
                   </p>
                 </div>
                 <div className="flex items-start gap-2 bg-white/60 rounded-lg p-2">
@@ -215,10 +225,19 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Comment aider */}
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
+              <p className="text-xs font-bold text-amber-800 mb-1">🤝 Comment aider ?</p>
+              <p className="text-xs text-amber-700">
+                <strong>Partagez ce site</strong> autour de vous. Les visiteurs peuvent accepter de recevoir les alertes de leur quartier.
+                Une photo s&apos;affichera sur leur écran pour les alerter si un enfant disparaît près de chez eux.
+              </p>
+            </div>
+
             {/* CTA */}
             <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl p-3 text-center">
               <p className="text-white text-xs font-medium">
-                🤝 <strong>Rejoignez le réseau</strong> — Acceptez de recevoir les alertes de votre quartier
+                📲 <strong>Rejoignez le réseau</strong> — Acceptez de recevoir les alertes de votre quartier
               </p>
             </div>
           </div>
