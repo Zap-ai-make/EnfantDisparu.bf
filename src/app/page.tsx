@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { MapPin, X, ChevronDown, Search, ChevronUp, Bell, Share2, Users, Zap } from "lucide-react";
+import { MapPin, X, ChevronDown, Search, ChevronUp } from "lucide-react";
 import { AnnouncementCard } from "@/components/AnnouncementCard";
 import { NetworkCoverageMap } from "@/components/NetworkCoverageMap";
 import { subscribeToFilteredAnnouncements, getGlobalStats } from "@/lib/firestore";
@@ -166,13 +166,11 @@ export default function HomePage() {
         </button>
 
         {showHowItWorks && (
-          <div className="px-4 pb-4 space-y-4">
+          <div className="px-4 pb-4 space-y-3">
             {/* Mission */}
             <div className="bg-white/60 rounded-xl p-3">
               <p className="text-sm text-gray-700 leading-relaxed">
-                <strong className="text-gray-900">EnfantDisparu.bf</strong> est la plateforme nationale d&apos;alerte pour les enfants disparus au Burkina Faso.
-                Notre système diffuse <strong>instantanément</strong> chaque signalement sur <strong>Facebook, Instagram, TikTok, X et LinkedIn</strong> pour toucher
-                les personnes qui peuvent vraiment aider : commerçants, mamans au foyer, boutiquiers, jardiniers — tous ceux qui sont dans la rue et les quartiers.
+                <strong className="text-gray-900">EnfantDisparu.bf</strong> est la plateforme nationale d&apos;alerte pour retrouver les enfants disparus au Burkina Faso.
               </p>
             </div>
 
@@ -180,37 +178,38 @@ export default function HomePage() {
             <div className="bg-red-50 border border-red-100 rounded-xl p-3">
               <p className="text-xs font-bold text-red-800 mb-1">⚠️ Le problème actuel</p>
               <p className="text-xs text-red-700">
-                Les annonces de disparition restent souvent limitées à 1-2 réseaux sociaux et touchent principalement
-                les gens dans les bureaux. Elles n&apos;atteignent pas les personnes dans la rue qui pourraient reconnaître l&apos;enfant.
+                Les annonces circulent sur 1-2 réseaux et touchent surtout les gens dans les bureaux. Mais ce n&apos;est pas eux qui vont croiser l&apos;enfant dans la rue.
+              </p>
+            </div>
+
+            {/* Notre réseau */}
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
+              <p className="text-xs font-bold text-amber-800 mb-1">👥 Notre réseau de vigilance</p>
+              <p className="text-xs text-amber-700">
+                Commerçants, mamans au marché, boutiquiers, vendeurs ambulants, jardiniers... <strong>Les gens dans la rue</strong> qui peuvent vraiment voir l&apos;enfant.
               </p>
             </div>
 
             {/* Comment ça fonctionne */}
             <div className="space-y-2">
-              <p className="text-xs font-bold text-gray-800">🔄 Notre solution</p>
+              <p className="text-xs font-bold text-gray-800">🔄 Comment ça fonctionne</p>
               <div className="grid gap-2">
                 <div className="flex items-start gap-2 bg-white/60 rounded-lg p-2">
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-3 h-3 text-blue-600" />
-                  </div>
+                  <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">1</div>
                   <p className="text-xs text-gray-600">
-                    <strong className="text-gray-800">Diffusion instantanée</strong> — Une annonce ici = publication automatique sur tous les réseaux
+                    <strong className="text-gray-800">Un parent signale</strong> → Diffusion instantanée sur Facebook, Instagram, TikTok, X, LinkedIn
                   </p>
                 </div>
                 <div className="flex items-start gap-2 bg-white/60 rounded-lg p-2">
-                  <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Bell className="w-3 h-3 text-amber-600" />
-                  </div>
+                  <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">2</div>
                   <p className="text-xs text-gray-600">
-                    <strong className="text-gray-800">Alertes ciblées</strong> — Recevez une notification avec photo si un enfant disparaît dans votre quartier
+                    <strong className="text-gray-800">Les membres reçoivent une notification</strong> avec la photo de l&apos;enfant si la disparition est dans leur quartier
                   </p>
                 </div>
                 <div className="flex items-start gap-2 bg-white/60 rounded-lg p-2">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Users className="w-3 h-3 text-green-600" />
-                  </div>
+                  <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">3</div>
                   <p className="text-xs text-gray-600">
-                    <strong className="text-gray-800">Réseau de vigilance</strong> — Plus nous sommes nombreux, plus vite on retrouve les enfants
+                    <strong className="text-gray-800">Plus nous sommes nombreux</strong>, plus vite l&apos;enfant est retrouvé
                   </p>
                 </div>
               </div>
@@ -218,13 +217,9 @@ export default function HomePage() {
 
             {/* CTA */}
             <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl p-3 text-center">
-              <p className="text-white text-xs font-medium mb-2">
-                🤝 Aidez-nous à couvrir tout le Burkina — partagez ce site autour de vous
+              <p className="text-white text-xs font-medium">
+                🤝 <strong>Rejoignez le réseau</strong> — Acceptez de recevoir les alertes de votre quartier
               </p>
-              <div className="flex items-center justify-center gap-2">
-                <Share2 className="w-3.5 h-3.5 text-white/80" />
-                <span className="text-white/90 text-xs">enfantdisparu.bf</span>
-              </div>
             </div>
           </div>
         )}
