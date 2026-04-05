@@ -176,7 +176,7 @@ export default function HomePage() {
                 <strong className="text-gray-900">EnfantDisparu.bf</strong> est la plateforme nationale d&apos;alerte pour retrouver les enfants disparus au Burkina Faso.
               </p>
               <p className="text-xs text-gray-500 leading-relaxed">
-                🤖 Un système <strong>autonome et indépendant</strong>, qui n&apos;appartient à personne, piloté par une intelligence artificielle.
+                🤖 Un système <strong>autonome</strong>, piloté par une intelligence artificielle.
                 Un écosystème synchronisé de bout en bout : site web, Facebook, Instagram, TikTok, X, LinkedIn — tout est lié.
               </p>
             </div>

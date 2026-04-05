@@ -10,29 +10,40 @@ interface StatsBarProps {
 }
 
 export function StatsBar({ stats, compact = false }: StatsBarProps) {
+  // Calcul du total reach (seulement les 4 réseaux principaux)
+  const facebookReach = stats.facebookReach ?? 0;
+  const instagramReach = stats.instagramReach ?? 0;
+  const twitterImpressions = stats.twitterImpressions ?? 0;
   const tiktokViews = stats.tiktokViews ?? 0;
-  const totalReach = stats.facebookReach + stats.whatsappChannelReach + stats.pushSent + tiktokViews;
+
+  const totalReach = facebookReach + instagramReach + twitterImpressions + tiktokViews;
   const hasDiffusion = totalReach > 0;
 
   if (compact) {
     return (
       <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-        {stats.facebookReach > 0 && (
+        {facebookReach > 0 && (
           <span className="flex items-center gap-1">
             <span className="text-blue-500">📘</span>
-            {formatK(stats.facebookReach)} vues
+            {formatK(facebookReach)}
           </span>
         )}
-        {stats.whatsappChannelReach > 0 && (
+        {instagramReach > 0 && (
           <span className="flex items-center gap-1">
-            <span>💬</span>
-            {formatK(stats.whatsappChannelReach)} communauté
+            <span className="text-pink-500">📸</span>
+            {formatK(instagramReach)}
           </span>
         )}
-        {stats.pushSent > 0 && (
+        {twitterImpressions > 0 && (
           <span className="flex items-center gap-1">
-            <span>🔔</span>
-            {stats.pushSent} secteur
+            <span>𝕏</span>
+            {formatK(twitterImpressions)}
+          </span>
+        )}
+        {tiktokViews > 0 && (
+          <span className="flex items-center gap-1">
+            <span>🎵</span>
+            {formatK(tiktokViews)}
           </span>
         )}
       </div>
@@ -40,243 +51,120 @@ export function StatsBar({ stats, compact = false }: StatsBarProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
-      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
-        Portée de l&apos;annonce
-      </h3>
-
-      {/* Total reach avec animation */}
-      <div className="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3">
-        <span className="text-3xl">📡</span>
-        <div className="flex-1">
-          <p className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 tabular-nums">
-            {hasDiffusion ? (
-              <CountUp
-                start={0}
-                end={totalReach}
-                duration={2}
-                separator=" "
-                useEasing={true}
-              />
-            ) : (
-              "—"
-            )}
-          </p>
-          <p className="text-xs text-gray-600 font-medium">personnes atteintes au total</p>
-        </div>
-        {!hasDiffusion && (
-          <p className="text-xs text-orange-600 italic flex items-center gap-1">
-            <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-            Diffusion en cours…
-          </p>
-        )}
-      </div>
-
-      {/* Facebook */}
-      {stats.facebookReach > 0 && (
-        <div className="rounded-xl bg-blue-50 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">📘</span>
-            <p className="font-bold text-blue-800">Facebook</p>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <StatItem
-              value={stats.facebookReach}
-              label="Portée"
-              colorClass="text-blue-700"
-            />
-            <StatItem
-              value={stats.facebookShares}
-              label="Partages"
-              colorClass="text-blue-700"
-            />
-            <StatItem
-              value={stats.facebookLikes}
-              label="Likes ❤️"
-              colorClass="text-blue-700"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Instagram */}
-      {(stats.instagramReach ?? 0) > 0 && (
-        <div className="rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">📸</span>
-            <p className="font-bold text-pink-800">Instagram</p>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <StatItem
-              value={stats.instagramReach ?? 0}
-              label="Portée"
-              colorClass="text-pink-700"
-            />
-            <StatItem
-              value={stats.instagramShares ?? 0}
-              label="Partages"
-              colorClass="text-pink-700"
-            />
-            <StatItem
-              value={stats.instagramLikes ?? 0}
-              label="Likes ❤️"
-              colorClass="text-pink-700"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Twitter/X */}
-      {(stats.twitterImpressions ?? 0) > 0 && (
-        <div className="rounded-xl bg-gray-900 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl text-white">𝕏</span>
-            <p className="font-bold text-white">X (Twitter)</p>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div>
-              <p className="text-lg font-extrabold leading-none text-white">
-                {(stats.twitterImpressions ?? 0) > 0 ? formatK(stats.twitterImpressions ?? 0) : "—"}
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">Vues</p>
-            </div>
-            <div>
-              <p className="text-lg font-extrabold leading-none text-white">
-                {(stats.twitterRetweets ?? 0) > 0 ? formatK(stats.twitterRetweets ?? 0) : "—"}
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">Retweets</p>
-            </div>
-            <div>
-              <p className="text-lg font-extrabold leading-none text-white">
-                {(stats.twitterLikes ?? 0) > 0 ? formatK(stats.twitterLikes ?? 0) : "—"}
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">Likes ❤️</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* WhatsApp communauté */}
-      <div className="rounded-xl bg-green-50 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">💬</span>
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Header avec total */}
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-3">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="font-bold text-green-800">WhatsApp</p>
-            <p className="text-xs text-green-600">Chaîne communauté</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-2xl font-extrabold text-green-700">
-            {stats.whatsappChannelReach > 0 ? formatK(stats.whatsappChannelReach) : "—"}
-          </p>
-          <p className="text-xs text-green-600">abonnés</p>
-        </div>
-      </div>
-
-      {/* OneSignal — secteur */}
-      <div className="rounded-xl bg-orange-50 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🔔</span>
-          <div>
-            <p className="font-bold text-orange-800">Notifications</p>
-            <p className="text-xs text-orange-600">personnes notifiées</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-2xl font-extrabold text-orange-700">
-            {stats.pushSent > 0 ? stats.pushSent : "—"}
-          </p>
-          {stats.pushClicked > 0 && (
-            <p className="text-xs text-orange-500 mt-0.5">
-              {stats.pushClicked} clics
+            <p className="text-xs text-white/80 font-medium uppercase tracking-wide">Portée de l&apos;annonce</p>
+            <p className="text-2xl font-extrabold text-white tabular-nums">
+              {hasDiffusion ? (
+                <CountUp
+                  start={0}
+                  end={totalReach}
+                  duration={2}
+                  separator=" "
+                  useEasing={true}
+                />
+              ) : (
+                "—"
+              )}
+              <span className="text-sm font-normal ml-1 opacity-80">personnes</span>
             </p>
+          </div>
+          {!hasDiffusion && (
+            <div className="flex items-center gap-2 text-white/80 text-xs">
+              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              Diffusion en cours…
+            </div>
           )}
         </div>
       </div>
 
-      {/* TikTok */}
-      <div className="rounded-xl bg-gray-900 p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xl">🎵</span>
-          <p className="font-bold text-white">TikTok</p>
+      {/* Grille des 4 réseaux */}
+      <div className="grid grid-cols-2 divide-x divide-y divide-gray-100">
+        {/* Facebook */}
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">📘</span>
+            <span className="font-bold text-gray-800 text-sm">Facebook</span>
+          </div>
+          <div className="space-y-2">
+            <StatRow label="Portée" value={facebookReach} />
+            <StatRow label="Partages" value={stats.facebookShares ?? 0} />
+            <StatRow label="Likes" value={stats.facebookLikes ?? 0} />
+          </div>
         </div>
-        <div className="grid grid-cols-4 gap-2 text-center">
-          <div>
-            <p className="text-lg font-extrabold leading-none text-white">
-              {(stats.tiktokViews ?? 0) > 0 ? formatK(stats.tiktokViews ?? 0) : "—"}
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5">Vues</p>
+
+        {/* Instagram */}
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">📸</span>
+            <span className="font-bold text-gray-800 text-sm">Instagram</span>
           </div>
-          <div>
-            <p className="text-lg font-extrabold leading-none text-white">
-              {(stats.tiktokLikes ?? 0) > 0 ? formatK(stats.tiktokLikes ?? 0) : "—"}
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5">❤️</p>
+          <div className="space-y-2">
+            <StatRow label="Portée" value={instagramReach} />
+            <StatRow label="Partages" value={stats.instagramShares ?? 0} />
+            <StatRow label="Likes" value={stats.instagramLikes ?? 0} />
           </div>
-          <div>
-            <p className="text-lg font-extrabold leading-none text-white">
-              {(stats.tiktokShares ?? 0) > 0 ? formatK(stats.tiktokShares ?? 0) : "—"}
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5">Partages</p>
+        </div>
+
+        {/* X (Twitter) */}
+        <div className="p-4 bg-gray-900">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg text-white">𝕏</span>
+            <span className="font-bold text-white text-sm">X (Twitter)</span>
           </div>
-          <div>
-            <p className="text-lg font-extrabold leading-none text-white">
-              {(stats.tiktokComments ?? 0) > 0 ? formatK(stats.tiktokComments ?? 0) : "—"}
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5">Comm.</p>
+          <div className="space-y-2">
+            <StatRow label="Vues" value={twitterImpressions} dark />
+            <StatRow label="Retweets" value={stats.twitterRetweets ?? 0} dark />
+            <StatRow label="Likes" value={stats.twitterLikes ?? 0} dark />
+          </div>
+        </div>
+
+        {/* TikTok */}
+        <div className="p-4 bg-gray-900">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">🎵</span>
+            <span className="font-bold text-white text-sm">TikTok</span>
+          </div>
+          <div className="space-y-2">
+            <StatRow label="Vues" value={tiktokViews} dark />
+            <StatRow label="Partages" value={stats.tiktokShares ?? 0} dark />
+            <StatRow label="Likes" value={stats.tiktokLikes ?? 0} dark />
           </div>
         </div>
       </div>
 
-      {/* Vues de la page */}
+      {/* Footer avec vues de la page */}
       {stats.pageViews > 0 && (
-        <div className="rounded-xl bg-gray-50 p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-gray-600">
+        <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-gray-600 text-sm">
             <span>👁</span>
-            <p className="text-sm font-medium">Vues de l&apos;annonce</p>
+            <span>Vues de l&apos;annonce</span>
           </div>
-          <p className="font-bold text-gray-800">{formatK(stats.pageViews)}</p>
-        </div>
-      )}
-
-      {/* Abonnés alerte */}
-      {stats.alertSubscribers > 0 && (
-        <div className="rounded-xl bg-red-50 p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-red-600">
-            <span>🔴</span>
-            <p className="text-sm font-medium">Abonnés alerte</p>
-          </div>
-          <p className="font-bold text-red-700">{stats.alertSubscribers}</p>
+          <span className="font-bold text-gray-800">{formatK(stats.pageViews)}</span>
         </div>
       )}
     </div>
   );
 }
 
-function StatItem({
-  value,
+function StatRow({
   label,
-  colorClass,
+  value,
+  dark = false,
 }: {
-  value: number;
   label: string;
-  colorClass: string;
+  value: number;
+  dark?: boolean;
 }) {
   return (
-    <div>
-      <p className={`text-lg font-extrabold leading-none tabular-nums ${colorClass}`}>
-        {value > 0 ? (
-          value > 1000 ? (
-            formatK(value)
-          ) : (
-            <CountUp start={0} end={value} duration={1.5} separator=" " />
-          )
-        ) : (
-          "—"
-        )}
-      </p>
-      <p className="text-xs text-blue-500 mt-0.5 opacity-70">{label}</p>
+    <div className="flex items-center justify-between">
+      <span className={`text-xs ${dark ? "text-gray-400" : "text-gray-500"}`}>{label}</span>
+      <span className={`text-sm font-bold tabular-nums ${dark ? "text-white" : "text-gray-800"}`}>
+        {value > 0 ? formatK(value) : "—"}
+      </span>
     </div>
   );
 }
-
