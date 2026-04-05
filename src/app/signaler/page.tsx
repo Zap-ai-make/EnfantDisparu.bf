@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { Upload, ChevronRight, ChevronLeft } from "lucide-react";
+import Link from "next/link";
+import { Upload, ChevronRight, ChevronLeft, Shield } from "lucide-react";
 import { createAnnouncement } from "@/lib/firestore";
 import { ZonePicker } from "@/components/ZonePicker";
 import { Field, inputClass } from "@/components/forms";
@@ -83,6 +84,22 @@ export default function SignalerPage() {
 
   return (
     <div className="space-y-6">
+      {/* SecureID Banner */}
+      <Link
+        href="/signaler/secureid"
+        className="block bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 hover:border-emerald-300 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Shield className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-emerald-800 text-sm">Vous avez un bracelet SecureID ?</p>
+            <p className="text-xs text-emerald-600">Pré-remplir automatiquement avec le profil de votre enfant →</p>
+          </div>
+        </div>
+      </Link>
+
       {/* Progress */}
       <div className="flex items-center gap-2">
         {STEPS.map((label, i) => (
