@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Shield, ArrowLeft, Loader2 } from "lucide-react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import toast from "react-hot-toast";
 
 interface SecureIDProfile {
@@ -32,45 +30,39 @@ export default function SignalerSecureIDPage() {
 
     setLoading(true);
     try {
-      // Chercher le bracelet par son code
-      const braceletRef = doc(db, "bracelets", braceletCode.toUpperCase().trim());
-      const braceletSnap = await getDoc(braceletRef);
+      // Appeler l'API pour rechercher le bracelet
+      const response = await fetch("/api/secureid/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ braceletCode: braceletCode.trim() }),
+      });
 
-      if (!braceletSnap.exists()) {
-        toast.error("Code bracelet introuvable");
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Debug info en console pour diagnostic
+        if (data.debug) {
+          console.log("SecureID Debug:", data.debug);
+        }
+        toast.error(data.error || "Code bracelet introuvable");
         setLoading(false);
         return;
       }
 
-      const braceletData = braceletSnap.data();
-      const profileId = braceletData.profileId;
-
-      if (!profileId) {
-        toast.error("Ce bracelet n'est pas associé à un profil enfant");
+      if (!data.success || !data.profile) {
+        toast.error("Profil introuvable");
         setLoading(false);
         return;
       }
-
-      // Récupérer le profil associé
-      const profileRef = doc(db, "profiles", profileId);
-      const profileSnap = await getDoc(profileRef);
-
-      if (!profileSnap.exists()) {
-        toast.error("Profil enfant introuvable");
-        setLoading(false);
-        return;
-      }
-
-      const profileData = profileSnap.data();
 
       setProfile({
-        id: profileId,
-        childName: profileData.name || profileData.childName || "",
-        childAge: profileData.age || profileData.childAge || 0,
-        childGender: profileData.gender || profileData.childGender || "M",
-        childPhotoURL: profileData.photoURL || profileData.childPhotoURL,
-        parentPhone: profileData.parentPhone || profileData.phone || "",
-        braceletId: braceletCode.toUpperCase().trim(),
+        id: data.profile.id,
+        childName: data.profile.childName,
+        childAge: data.profile.childAge,
+        childGender: data.profile.childGender,
+        childPhotoURL: data.profile.childPhotoURL,
+        parentPhone: data.profile.parentPhone,
+        braceletId: data.profile.braceletId,
       });
 
       toast.success("Profil trouvé !");
