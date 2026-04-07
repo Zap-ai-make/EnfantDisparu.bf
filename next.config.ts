@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
         hostname: "storage.googleapis.com",
       },
     ],
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 365, // 1 an
   },
   // Headers de sécurité + Service Worker OneSignal
   async headers() {
