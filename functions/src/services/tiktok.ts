@@ -1,6 +1,6 @@
 import { logger } from "firebase-functions";
 import { AnnouncementDoc } from "../types";
-import { TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, BASE_URL } from "../config";
+import { TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, BASE_URL, db } from "../config";
 import { fetchWithRetry } from "../utils/http";
 
 const TIKTOK_API_VERSION = "v2";
@@ -68,10 +68,41 @@ interface TikTokPostResponse {
 }
 
 /**
+ * Récupère l'access token TikTok depuis Firestore
+ */
+async function getTikTokAccessToken(): Promise<string | null> {
+  try {
+    const configDoc = await db.collection("app_config").doc("tiktok").get();
+
+    if (!configDoc.exists) {
+      logger.warn("TikTok not configured in Firestore");
+      return null;
+    }
+
+    const config = configDoc.data();
+    if (!config) return null;
+
+    // Vérifier si le token est expiré
+    if (config.expiresAt && config.expiresAt < Date.now()) {
+      logger.warn("TikTok access token expired", {
+        expiresAt: new Date(config.expiresAt).toISOString(),
+      });
+      // TODO: Implémenter le refresh token
+      return null;
+    }
+
+    return config.accessToken || null;
+  } catch (error) {
+    logger.error("Error fetching TikTok access token", { error });
+    return null;
+  }
+}
+
+/**
  * Poste une nouvelle alerte sur TikTok (Photo Carousel)
  *
- * Pour la démo sandbox, nous utiliserons l'access token obtenu manuellement
- * En production, l'access token sera stocké en Firestore après l'OAuth
+ * Récupère automatiquement l'access token depuis Firestore.
+ * Si accessToken est fourni en paramètre, il sera utilisé à la place.
  */
 export async function postAnnouncementToTikTok(
   announcement: AnnouncementDoc,
@@ -86,9 +117,14 @@ export async function postAnnouncementToTikTok(
     return null;
   }
 
-  if (!accessToken) {
-    logger.warn("TikTok access token not provided, skipping post");
-    return null;
+  // Si aucun access token fourni, récupérer depuis Firestore
+  let token: string | null = accessToken ?? null;
+  if (!token) {
+    token = await getTikTokAccessToken();
+    if (!token) {
+      logger.warn("TikTok access token not available, skipping post");
+      return null;
+    }
   }
 
   if (!announcement.alertCardURL) {
@@ -136,7 +172,7 @@ ${emotionalMsg}
     const initResponse = await fetchWithRetry(`${TIKTOK_API_BASE}/post/photo/init/`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json; charset=UTF-8",
       },
       body: JSON.stringify({
@@ -169,7 +205,7 @@ ${emotionalMsg}
     const publishResponse = await fetchWithRetry(`${TIKTOK_API_BASE}/post/photo/publish/`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json; charset=UTF-8",
       },
       body: JSON.stringify({

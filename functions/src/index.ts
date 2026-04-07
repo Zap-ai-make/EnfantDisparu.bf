@@ -27,6 +27,7 @@ export { onAnnouncementUpdate } from "./triggers/onAnnouncementUpdate";
 export { regenerateAlertCard } from "./http/regenerateAlertCard";
 export { healthCheck } from "./http/healthCheck";
 export { postToTikTok } from "./http/postToTikTok";
+export { exchangeTikTokCode } from "./http/exchangeTikTokCode";
 
 // Programme Ambassadeur
 export { oneSignalWebhook } from "./http/oneSignalWebhook";
