@@ -1,18 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { CheckCircle, AlertCircle, Loader2, Lock } from "lucide-react";
 import Link from "next/link";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
-type TikTokConfig = {
-  accessToken?: string;
-  refreshToken?: string;
-  expiresAt?: number;
-  connectedAt?: number;
-  openId?: string;
+type TikTokStatus = {
+  isConnected: boolean;
+  connectedAt?: number | null;
+  expiresAt?: number | null;
 };
 
 export default function TikTokAdminPage() {
@@ -21,22 +17,26 @@ export default function TikTokAdminPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [config, setConfig] = useState<TikTokConfig | null>(null);
+  const [status, setStatus] = useState<TikTokStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
-    loadTikTokConfig();
-  }, []);
+    if (isAuthenticated) {
+      loadTikTokStatus();
+    }
+  }, [isAuthenticated]);
 
-  const loadTikTokConfig = async () => {
+  const loadTikTokStatus = async () => {
     try {
-      const configDoc = await getDoc(doc(db, "app_config", "tiktok"));
-      if (configDoc.exists()) {
-        setConfig(configDoc.data() as TikTokConfig);
+      // Appel API serveur-side (sécurisé, ne expose pas les tokens)
+      const response = await fetch('/api/admin/tiktok-status');
+      if (response.ok) {
+        const data = await response.json();
+        setStatus(data);
       }
     } catch (error) {
-      console.error("Error loading TikTok config:", error);
+      console.error("Error loading TikTok status:", error);
     } finally {
       setLoading(false);
     }
@@ -60,8 +60,8 @@ export default function TikTokAdminPage() {
   };
 
   const isTokenValid = () => {
-    if (!config?.expiresAt) return false;
-    return config.expiresAt > Date.now();
+    if (!status?.expiresAt) return false;
+    return status.expiresAt > Date.now();
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -189,7 +189,7 @@ export default function TikTokAdminPage() {
           <div className="p-6 space-y-6">
             {/* Status */}
             <div className="flex items-start gap-4 p-4 rounded-xl border-2 border-gray-200">
-              {config && isTokenValid() ? (
+              {status?.isConnected && isTokenValid() ? (
                 <>
                   <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
                   <div className="flex-1">
@@ -202,8 +202,8 @@ export default function TikTokAdminPage() {
                     <div className="text-xs text-gray-500 space-y-1">
                       <p>
                         <strong>Connecté le :</strong>{" "}
-                        {config.connectedAt
-                          ? new Date(config.connectedAt).toLocaleDateString("fr-FR", {
+                        {status.connectedAt
+                          ? new Date(status.connectedAt).toLocaleDateString("fr-FR", {
                               day: "numeric",
                               month: "long",
                               year: "numeric",
@@ -214,8 +214,8 @@ export default function TikTokAdminPage() {
                       </p>
                       <p>
                         <strong>Expire le :</strong>{" "}
-                        {config.expiresAt
-                          ? new Date(config.expiresAt).toLocaleDateString("fr-FR", {
+                        {status.expiresAt
+                          ? new Date(status.expiresAt).toLocaleDateString("fr-FR", {
                               day: "numeric",
                               month: "long",
                               year: "numeric",
@@ -287,12 +287,12 @@ export default function TikTokAdminPage() {
             <pre className="text-xs text-gray-600 overflow-auto">
               {JSON.stringify(
                 {
-                  hasAccessToken: !!config.accessToken,
-                  hasRefreshToken: !!config.refreshToken,
-                  expiresAt: config.expiresAt,
+                  hasAccessToken: !!status.isConnected,
+                  hasRefreshToken: !!status.isConnected,
+                  expiresAt: status.expiresAt,
                   isValid: isTokenValid(),
                   // Ne jamais afficher les tokens complets côté client
-                  tokenPreview: config.accessToken ? `${config.accessToken.substring(0, 10)}...` : null,
+                  tokenPreview: status.isConnected ? `${status.isConnected.substring(0, 10)}...` : null,
                 },
                 null,
                 2

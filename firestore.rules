@@ -138,12 +138,16 @@ service cloud.firestore {
     // ─── Collections SecureID ───────────────────────────────────────────────────
 
     match /bracelets/{braceletId} {
-      allow read: if true;
+      // Lecture autorisée seulement pour les bracelets publics
+      // Protection des données personnelles des enfants
+      allow read: if resource.data.isPublic == true;
       allow write: if false;
     }
 
     match /profiles/{profileId} {
-      allow read: if true;
+      // Lecture autorisée seulement pour les profils publics
+      // Protection des données personnelles
+      allow read: if resource.data.isPublic == true;
       allow write: if false;
     }
 
@@ -232,11 +236,10 @@ service cloud.firestore {
     // ─── Configuration de l'application ─────────────────────────────────────────
 
     match /app_config/{configId} {
-      // Lecture publique uniquement pour vérifier le statut (pas les tokens)
-      // Le frontend peut voir si TikTok est connecté, mais pas le token
-      allow read: if true;
-      // Écriture uniquement via Cloud Functions
-      allow write: if false;
+      // SÉCURITÉ CRITIQUE : Ne PAS exposer les tokens côté client
+      // Les tokens OAuth doivent rester serveur-side uniquement
+      allow read: if false;  // Bloqué côté client
+      allow write: if false; // Écriture uniquement via Cloud Functions
     }
   }
 }
