@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle, AlertCircle, Loader2, Lock } from "lucide-react";
 import Link from "next/link";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 type TikTokConfig = {
   accessToken?: string;
@@ -15,6 +16,11 @@ type TikTokConfig = {
 };
 
 export default function TikTokAdminPage() {
+  const { isAuthenticated, isLoading: authLoading, login } = useAdminAuth();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [config, setConfig] = useState<TikTokConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
@@ -57,6 +63,101 @@ export default function TikTokAdminPage() {
     if (!config?.expiresAt) return false;
     return config.expiresAt > Date.now();
   };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    const success = await login(password);
+
+    if (!success) {
+      setError("Mot de passe incorrect");
+      setPassword("");
+    }
+
+    setIsSubmitting(false);
+  };
+
+  // Écran de chargement auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+      </div>
+    );
+  }
+
+  // Formulaire de login si non authentifié
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 text-white text-center">
+              <Lock className="w-12 h-12 mx-auto mb-3" />
+              <h1 className="text-2xl font-bold">Accès Admin</h1>
+              <p className="text-red-100 mt-2">Configuration TikTok</p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleLogin} className="p-6 space-y-4">
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Mot de passe administrateur
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Entrez le mot de passe"
+                  required
+                  autoFocus
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-800">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting || !password}
+                className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-3 px-6 rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Vérification...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-5 h-5" />
+                    Se connecter
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-6 py-4 text-center">
+              <Link
+                href="/"
+                className="text-sm text-gray-600 hover:text-red-600 transition-colors"
+              >
+                ← Retour à l'accueil
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
