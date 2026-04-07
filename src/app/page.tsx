@@ -2,13 +2,23 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { MapPin, X, ChevronDown, Search, ChevronUp } from "lucide-react";
 import { AnnouncementCard } from "@/components/AnnouncementCard";
-import { NetworkCoverageMap } from "@/components/NetworkCoverageMap";
 import { subscribeToFilteredAnnouncements, getGlobalStats } from "@/lib/firestore";
 import { COUNTRIES, CITIES_BY_COUNTRY, ZONES_BY_CITY, getZoneById } from "@/lib/zones";
 import { cn } from "@/lib/utils";
 import type { Announcement } from "@/types/announcement";
+
+// Lazy load de la carte (Google Maps API est lourd)
+const NetworkCoverageMap = dynamic(() => import("@/components/NetworkCoverageMap").then(mod => ({ default: mod.NetworkCoverageMap })), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-gray-100 rounded-2xl h-[300px] flex items-center justify-center text-gray-400">
+      <MapPin className="w-8 h-8 animate-pulse" />
+    </div>
+  ),
+});
 
 // ─── Détection pays via fuseau horaire ───────────────────────────────────────
 

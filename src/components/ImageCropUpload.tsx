@@ -152,7 +152,7 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
 
   const handleZoomChange = (delta: number) => {
     const minZoom = getMinZoom();
-    setZoom((prev) => Math.min(3, Math.max(minZoom, prev + delta)));
+    setZoom((prev) => Math.min(5, Math.max(minZoom, prev + delta)));
   };
 
   const handleRotate = () => {
@@ -310,7 +310,7 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
         <div
           ref={containerRef}
           className={cn(
-            "relative w-full aspect-square max-w-md mx-auto bg-black rounded-xl overflow-hidden",
+            "relative w-full aspect-square max-w-lg mx-auto bg-black rounded-xl overflow-hidden",
             isDragging ? "cursor-grabbing" : "cursor-grab"
           )}
           onMouseDown={handleMouseDown}
@@ -360,43 +360,58 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
         </div>
 
         {/* Contrôles */}
-        <div className="flex flex-wrap gap-3 justify-center">
-          <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
+        <div className="flex flex-wrap gap-3 justify-center items-center">
+          <div className="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-2.5">
             <button
               type="button"
-              onClick={() => handleZoomChange(-0.1)}
-              className="p-1 hover:bg-gray-200 rounded"
+              onClick={() => handleZoomChange(-0.15)}
+              className="p-1.5 hover:bg-gray-200 rounded transition-colors active:scale-95"
               title="Dézoomer"
             >
-              <ZoomOut className="w-4 h-4" />
+              <ZoomOut className="w-5 h-5 text-gray-700" />
             </button>
-            <span className="text-xs font-medium text-gray-700 w-12 text-center">
+            <span className="text-sm font-bold text-gray-800 w-14 text-center">
               {Math.round(zoom * 100)}%
             </span>
             <button
               type="button"
-              onClick={() => handleZoomChange(0.1)}
-              className="p-1 hover:bg-gray-200 rounded"
+              onClick={() => handleZoomChange(0.15)}
+              className="p-1.5 hover:bg-gray-200 rounded transition-colors active:scale-95"
               title="Zoomer"
             >
-              <ZoomIn className="w-4 h-4" />
+              <ZoomIn className="w-5 h-5 text-gray-700" />
             </button>
           </div>
 
           <button
             type="button"
             onClick={handleRotate}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors active:scale-95"
             title="Rotation 90°"
           >
-            <RotateCw className="w-4 h-4" />
-            Rotation
+            <RotateCw className="w-5 h-5" />
+            Pivoter
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setZoom(1);
+              setPosition({ x: 50, y: 50 });
+              setRotation(0);
+            }}
+            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors active:scale-95"
+            title="Réinitialiser"
+          >
+            Réinitialiser
           </button>
         </div>
 
-        <p className="text-xs text-gray-500 text-center">
-          Zoomez et déplacez l&apos;image pour cadrer le visage
-        </p>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-xs text-blue-800 text-center">
+            <strong>Astuce :</strong> Glissez l&apos;image pour la repositionner • Zoomez jusqu&apos;à 500% • Pivotez pour redresser
+          </p>
+        </div>
 
         {/* Canvas caché pour le traitement */}
         <canvas ref={canvasRef} className="hidden" />
@@ -408,20 +423,21 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
     <div>
       <label className="cursor-pointer block">
         {previewUrl ? (
-          <div className="relative w-32 h-32 rounded-2xl overflow-hidden border-2 border-red-200">
+          <div className="relative w-40 h-40 rounded-2xl overflow-hidden border-4 border-red-200 shadow-md">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={previewUrl} alt="Prévisualisation" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-              <span className="text-white text-xs">Changer</span>
+            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+              <Upload className="w-6 h-6 text-white mb-1" />
+              <span className="text-white text-xs font-medium">Changer la photo</span>
             </div>
           </div>
         ) : (
           <div className={cn(
-            "w-32 h-32 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 hover:border-red-400 transition-colors",
+            "w-40 h-40 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 hover:border-red-400 hover:bg-red-50/30 transition-all active:scale-95",
             error ? "border-red-500 bg-red-50" : "border-gray-300 text-gray-400"
           )}>
-            <Upload className="w-6 h-6" />
-            <span className="text-xs">Ajouter photo</span>
+            <Upload className="w-7 h-7" />
+            <span className="text-sm font-medium">Ajouter photo</span>
           </div>
         )}
         <input
@@ -432,7 +448,7 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
           onChange={handleFileSelect}
         />
       </label>
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && <p className="text-red-500 text-xs mt-1.5 font-medium">{error}</p>}
       {previewUrl && !cropMode && (
         <button
           type="button"
@@ -443,10 +459,10 @@ export function ImageCropUpload({ onImageCropped, error }: ImageCropUploadProps)
               fileInputRef.current?.click();
             }
           }}
-          className="mt-2 flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium"
+          className="mt-3 flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-semibold active:scale-95 transition-transform"
         >
           <Crop className="w-4 h-4" />
-          Recadrer à nouveau
+          Recadrer et ajuster à nouveau
         </button>
       )}
     </div>

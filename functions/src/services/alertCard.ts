@@ -103,8 +103,8 @@ function buildMobileCardElement(
         type: "img",
         props: {
           src: childPhotoBase64,
-          width: 400,
-          height: 400,
+          width: 550,
+          height: 550,
           style: {
             borderRadius: 20,
             border: "8px solid " + COLORS.redPrimary,
@@ -116,8 +116,8 @@ function buildMobileCardElement(
         type: "div",
         props: {
           style: {
-            width: 400,
-            height: 400,
+            width: 550,
+            height: 550,
             backgroundColor: "#F3F4F6",
             borderRadius: 20,
             border: "8px solid " + COLORS.redPrimary,
@@ -476,8 +476,8 @@ function buildResolutionCardElement(
         type: "img",
         props: {
           src: childPhotoBase64,
-          width: 350,
-          height: 350,
+          width: 500,
+          height: 500,
           style: {
             borderRadius: 20,
             border: "8px solid " + COLORS.greenPrimary,
@@ -489,8 +489,8 @@ function buildResolutionCardElement(
         type: "div",
         props: {
           style: {
-            width: 350,
-            height: 350,
+            width: 500,
+            height: 500,
             backgroundColor: "#F3F4F6",
             borderRadius: 20,
             border: "8px solid " + COLORS.greenPrimary,

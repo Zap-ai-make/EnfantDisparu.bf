@@ -10,7 +10,12 @@
       "Bash(ls:*)",
       "Read(//c/Users/X1 Carbon/Desktop/EnfantPerdu.bf/**)",
       "Bash(git push:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(findstr:*)",
+      "Bash(cd:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

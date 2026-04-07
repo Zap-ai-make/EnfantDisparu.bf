@@ -6,8 +6,9 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { OneSignalInit } from "@/components/OneSignalInit";
 import { AmbassadorRefTracker } from "@/components/AmbassadorRefTracker";
-import { ChatBot } from "@/components/ChatBot";
 import { LiveStatusBar } from "@/components/LiveStatusBar";
+import { Providers } from "@/components/Providers";
+import { ChatBotWrapper } from "@/components/ChatBotWrapper";
 
 // Icônes SVG des réseaux sociaux
 const FacebookIcon = () => (
@@ -109,17 +110,18 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="min-h-screen flex flex-col">
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            className: 'text-sm',
-            duration: 4000,
-          }}
-        />
-        <OneSignalInit />
-        <Suspense fallback={null}>
-          <AmbassadorRefTracker />
-        </Suspense>
+        <Providers>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              className: 'text-sm',
+              duration: 4000,
+            }}
+          />
+          <OneSignalInit />
+          <Suspense fallback={null}>
+            <AmbassadorRefTracker />
+          </Suspense>
 
         {/* Header + Status Bar - sticky pour accès rapide sur mobile */}
         <div className="sticky top-0 z-40">
@@ -280,7 +282,8 @@ export default function RootLayout({
         </footer>
 
         {/* ChatBot flottant */}
-        <ChatBot />
+        <ChatBotWrapper />
+        </Providers>
       </body>
     </html>
   );
