@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Directions - EnfantDisparu.bf Homepage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #F9FAFB;
+            color: #111827;
+        }
+
+        /* Navigation Controls */
+        .nav-controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .nav-controls h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .nav-controls h1 span {
+            color: #DC2626;
+        }
+
+        .direction-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .direction-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #E5E7EB;
+            background: white;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .direction-btn:hover {
+            border-color: #DC2626;
+            color: #DC2626;
+        }
+
+        .direction-btn.active {
+            background: #DC2626;
+            color: white;
+            border-color: #DC2626;
+        }
+
+        /* Main Container */
+        .container {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .direction {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .direction.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Direction Info */
+        .direction-info {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #E5E7EB;
+        }
+
+        .direction-info h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #DC2626;
+        }
+
+        .direction-info p {
+            color: #6B7280;
+            line-height: 1.6;
+        }
+
+        /* Mockup Frame */
+        .mockup-frame {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+        }
+
+        /* Common Styles */
+        .btn-primary {
+            background: #DC2626;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: #B91C1C;
+        }
+
+        .btn-secondary {
+            background: #3B82F6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background: #2563EB;
+        }
+
+        /* Direction 1: Hero-Centered with Impact Stats */
+        .dir1-hero {
+            background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .dir1-hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .dir1-hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dir1-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 3rem auto 0;
+        }
+
+        .dir1-stat {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .dir1-stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .dir1-stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .dir1-content {
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dir1-recent {
+            background: #F9FAFB;
+            padding: 3rem 2rem;
+        }
+
+        .dir1-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .dir1-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+
+        .dir1-card-img {
+            width: 100%;
+            height: 200px;
+            background: #E5E7EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        .dir1-card-content {
+            padding: 1.5rem;
+        }
+
+        .dir1-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .dir1-card-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #6B7280;
+            margin-bottom: 1rem;
+        }
+
+        .dir1-card-desc {
+            font-size: 0.875rem;
+            color: #4B5563;
+            line-height: 1.6;
+        }
+
+        .dir1-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Direction 2: Split Screen with Map */
+        .dir2-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 600px;
+        }
+
+        .dir2-left {
+            padding: 4rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .dir2-left h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: #111827;
+            line-height: 1.2;
+        }
+
+        .dir2-left h1 .highlight {
+            color: #DC2626;
+        }
+
+        .dir2-left p {
+            font-size: 1.125rem;
+            color: #6B7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .dir2-cta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dir2-right {
+            background: #E5E7EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dir2-map {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: #9CA3AF;
+            background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+        }
+
+        .dir2-features {
+            padding: 3rem;
+            background: white;
+        }
+
+        .dir2-features h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .dir2-feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .dir2-feature {
+            text-align: center;
+            padding: 2rem;
+            background: #F9FAFB;
+            border-radius: 1rem;
+        }
+
+        .dir2-feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .dir2-feature h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .dir2-feature p {
+            font-size: 0.875rem;
+            color: #6B7280;
+            line-height: 1.6;
+        }
+
+        /* Direction 3: Card-First Timeline */
+        .dir3-header {
+            background: white;
+            padding: 2rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .dir3-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dir3-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .dir3-header h1 .red {
+            color: #DC2626;
+        }
+
+        .dir3-hero {
+            background: linear-gradient(to bottom, #FEF2F2 0%, white 100%);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .dir3-hero h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+
+        .dir3-hero p {
+            font-size: 1rem;
+            color: #6B7280;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dir3-timeline {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .dir3-timeline-item {
+            background: white;
+            border-left: 4px solid #DC2626;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .dir3-timeline-item:hover {
+            transform: translateX(4px);
+        }
+
+        .dir3-timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .dir3-timeline-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .dir3-timeline-date {
+            font-size: 0.75rem;
+            color: #DC2626;
+            font-weight: 600;
+            background: #FEE2E2;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+        }
+
+        .dir3-timeline-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: #6B7280;
+            margin-bottom: 0.75rem;
+        }
+
+        .dir3-timeline-desc {
+            font-size: 0.875rem;
+            color: #4B5563;
+            line-height: 1.6;
+        }
+
+        /* Direction 4: Warm & Human Photo Grid */
+        .dir4-hero {
+            background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .dir4-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+
+        .dir4-hero h1 .warm {
+            color: #EA580C;
+        }
+
+        .dir4-hero p {
+            font-size: 1.125rem;
+            color: #6B7280;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .dir4-impact {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .dir4-impact-item {
+            text-align: center;
+        }
+
+        .dir4-impact-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #EA580C;
+        }
+
+        .dir4-impact-label {
+            font-size: 0.875rem;
+            color: #6B7280;
+            margin-top: 0.5rem;
+        }
+
+        .dir4-section {
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dir4-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .dir4-photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .dir4-photo-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .dir4-photo-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .dir4-photo {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #FFEDD5 0%, #FED7AA 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: white;
+        }
+
+        .dir4-photo-content {
+            padding: 1.25rem;
+        }
+
+        .dir4-photo-content h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .dir4-photo-meta {
+            font-size: 0.875rem;
+            color: #6B7280;
+            margin-bottom: 0.75rem;
+        }
+
+        .dir4-photo-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        /* Direction 5: Minimalist Modern */
+        .dir5-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dir5-hero {
+            padding: 5rem 3rem;
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .dir5-hero-content {
+            max-width: 700px;
+        }
+
+        .dir5-hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: #111827;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .dir5-hero h1 .accent {
+            color: #DC2626;
+        }
+
+        .dir5-hero p {
+            font-size: 1.25rem;
+            color: #6B7280;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .dir5-hero-cta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .dir5-metrics {
+            padding: 3rem;
+            background: #F9FAFB;
+        }
+
+        .dir5-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dir5-metric {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #E5E7EB;
+        }
+
+        .dir5-metric-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .dir5-metric-label {
+            font-size: 0.875rem;
+            color: #6B7280;
+        }
+
+        .dir5-list {
+            padding: 4rem 3rem;
+            background: white;
+        }
+
+        .dir5-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dir5-list-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .dir5-list-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 1.5rem;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #E5E7EB;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .dir5-list-item:hover {
+            background: #F9FAFB;
+        }
+
+        .dir5-list-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 0.75rem;
+            background: #FEE2E2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .dir5-list-content h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .dir5-list-meta {
+            font-size: 0.875rem;
+            color: #6B7280;
+        }
+
+        .dir5-list-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: #DC2626;
+            color: white;
+        }
+
+        /* Direction 6: Dashboard-Style Info Dense */
+        .dir6-topbar {
+            background: #111827;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dir6-topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .dir6-topbar h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .dir6-topbar-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .dir6-topbar-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dir6-topbar-number {
+            font-weight: 700;
+            color: #10B981;
+        }
+
+        .dir6-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: calc(100vh - 120px);
+        }
+
+        .dir6-sidebar {
+            background: #F9FAFB;
+            border-right: 1px solid #E5E7EB;
+            padding: 2rem 1.5rem;
+        }
+
+        .dir6-sidebar h3 {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6B7280;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .dir6-filter {
+            margin-bottom: 2rem;
+        }
+
+        .dir6-filter-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            text-align: left;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dir6-filter-btn:hover {
+            border-color: #DC2626;
+            color: #DC2626;
+        }
+
+        .dir6-filter-btn.active {
+            background: #DC2626;
+            color: white;
+            border-color: #DC2626;
+        }
+
+        .dir6-main {
+            padding: 2rem;
+        }
+
+        .dir6-main h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .dir6-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .dir6-card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            transition: box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .dir6-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .dir6-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .dir6-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .dir6-card-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .dir6-card-meta {
+            font-size: 0.75rem;
+            color: #6B7280;
+            margin-bottom: 0.75rem;
+        }
+
+        .dir6-card-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .dir6-card-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: #6B7280;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-controls {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .direction-buttons {
+                overflow-x: auto;
+            }
+
+            .dir2-split {
+                grid-template-columns: 1fr;
+            }
+
+            .dir6-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .dir6-sidebar {
+                border-right: none;
+                border-bottom: 1px solid #E5E7EB;
+            }
+
+            .dir5-hero h1 {
+                font-size: 2rem;
+            }
+
+            .dir1-hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Controls -->
+    <div class="nav-controls">
+        <h1>EnfantDisparu<span>.bf</span> Design Directions</h1>
+        <div class="direction-buttons">
+            <button class="direction-btn active" onclick="showDirection(1)">D1: Hero Impact</button>
+            <button class="direction-btn" onclick="showDirection(2)">D2: Split Map</button>
+            <button class="direction-btn" onclick="showDirection(3)">D3: Timeline</button>
+            <button class="direction-btn" onclick="showDirection(4)">D4: Warm Photo</button>
+            <button class="direction-btn" onclick="showDirection(5)">D5: Minimalist</button>
+            <button class="direction-btn" onclick="showDirection(6)">D6: Dashboard</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Direction 1: Hero-Centered with Impact Stats -->
+        <div class="direction active" id="direction-1">
+            <div class="direction-info">
+                <h2>Direction 1: Hero Impact-Centered</h2>
+                <p><strong>Concept:</strong> Frappe immédiatement avec l'urgence et l'impact mesurable. Hero rouge vif avec stats transparentes en temps réel, suivi de cards d'annonces récentes. <strong>Emotion:</strong> Urgence + Confiance (transparence data). <strong>Best for:</strong> Maximiser conversions signalement, rassurer sur l'efficacité.</p>
+            </div>
+
+            <div class="mockup-frame">
+                <!-- Hero Section -->
+                <div class="dir1-hero">
+                    <h1>Ensemble, retrouvons<br>nos enfants disparus</h1>
+                    <p>Chaque seconde compte. Signalez, mobilisez, sauvez.</p>
+                    <button class="btn-primary">🚨 Signaler une disparition</button>
+
+                    <div class="dir1-stats">
+                        <div class="dir1-stat">
+                            <div class="dir1-stat-number">127</div>
+                            <div class="dir1-stat-label">Enfants recherchés</div>
+                        </div>
+                        <div class="dir1-stat">
+                            <div class="dir1-stat-number">2.4M</div>
+                            <div class="dir1-stat-label">Personnes mobilisées</div>
+                        </div>
+                        <div class="dir1-stat">
+                            <div class="dir1-stat-number">89</div>
+                            <div class="dir1-stat-label">Enfants retrouvés</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Announcements -->
+                <div class="dir1-recent">
+                    <div class="dir1-content">
+                        <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem; text-align: center;">Recherches actives</h2>
+                        <div class="dir1-grid">
+                            <div class="dir1-card">
+                                <div class="dir1-card-img">👧</div>
+                                <div class="dir1-card-content">
+                                    <h3>Fatoumata Ouédraogo</h3>
+                                    <div class="dir1-card-meta">
+                                        <span>📍 Ouagadougou, Secteur 15</span>
+                                        <span>🕐 Il y a 2h</span>
+                                    </div>
+                                    <p class="dir1-card-desc">Fille de 6 ans, disparue près du marché Rood-Woko. Portait un t-shirt rose et une jupe bleue.</p>
+                                </div>
+                            </div>
+                            <div class="dir1-card">
+                                <div class="dir1-card-img">👦</div>
+                                <div class="dir1-card-content">
+                                    <h3>Moussa Traoré</h3>
+                                    <div class="dir1-card-meta">
+                                        <span>📍 Bobo-Dioulasso</span>
+                                        <span>🕐 Il y a 5h</span>
+                                    </div>
+                                    <p class="dir1-card-desc">Garçon de 8 ans, vu pour la dernière fois devant son école primaire.</p>
+                                </div>
+                            </div>
+                            <div class="dir1-card">
+                                <div class="dir1-card-img">👧</div>
+                                <div class="dir1-card-content">
+                                    <h3>Aminata Sawadogo</h3>
+                                    <div class="dir1-card-meta">
+                                        <span>📍 Koudougou</span>
+                                        <span>🕐 Il y a 1 jour</span>
+                                    </div>
+                                    <p class="dir1-card-desc">Fille de 12 ans, disparue en revenant de l'école. Signe distinctif: cicatrice sur le front.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direction 2: Split Screen with Map -->
+        <div class="direction" id="direction-2">
+            <div class="direction-info">
+                <h2>Direction 2: Split Screen Map-Focused</h2>
+                <p><strong>Concept:</strong> Split 50/50 entre message humain (gauche) et visualisation carte géographique (droite). Équilibre émotion et logistique. <strong>Emotion:</strong> Chaleur humaine + Organisation. <strong>Best for:</strong> Montrer la couverture géographique, rassurer sur la coordination.</p>
+            </div>
+
+            <div class="mockup-frame">
+                <div class="dir2-split">
+                    <div class="dir2-left">
+                        <h1>Votre <span class="highlight">communauté</span><br>peut tout changer</h1>
+                        <p>Des milliers d'yeux vigilants, une plateforme coordonnée, des vies sauvées. Rejoignez le mouvement de solidarité nationale.</p>
+                        <div class="dir2-cta">
+                            <button class="btn-primary">🚨 Signaler</button>
+                            <button class="btn-secondary">👁️ Devenir ambassadeur</button>
+                        </div>
+                    </div>
+                    <div class="dir2-right">
+                        <div class="dir2-map">🗺️</div>
+                    </div>
+                </div>
+
+                <div class="dir2-features">
+                    <h2>Comment ça marche</h2>
+                    <div class="dir2-feature-grid">
+                        <div class="dir2-feature">
+                            <div class="dir2-feature-icon">📱</div>
+                            <h3>Signalez en 2 min</h3>
+                            <p>Photo, description, localisation. L'alerte est immédiatement diffusée sur tous nos canaux.</p>
+                        </div>
+                        <div class="dir2-feature">
+                            <div class="dir2-feature-icon">📡</div>
+                            <h3>Diffusion virale</h3>
+                            <p>Facebook, WhatsApp, Instagram, X, TikTok. Touchez 50,000+ personnes en minutes.</p>
+                        </div>
+                        <div class="dir2-feature">
+                            <div class="dir2-feature-icon">🗺️</div>
+                            <h3>Coordination terrain</h3>
+                            <p>Carte interactive, notifications géolocalisées, communauté mobilisée.</p>
+                        </div>
+                        <div class="dir2-feature">
+                            <div class="dir2-feature-icon">✅</div>
+                            <h3>Transparence totale</h3>
+                            <p>Suivez en temps réel la portée de l'alerte et les actions de recherche.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direction 3: Card-First Timeline -->
+        <div class="direction" id="direction-3">
+            <div class="direction-info">
+                <h2>Direction 3: Timeline Feed-Style</h2>
+                <p><strong>Concept:</strong> Format feed social familier, timeline chronologique des annonces avec barre latérale urgence. Très scannable. <strong>Emotion:</strong> Accessible, Immédiat. <strong>Best for:</strong> Utilisateurs habitués aux réseaux sociaux, facilite l'engagement rapide.</p>
+            </div>
+
+            <div class="mockup-frame">
+                <div class="dir3-header">
+                    <div class="dir3-header-content">
+                        <h1>EnfantDisparu<span class="red">.bf</span></h1>
+                        <button class="btn-primary">🚨 Signaler</button>
+                    </div>
+                </div>
+
+                <div class="dir3-hero">
+                    <h2>Chaque minute compte.</h2>
+                    <p>Mobilisons-nous ensemble pour retrouver nos enfants. Signalez, partagez, agissez.</p>
+                    <button class="btn-primary">Voir toutes les recherches actives</button>
+                </div>
+
+                <div class="dir3-timeline">
+                    <div class="dir3-timeline-item">
+                        <div class="dir3-timeline-header">
+                            <div class="dir3-timeline-title">👧 Fatoumata Ouédraogo - 6 ans</div>
+                            <div class="dir3-timeline-date">Il y a 2h</div>
+                        </div>
+                        <div class="dir3-timeline-meta">
+                            <span>📍 Ouagadougou, Secteur 15</span>
+                            <span>👁️ 12,458 vues</span>
+                            <span>🔔 428 alertes envoyées</span>
+                        </div>
+                        <p class="dir3-timeline-desc">Fille de 6 ans, disparue près du marché Rood-Woko ce matin vers 9h. Portait un t-shirt rose et une jupe bleue. Cicatrice petite sur le genou gauche.</p>
+                    </div>
+
+                    <div class="dir3-timeline-item">
+                        <div class="dir3-timeline-header">
+                            <div class="dir3-timeline-title">👦 Moussa Traoré - 8 ans</div>
+                            <div class="dir3-timeline-date">Il y a 5h</div>
+                        </div>
+                        <div class="dir3-timeline-meta">
+                            <span>📍 Bobo-Dioulasso</span>
+                            <span>👁️ 8,234 vues</span>
+                            <span>🔔 312 alertes envoyées</span>
+                        </div>
+                        <p class="dir3-timeline-desc">Garçon de 8 ans, vu pour la dernière fois devant son école primaire vers 12h30. Portait l'uniforme scolaire bleu et blanc.</p>
+                    </div>
+
+                    <div class="dir3-timeline-item">
+                        <div class="dir3-timeline-header">
+                            <div class="dir3-timeline-title">👧 Aminata Sawadogo - 12 ans</div>
+                            <div class="dir3-timeline-date">Il y a 1 jour</div>
+                        </div>
+                        <div class="dir3-timeline-meta">
+                            <span>📍 Koudougou</span>
+                            <span>👁️ 24,567 vues</span>
+                            <span>🔔 891 alertes envoyées</span>
+                        </div>
+                        <p class="dir3-timeline-desc">Fille de 12 ans, disparue hier en revenant de l'école vers 17h. Signe distinctif: cicatrice visible sur le front. Portait un sac à dos rouge.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direction 4: Warm & Human Photo Grid -->
+        <div class="direction" id="direction-4">
+            <div class="direction-info">
+                <h2>Direction 4: Warm Photo-Centric Human</h2>
+                <p><strong>Concept:</strong> Palette chaude (orange/beige), grandes photos, tone empathique et humain. Focus sur les visages et histoires. <strong>Emotion:</strong> Chaleur, Humanité, Empathie. <strong>Best for:</strong> Créer connexion émotionnelle forte, inspire l'action par l'empathie.</p>
+            </div>
+
+            <div class="mockup-frame">
+                <div class="dir4-hero">
+                    <h1>Chaque enfant mérite de <span class="warm">rentrer à la maison</span></h1>
+                    <p>Nous sommes une communauté unie par un seul objectif: protéger nos enfants et les ramener en sécurité auprès de leurs familles.</p>
+                    <button class="btn-primary">🚨 Signaler une disparition</button>
+
+                    <div class="dir4-impact">
+                        <div class="dir4-impact-item">
+                            <div class="dir4-impact-number">89</div>
+                            <div class="dir4-impact-label">Enfants retrouvés</div>
+                        </div>
+                        <div class="dir4-impact-item">
+                            <div class="dir4-impact-number">2.4M</div>
+                            <div class="dir4-impact-label">Personnes mobilisées</div>
+                        </div>
+                        <div class="dir4-impact-item">
+                            <div class="dir4-impact-number">5,247</div>
+                            <div class="dir4-impact-label">Ambassadeurs actifs</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dir4-section">
+                    <h2>Ils ont besoin de vous</h2>
+                    <div class="dir4-photo-grid">
+                        <div class="dir4-photo-card">
+                            <div class="dir4-photo">👧</div>
+                            <div class="dir4-photo-content">
+                                <h3>Fatoumata, 6 ans</h3>
+                                <p class="dir4-photo-meta">📍 Ouagadougou · 🕐 Il y a 2h</p>
+                                <span class="dir4-photo-status">🚨 Recherche active</span>
+                            </div>
+                        </div>
+                        <div class="dir4-photo-card">
+                            <div class="dir4-photo">👦</div>
+                            <div class="dir4-photo-content">
+                                <h3>Moussa, 8 ans</h3>
+                                <p class="dir4-photo-meta">📍 Bobo-Dioulasso · 🕐 Il y a 5h</p>
+                                <span class="dir4-photo-status">🚨 Recherche active</span>
+                            </div>
+                        </div>
+                        <div class="dir4-photo-card">
+                            <div class="dir4-photo">👧</div>
+                            <div class="dir4-photo-content">
+                                <h3>Aminata, 12 ans</h3>
+                                <p class="dir4-photo-meta">📍 Koudougou · 🕐 Il y a 1j</p>
+                                <span class="dir4-photo-status">🚨 Recherche active</span>
+                            </div>
+                        </div>
+                        <div class="dir4-photo-card">
+                            <div class="dir4-photo">👦</div>
+                            <div class="dir4-photo-content">
+                                <h3>Ibrahim, 10 ans</h3>
+                                <p class="dir4-photo-meta">📍 Ouahigouya · 🕐 Il y a 2j</p>
+                                <span class="dir4-photo-status">🚨 Recherche active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direction 5: Minimalist Modern -->
+        <div class="direction" id="direction-5">
+            <div class="direction-info">
+                <h2>Direction 5: Minimalist Modern Premium</h2>
+                <p><strong>Concept:</strong> Typographie large et expressive, beaucoup d'espace blanc, liste épurée. Style tech moderne et crédible. <strong>Emotion:</strong> Professionnalisme, Efficacité. <strong>Best for:</strong> Crédibilité institutionnelle maximale, attirer partenaires/grants.</p>
+            </div>
+
+            <div class="mockup-frame dir5-container">
+                <div class="dir5-hero">
+                    <div class="dir5-hero-content">
+                        <h1>Sauvons nos<br><span class="accent">enfants</span><br>ensemble.</h1>
+                        <p>Infrastructure nationale de mobilisation collective pour retrouver les enfants disparus au Burkina Faso.</p>
+                        <div class="dir5-hero-cta">
+                            <button class="btn-primary">Signaler une disparition</button>
+                            <button class="btn-secondary">En savoir plus →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dir5-metrics">
+                    <div class="dir5-metrics-grid">
+                        <div class="dir5-metric">
+                            <div class="dir5-metric-value">127</div>
+                            <div class="dir5-metric-label">Recherches actives</div>
+                        </div>
+                        <div class="dir5-metric">
+                            <div class="dir5-metric-value">2.4M</div>
+                            <div class="dir5-metric-label">Personnes mobilisées</div>
+                        </div>
+                        <div class="dir5-metric">
+                            <div class="dir5-metric-value">89</div>
+                            <div class="dir5-metric-label">Enfants retrouvés</div>
+                        </div>
+                        <div class="dir5-metric">
+                            <div class="dir5-metric-value">5.2K</div>
+                            <div class="dir5-metric-label">Ambassadeurs</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dir5-list">
+                    <div class="dir5-list-header">
+                        <h2>Recherches en cours</h2>
+                        <button class="btn-secondary">Voir tout →</button>
+                    </div>
+
+                    <div class="dir5-list-item">
+                        <div class="dir5-list-icon">👧</div>
+                        <div class="dir5-list-content">
+                            <h3>Fatoumata Ouédraogo, 6 ans</h3>
+                            <p class="dir5-list-meta">Ouagadougou, Secteur 15 · Disparue il y a 2 heures</p>
+                        </div>
+                        <div class="dir5-list-badge">Urgent</div>
+                    </div>
+
+                    <div class="dir5-list-item">
+                        <div class="dir5-list-icon">👦</div>
+                        <div class="dir5-list-content">
+                            <h3>Moussa Traoré, 8 ans</h3>
+                            <p class="dir5-list-meta">Bobo-Dioulasso · Disparu il y a 5 heures</p>
+                        </div>
+                        <div class="dir5-list-badge">Urgent</div>
+                    </div>
+
+                    <div class="dir5-list-item">
+                        <div class="dir5-list-icon">👧</div>
+                        <div class="dir5-list-content">
+                            <h3>Aminata Sawadogo, 12 ans</h3>
+                            <p class="dir5-list-meta">Koudougou · Disparue il y a 1 jour</p>
+                        </div>
+                        <div class="dir5-list-badge">Actif</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direction 6: Dashboard-Style Info Dense -->
+        <div class="direction" id="direction-6">
+            <div class="direction-info">
+                <h2>Direction 6: Dashboard Pro Dense</h2>
+                <p><strong>Concept:</strong> Style dashboard avec sidebar filtres, topbar dark avec stats live, cards compactes. Maximum d'info density. <strong>Emotion:</strong> Contrôle, Données, Autorité. <strong>Best for:</strong> Utilisateurs intensifs (autorités, ambassadeurs daily), efficacité opérationnelle.</p>
+            </div>
+
+            <div class="mockup-frame">
+                <div class="dir6-topbar">
+                    <div class="dir6-topbar-left">
+                        <h1>EnfantDisparu.bf</h1>
+                        <div class="dir6-topbar-stats">
+                            <div class="dir6-topbar-stat">
+                                <span>📡 Portée:</span>
+                                <span class="dir6-topbar-number">2.4M</span>
+                            </div>
+                            <div class="dir6-topbar-stat">
+                                <span>✅ Retrouvés:</span>
+                                <span class="dir6-topbar-number">89</span>
+                            </div>
+                            <div class="dir6-topbar-stat">
+                                <span>🚨 Actifs:</span>
+                                <span class="dir6-topbar-number">127</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary">🚨 Signaler</button>
+                </div>
+
+                <div class="dir6-layout">
+                    <div class="dir6-sidebar">
+                        <div class="dir6-filter">
+                            <h3>Statut</h3>
+                            <button class="dir6-filter-btn active">🚨 Recherches actives (127)</button>
+                            <button class="dir6-filter-btn">✅ Retrouvés (89)</button>
+                            <button class="dir6-filter-btn">📊 Toutes (216)</button>
+                        </div>
+
+                        <div class="dir6-filter">
+                            <h3>Région</h3>
+                            <button class="dir6-filter-btn">Ouagadougou (45)</button>
+                            <button class="dir6-filter-btn">Bobo-Dioulasso (23)</button>
+                            <button class="dir6-filter-btn">Koudougou (12)</button>
+                            <button class="dir6-filter-btn">Toutes régions</button>
+                        </div>
+
+                        <div class="dir6-filter">
+                            <h3>Période</h3>
+                            <button class="dir6-filter-btn active">Dernières 24h</button>
+                            <button class="dir6-filter-btn">Derniers 7 jours</button>
+                            <button class="dir6-filter-btn">Derniers 30 jours</button>
+                        </div>
+                    </div>
+
+                    <div class="dir6-main">
+                        <h2>Recherches actives (127)</h2>
+                        <div class="dir6-cards">
+                            <div class="dir6-card">
+                                <div class="dir6-card-header">
+                                    <div class="dir6-card-title">👧 Fatoumata Ouédraogo, 6 ans</div>
+                                    <div class="dir6-card-badge">2h</div>
+                                </div>
+                                <p class="dir6-card-meta">📍 Ouagadougou, Secteur 15 · Marché Rood-Woko</p>
+                                <div class="dir6-card-stats">
+                                    <div class="dir6-card-stat">👁️ 12.4K vues</div>
+                                    <div class="dir6-card-stat">🔔 428 alertes</div>
+                                    <div class="dir6-card-stat">📱 EPB-2024-0127</div>
+                                </div>
+                            </div>
+
+                            <div class="dir6-card">
+                                <div class="dir6-card-header">
+                                    <div class="dir6-card-title">👦 Moussa Traoré, 8 ans</div>
+                                    <div class="dir6-card-badge">5h</div>
+                                </div>
+                                <p class="dir6-card-meta">📍 Bobo-Dioulasso · École primaire</p>
+                                <div class="dir6-card-stats">
+                                    <div class="dir6-card-stat">👁️ 8.2K vues</div>
+                                    <div class="dir6-card-stat">🔔 312 alertes</div>
+                                    <div class="dir6-card-stat">📱 EPB-2024-0126</div>
+                                </div>
+                            </div>
+
+                            <div class="dir6-card">
+                                <div class="dir6-card-header">
+                                    <div class="dir6-card-title">👧 Aminata Sawadogo, 12 ans</div>
+                                    <div class="dir6-card-badge">1j</div>
+                                </div>
+                                <p class="dir6-card-meta">📍 Koudougou · Retour école</p>
+                                <div class="dir6-card-stats">
+                                    <div class="dir6-card-stat">👁️ 24.5K vues</div>
+                                    <div class="dir6-card-stat">🔔 891 alertes</div>
+                                    <div class="dir6-card-stat">📱 EPB-2024-0125</div>
+                                </div>
+                            </div>
+
+                            <div class="dir6-card">
+                                <div class="dir6-card-header">
+                                    <div class="dir6-card-title">👦 Ibrahim Compaoré, 10 ans</div>
+                                    <div class="dir6-card-badge">2j</div>
+                                </div>
+                                <p class="dir6-card-meta">📍 Ouahigouya · Marché central</p>
+                                <div class="dir6-card-stats">
+                                    <div class="dir6-card-stat">👁️ 18.7K vues</div>
+                                    <div class="dir6-card-stat">🔔 623 alertes</div>
+                                    <div class="dir6-card-stat">📱 EPB-2024-0124</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDirection(num) {
+            // Hide all directions
+            document.querySelectorAll('.direction').forEach(dir => {
+                dir.classList.remove('active');
+            });
+
+            // Remove active from all buttons
+            document.querySelectorAll('.direction-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected direction
+            document.getElementById('direction-' + num).classList.add('active');
+
+            // Activate button
+            event.target.classList.add('active');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+
+</body>
+</html>
