@@ -2,7 +2,7 @@ import { initializeApp, getApps, cert, App } from "firebase-admin/app";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
 
 let adminApp: App | null = null;
-let adminDb: Firestore | null = null;
+let _adminDb: Firestore | null = null;
 
 function getAdminApp(): App {
   if (adminApp) {
@@ -43,9 +43,12 @@ function getAdminApp(): App {
 }
 
 export function getAdminDb(): Firestore {
-  if (adminDb) {
-    return adminDb;
+  if (_adminDb) {
+    return _adminDb;
   }
-  adminDb = getFirestore(getAdminApp());
-  return adminDb;
+  _adminDb = getFirestore(getAdminApp());
+  return _adminDb;
 }
+
+// Export direct pour faciliter l'utilisation
+export const adminDb = getAdminDb();

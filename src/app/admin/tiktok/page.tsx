@@ -265,7 +265,7 @@ export default function TikTokAdminPage() {
                     <Loader2 className="w-5 h-5 animate-spin" />
                     Connexion en cours...
                   </>
-                ) : config && isTokenValid() ? (
+                ) : status && isTokenValid() ? (
                   "🔄 Reconnecter TikTok"
                 ) : (
                   "🚀 Connecter TikTok"
@@ -281,18 +281,16 @@ export default function TikTokAdminPage() {
         </div>
 
         {/* Debug Info (only in development) */}
-        {process.env.NODE_ENV === "development" && config && (
+        {process.env.NODE_ENV === "development" && status && (
           <div className="mt-6 bg-gray-100 rounded-xl p-4">
             <h4 className="font-mono text-xs font-bold text-gray-700 mb-2">Debug Info:</h4>
             <pre className="text-xs text-gray-600 overflow-auto">
               {JSON.stringify(
                 {
-                  hasAccessToken: !!status.isConnected,
-                  hasRefreshToken: !!status.isConnected,
+                  isConnected: status.isConnected,
                   expiresAt: status.expiresAt,
                   isValid: isTokenValid(),
-                  // Ne jamais afficher les tokens complets côté client
-                  tokenPreview: status.isConnected ? `${status.isConnected.substring(0, 10)}...` : null,
+                  // Les tokens ne sont plus accessibles côté client (sécurité)
                 },
                 null,
                 2
