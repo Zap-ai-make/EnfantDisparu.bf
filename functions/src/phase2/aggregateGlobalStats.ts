@@ -10,6 +10,9 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore';
  * Aggregates platform-wide statistics and writes to system/globalStats.
  */
 
+// Base counts (starting point before real inscriptions)
+const BASE_AMBASSADORS = 10;
+
 interface GlobalStats {
   totalAnnouncements: number;
   activeAnnouncements: number;
@@ -105,7 +108,8 @@ export const aggregateGlobalStats = onSchedule(
 
       // Calculate metrics
       const totalAnnouncements = announcementsSnapshot.size;
-      const totalAmbassadors = ambassadorsSnapshot.size;
+      // Add base ambassadors to the real count
+      const totalAmbassadors = BASE_AMBASSADORS + ambassadorsSnapshot.size;
       const totalSightings = sightingsSnapshot.size;
 
       const resolutionRate = totalAnnouncements > 0

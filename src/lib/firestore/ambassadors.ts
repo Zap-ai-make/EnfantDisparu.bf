@@ -350,6 +350,9 @@ export async function incrementAmbassadorStat(
 
 // ─── Compter les ambassadeurs approuvés ──────────────────────────────────────
 
+// Base counts (starting point before real inscriptions)
+const BASE_AMBASSADORS = 10;
+
 let ambassadorCountCache: { count: number; timestamp: number } | null = null;
 const AMBASSADOR_COUNT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -361,7 +364,8 @@ export async function getAmbassadorCount(): Promise<number> {
 
   const q = query(collection(db, "ambassadors"), where("status", "==", "approved"));
   const snapshot = await getDocs(q);
-  const count = snapshot.size;
+  // Add base ambassadors to the real count
+  const count = BASE_AMBASSADORS + snapshot.size;
 
   // Mettre à jour le cache
   ambassadorCountCache = { count, timestamp: Date.now() };
@@ -507,7 +511,8 @@ export async function getAmbassadorGlobalStats(): Promise<AmbassadorGlobalStats>
 
   return {
     totalPending: pendingSnap.size,
-    totalApproved: approvedSnap.size,
+    // Add base ambassadors to the real count
+    totalApproved: BASE_AMBASSADORS + approvedSnap.size,
     totalRejected: rejectedSnap.size,
     totalNotificationsActivated,
     totalAlertsShared,
