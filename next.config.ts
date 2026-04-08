@@ -45,9 +45,9 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              // Note: 'unsafe-inline' requis pour Next.js (scripts d'hydratation inline)
-              // 'unsafe-eval' retiré pour améliorer la sécurité
-              "script-src 'self' 'unsafe-inline' https://cdn.onesignal.com https://api.onesignal.com https://*.onesignal.com https://*.firebaseio.com https://*.googleapis.com",
+              // Note: 'unsafe-inline' et 'unsafe-eval' requis pour Next.js en développement
+              // En production, Next.js n'utilise pas eval(), mais React Refresh en a besoin en dev
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.onesignal.com https://api.onesignal.com https://*.onesignal.com https://*.firebaseio.com https://*.googleapis.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", // unsafe-inline nécessaire pour Tailwind
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.googleapis.com",

@@ -29,31 +29,26 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   "Djibo": { lat: 14.1000, lng: -1.6333 },
 };
 
-// Données fictives réalistes - distribution du réseau
-const MOCK_NETWORK_DATA = {
-  // Total: 1037 personnes + 44 ambassadeurs
-  cities: [
-    { city: "Ouagadougou", subscribers: 412, ambassadors: 18 },
-    { city: "Bobo-Dioulasso", subscribers: 187, ambassadors: 8 },
-    { city: "Koudougou", subscribers: 89, ambassadors: 4 },
-    { city: "Banfora", subscribers: 67, ambassadors: 3 },
-    { city: "Ouahigouya", subscribers: 58, ambassadors: 2 },
-    { city: "Fada N'Gourma", subscribers: 45, ambassadors: 2 },
-    { city: "Kaya", subscribers: 42, ambassadors: 2 },
-    { city: "Dédougou", subscribers: 34, ambassadors: 1 },
-    { city: "Ziniaré", subscribers: 28, ambassadors: 1 },
-    { city: "Tenkodogo", subscribers: 25, ambassadors: 1 },
-    { city: "Gaoua", subscribers: 18, ambassadors: 1 },
-    { city: "Dori", subscribers: 12, ambassadors: 0 },
-    { city: "Manga", subscribers: 8, ambassadors: 1 },
-    { city: "Pô", subscribers: 6, ambassadors: 0 },
-    { city: "Léo", subscribers: 3, ambassadors: 0 },
-    { city: "Yako", subscribers: 2, ambassadors: 0 },
-    { city: "Kongoussi", subscribers: 1, ambassadors: 0 },
-  ],
-  totalSubscribers: 1037,
-  totalAmbassadors: 44,
-};
+// Distribution par défaut si API ne répond pas
+const DEFAULT_CITY_DISTRIBUTION = [
+  { city: "Ouagadougou", percentage: 0.40 },
+  { city: "Bobo-Dioulasso", percentage: 0.18 },
+  { city: "Koudougou", percentage: 0.09 },
+  { city: "Banfora", percentage: 0.06 },
+  { city: "Ouahigouya", percentage: 0.06 },
+  { city: "Fada N'Gourma", percentage: 0.04 },
+  { city: "Kaya", percentage: 0.04 },
+  { city: "Dédougou", percentage: 0.03 },
+  { city: "Ziniaré", percentage: 0.03 },
+  { city: "Tenkodogo", percentage: 0.02 },
+  { city: "Gaoua", percentage: 0.02 },
+  { city: "Dori", percentage: 0.01 },
+  { city: "Manga", percentage: 0.01 },
+  { city: "Pô", percentage: 0.005 },
+  { city: "Léo", percentage: 0.003 },
+  { city: "Yako", percentage: 0.002 },
+  { city: "Kongoussi", percentage: 0.001 },
+];
 
 // Style de la carte (mode clair élégant)
 const mapStyles = [
@@ -82,25 +77,70 @@ interface CityData {
   ambassadors: number;
 }
 
+interface GlobalStats {
+  totalAmbassadors: number;
+  totalMembers: number;
+}
+
 export function NetworkCoverageMap() {
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [cityData, setCityData] = useState<CityData[]>([]);
+  const [stats, setStats] = useState<GlobalStats>({ totalAmbassadors: 10, totalMembers: 400 });
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   });
 
   useEffect(() => {
-    // Charger les données fictives
-    const data: CityData[] = MOCK_NETWORK_DATA.cities
-      .filter((c) => CITY_COORDINATES[c.city])
-      .map((c) => ({
-        city: c.city,
-        position: CITY_COORDINATES[c.city],
-        subscribers: c.subscribers,
-        ambassadors: c.ambassadors,
-      }));
-    setCityData(data);
+    // Récupérer les stats globales depuis l'API
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats/global');
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data as GlobalStats);
+
+          // Distribuer les membres et ambassadeurs sur les villes
+          const cityDataWithDistribution: CityData[] = DEFAULT_CITY_DISTRIBUTION
+            .filter((c) => CITY_COORDINATES[c.city])
+            .map((c) => ({
+              city: c.city,
+              position: CITY_COORDINATES[c.city],
+              subscribers: Math.round(data.totalMembers * c.percentage),
+              ambassadors: Math.round(data.totalAmbassadors * c.percentage),
+            }));
+          setCityData(cityDataWithDistribution);
+        } else {
+          // Utiliser les valeurs par défaut
+          const cityDataWithDistribution: CityData[] = DEFAULT_CITY_DISTRIBUTION
+            .filter((c) => CITY_COORDINATES[c.city])
+            .map((c) => ({
+              city: c.city,
+              position: CITY_COORDINATES[c.city],
+              subscribers: Math.round(stats.totalMembers * c.percentage),
+              ambassadors: Math.round(stats.totalAmbassadors * c.percentage),
+            }));
+          setCityData(cityDataWithDistribution);
+        }
+      } catch (error) {
+        console.error('Error fetching global stats:', error);
+        // Utiliser les valeurs par défaut en cas d'erreur
+        const cityDataWithDistribution: CityData[] = DEFAULT_CITY_DISTRIBUTION
+          .filter((c) => CITY_COORDINATES[c.city])
+          .map((c) => ({
+            city: c.city,
+            position: CITY_COORDINATES[c.city],
+            subscribers: Math.round(stats.totalMembers * c.percentage),
+            ambassadors: Math.round(stats.totalAmbassadors * c.percentage),
+          }));
+        setCityData(cityDataWithDistribution);
+      }
+    };
+
+    fetchStats();
+    // Rafraîchir toutes les minutes comme la StatusBar
+    const interval = setInterval(fetchStats, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const onMapClick = useCallback(() => {
@@ -108,7 +148,8 @@ export function NetworkCoverageMap() {
   }, []);
 
   // Icône pour les abonnés (bleu)
-  const getSubscriberIcon = (count: number) => {
+  const getSubscriberIcon = useCallback((count: number) => {
+    if (!isLoaded || typeof google === 'undefined') return undefined;
     const size = Math.min(45, 20 + Math.sqrt(count) * 2);
     return {
       path: google.maps.SymbolPath.CIRCLE,
@@ -118,10 +159,11 @@ export function NetworkCoverageMap() {
       strokeWeight: 2,
       scale: size / 5,
     };
-  };
+  }, [isLoaded]);
 
   // Icône pour les ambassadeurs (or/ambre)
-  const getAmbassadorIcon = (count: number) => {
+  const getAmbassadorIcon = useCallback((count: number) => {
+    if (!isLoaded || typeof google === 'undefined') return undefined;
     const size = Math.min(30, 12 + count * 2);
     return {
       path: "M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z", // Étoile
@@ -132,7 +174,7 @@ export function NetworkCoverageMap() {
       scale: size / 12,
       anchor: new google.maps.Point(12, 12),
     };
-  };
+  }, [isLoaded]);
 
   // Fallback sans Google Maps
   if (loadError || !process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
@@ -150,11 +192,11 @@ export function NetworkCoverageMap() {
 
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-white/10 rounded-xl p-3 text-center">
-            <p className="text-3xl font-bold">{MOCK_NETWORK_DATA.totalSubscribers.toLocaleString()}</p>
+            <p className="text-3xl font-bold">{stats.totalMembers.toLocaleString()}</p>
             <p className="text-xs text-blue-100">Personnes vigilantes</p>
           </div>
           <div className="bg-white/10 rounded-xl p-3 text-center">
-            <p className="text-3xl font-bold">{MOCK_NETWORK_DATA.totalAmbassadors}</p>
+            <p className="text-3xl font-bold">{stats.totalAmbassadors}</p>
             <p className="text-xs text-blue-100">Ambassadeurs</p>
           </div>
         </div>
@@ -188,7 +230,7 @@ export function NetworkCoverageMap() {
             <div>
               <h3 className="font-bold text-gray-900">Réseau de Vigilance</h3>
               <p className="text-xs text-gray-500">
-                {MOCK_NETWORK_DATA.totalSubscribers.toLocaleString()} personnes · {MOCK_NETWORK_DATA.totalAmbassadors} ambassadeurs
+                {stats.totalMembers.toLocaleString()} personnes · {stats.totalAmbassadors} ambassadeurs
               </p>
             </div>
           </div>
@@ -278,7 +320,7 @@ export function NetworkCoverageMap() {
                   Vous n'êtes pas seul
                 </p>
                 <p className="text-xs text-gray-500">
-                  {(MOCK_NETWORK_DATA.totalSubscribers + MOCK_NETWORK_DATA.totalAmbassadors).toLocaleString()} personnes prêtes à relayer l'alerte instantanément
+                  {(stats.totalMembers + stats.totalAmbassadors).toLocaleString()} personnes prêtes à relayer l'alerte instantanément
                 </p>
               </div>
             </div>

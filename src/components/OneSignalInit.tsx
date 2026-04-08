@@ -83,8 +83,15 @@ export function OneSignalInit() {
       OneSignal.init({
         appId,
         allowLocalhostAsSecureOrigin: true,
-        // Le dashboard OneSignal gère la configuration du prompt
-      }).then(() => {
+      }).then(async () => {
+        // Demander l'autorisation de notification si pas encore fait
+        const permission = await OneSignal.Notifications.permission;
+
+        // Si l'utilisateur n'a pas encore été sollicité ou a refusé, afficher le prompt
+        if (permission === false || permission === null) {
+          // Afficher le prompt natif
+          await OneSignal.Slidedown.promptPush();
+        }
         // Envoyer le tag ambassador_ref si présent
         const ambassadorRef = getStoredAmbassadorRef();
         if (ambassadorRef) {
