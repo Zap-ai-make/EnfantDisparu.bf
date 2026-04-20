@@ -144,15 +144,43 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /children/{childId} {
+      // Lecture autorisée pour :
+      // 1. Enfants avec profils publics
+      // 2. Parent authentifié (peut voir ses propres enfants)
+      allow read: if
+        resource.data.isPublic == true
+        || (request.auth != null && resource.data.userId == request.auth.uid)
+        || (request.auth != null && resource.data.parentId == request.auth.uid)
+        || (request.auth != null && resource.data.ownerId == request.auth.uid);
+      allow write: if false;
+    }
+
     match /profiles/{profileId} {
-      // Lecture autorisée seulement pour les profils publics
-      // Protection des données personnelles
-      allow read: if resource.data.isPublic == true;
+      // Lecture autorisée pour :
+      // 1. Profils publics (pour scanner QR public)
+      // 2. Propriétaire authentifié (parent peut voir ses enfants)
+      allow read: if
+        resource.data.isPublic == true
+        || (request.auth != null && resource.data.userId == request.auth.uid)
+        || (request.auth != null && resource.data.parentId == request.auth.uid)
+        || (request.auth != null && resource.data.ownerId == request.auth.uid);
       allow write: if false;
     }
 
     match /users/{userId} {
+      // Lecture/écriture: l'utilisateur peut accéder à ses propres données
       allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Sous-collection profiles: le parent peut lire/écrire les profils de ses enfants
+      match /profiles/{profileId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Sous-collection children: le parent peut lire/écrire les données de ses enfants
+      match /children/{childId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     match /orders/{orderId} {
