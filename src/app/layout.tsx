@@ -255,6 +255,16 @@ export default function RootLayout({
               </Link>
             </div>
 
+            {/* Liens légaux - visible et accessible */}
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-3 border-t border-gray-100">
+              <Link href="/conditions-utilisation" className="hover:text-gray-600 underline py-1 font-medium">
+                Conditions d'utilisation
+              </Link>
+              <Link href="/politique-confidentialite" className="hover:text-gray-600 underline py-1 font-medium">
+                Politique de confidentialité
+              </Link>
+            </div>
+
             {/* Propulsé par SecureID */}
             <div className="pt-3">
               <a
